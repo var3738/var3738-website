@@ -9,10 +9,10 @@ export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const navItems = [
-    { label: 'Home', href: '/' },
-    { label: 'Democracy Activated', href: '/democracy-activated' },
-    { label: 'Digital Resilience', href: '/reports' },
-    { label: 'Reports', href: '/reports' },
+    { id: 'home', label: 'Home', href: '/' },
+    { id: 'democracy', label: 'Democracy Activated', href: '/democracy-activated' },
+    { id: 'resilience', label: 'Digital Resilience', href: '/reports' },
+    { id: 'reports', label: 'Reports', href: '/reports' },
   ];
 
   return (
@@ -38,7 +38,7 @@ export default function Header() {
           <nav className="hidden md:flex items-center gap-8">
             {navItems.map((item) => (
               <Link
-                key={item.href}
+                key={item.id}
                 href={item.href}
                 className="font-bold text-sm hover:text-primary transition-colors"
               >
@@ -69,7 +69,7 @@ export default function Header() {
           <nav className="md:hidden pb-6 space-y-4 border-t border-border/50 pt-4">
             {navItems.map((item) => (
               <Link
-                key={item.href}
+                key={item.id}
                 href={item.href}
                 className="block font-bold text-sm hover:text-primary transition-colors"
                 onClick={() => setIsMenuOpen(false)}
