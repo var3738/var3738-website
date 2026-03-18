@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, X } from 'lucide-react';
 
 interface RegistrationFormProps {
   wardName: string;
@@ -52,19 +52,26 @@ export default function RegistrationForm({ wardName, onClose }: RegistrationForm
   };
 
   const stepVariants = {
-    hidden: { opacity: 0, x: 20 },
+    hidden: { opacity: 0, x: 50 },
     visible: { opacity: 1, x: 0 },
-    exit: { opacity: 0, x: -20 },
+    exit: { opacity: 0, x: -50 },
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <motion.div
-        className="bg-background stamp-card max-w-md w-full"
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.95 }}
+        className="glass-card max-w-md w-full p-8 rounded-[2.5rem] relative"
+        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.9, y: 20 }}
       >
+        <button 
+          onClick={onClose}
+          className="absolute top-6 right-6 p-2 rounded-full hover:bg-white/10 transition-colors text-muted-foreground"
+        >
+          <X size={20} />
+        </button>
+
         <AnimatePresence mode="wait">
           {!isSubmitted ? (
             <motion.form
@@ -74,96 +81,93 @@ export default function RegistrationForm({ wardName, onClose }: RegistrationForm
               initial="hidden"
               animate="visible"
               exit="exit"
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
             >
               {/* Header */}
-              <div className="mb-6 pb-6 border-b-4 border-foreground">
-                <h2 className="text-2xl font-black mb-2">Register for {wardName}</h2>
-                <p className="text-sm text-muted-foreground">Step {step} of 3</p>
+              <div className="mb-10">
+                <h2 className="text-3xl font-black mb-2 leading-tight">Register for <span className="gradient-text">{wardName}</span></h2>
+                <div className="flex gap-2 mt-4">
+                  {[1, 2, 3].map((s) => (
+                    <div 
+                      key={s} 
+                      className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${s <= step ? 'bg-primary' : 'bg-white/10'}`}
+                    ></div>
+                  ))}
+                </div>
               </div>
 
-              {/* Step 1: Basic Info */}
-              {step === 1 && (
-                <motion.div
-                  variants={stepVariants}
-                  initial="hidden"
-                  animate="visible"
-                  exit="exit"
-                  className="space-y-4 mb-6"
-                >
-                  <div>
-                    <label className="block text-sm font-bold mb-2">Full Name</label>
-                    <input
-                      type="text"
-                      name="fullName"
-                      value={formData.fullName}
-                      onChange={handleInputChange}
-                      placeholder="Your full name"
-                      className="w-full px-4 py-3 border-4 border-foreground bg-background text-foreground placeholder-muted-foreground font-bold"
-                      required
-                    />
-                  </div>
-                </motion.div>
-              )}
+              {/* Steps Content */}
+              <div className="min-h-[120px] mb-10">
+                {step === 1 && (
+                  <motion.div variants={stepVariants} className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3">Full Name</label>
+                      <input
+                        type="text"
+                        name="fullName"
+                        value={formData.fullName}
+                        onChange={handleInputChange}
+                        placeholder="Enter your name"
+                        className="w-full px-6 py-4 rounded-2xl bg-white/5 border border-white/10 text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:bg-white/10 transition-all font-medium"
+                        required
+                        autoFocus
+                      />
+                    </div>
+                  </motion.div>
+                )}
 
-              {/* Step 2: Contact Info */}
-              {step === 2 && (
-                <motion.div
-                  variants={stepVariants}
-                  initial="hidden"
-                  animate="visible"
-                  exit="exit"
-                  className="space-y-4 mb-6"
-                >
-                  <div>
-                    <label className="block text-sm font-bold mb-2">Phone Number</label>
-                    <input
-                      type="tel"
-                      name="phoneNumber"
-                      value={formData.phoneNumber}
-                      onChange={handleInputChange}
-                      placeholder="+254 XXX XXX XXX"
-                      className="w-full px-4 py-3 border-4 border-foreground bg-background text-foreground placeholder-muted-foreground font-bold"
-                      required
-                    />
-                  </div>
-                </motion.div>
-              )}
+                {step === 2 && (
+                  <motion.div variants={stepVariants} className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3">Phone Number</label>
+                      <input
+                        type="tel"
+                        name="phoneNumber"
+                        value={formData.phoneNumber}
+                        onChange={handleInputChange}
+                        placeholder="+254 XXX XXX XXX"
+                        className="w-full px-6 py-4 rounded-2xl bg-white/5 border border-white/10 text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:bg-white/10 transition-all font-medium"
+                        required
+                        autoFocus
+                      />
+                    </div>
+                  </motion.div>
+                )}
 
-              {/* Step 3: Additional Info */}
-              {step === 3 && (
-                <motion.div
-                  variants={stepVariants}
-                  initial="hidden"
-                  animate="visible"
-                  exit="exit"
-                  className="space-y-4 mb-6"
-                >
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="checkbox"
-                      id="champion"
-                      name="isYouthChampion"
-                      checked={formData.isYouthChampion}
-                      onChange={handleInputChange}
-                      className="w-6 h-6 border-4 border-foreground cursor-pointer"
-                    />
-                    <label htmlFor="champion" className="font-bold cursor-pointer">
-                      I want to be a Youth Champion
-                    </label>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Champions help lead townhall discussions and mobilize their communities.
-                  </p>
-                </motion.div>
-              )}
+                {step === 3 && (
+                  <motion.div variants={stepVariants} className="space-y-6">
+                    <div className="flex items-start gap-4 p-4 rounded-2xl bg-primary/5 border border-primary/20">
+                      <div className="relative mt-1">
+                        <input
+                          type="checkbox"
+                          id="champion"
+                          name="isYouthChampion"
+                          checked={formData.isYouthChampion}
+                          onChange={handleInputChange}
+                          className="w-6 h-6 rounded-lg bg-white/5 border-2 border-primary/50 text-primary focus:ring-primary/30 cursor-pointer appearance-none checked:bg-primary"
+                        />
+                        {formData.isYouthChampion && <CheckCircle size={14} className="absolute top-1 left-1 text-white pointer-events-none" />}
+                      </div>
+                      <div>
+                        <label htmlFor="champion" className="font-bold text-base cursor-pointer block mb-1">
+                          Apply as Youth Champion
+                        </label>
+                        <p className="text-xs text-muted-foreground leading-relaxed">
+                          Champions help lead townhall discussions and mobilize their local communities.
+                        </p>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </div>
 
               {/* Navigation Buttons */}
-              <div className="flex gap-4 pt-6 border-t-4 border-foreground">
+              <div className="flex gap-4">
                 {step > 1 && (
                   <button
                     type="button"
                     onClick={handleBack}
-                    className="flex-1 px-4 py-3 font-bold border-4 border-foreground bg-muted text-foreground hover:bg-muted/80 transition-colors"
+                    className="flex-1 px-4 py-4 font-bold rounded-2xl border border-white/10 bg-white/5 text-foreground hover:bg-white/10 transition-colors"
                   >
                     Back
                   </button>
@@ -176,16 +180,16 @@ export default function RegistrationForm({ wardName, onClose }: RegistrationForm
                       (step === 1 && !formData.fullName) ||
                       (step === 2 && !formData.phoneNumber)
                     }
-                    className="flex-1 stamp-button disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 premium-button disabled:opacity-50 disabled:scale-100 disabled:cursor-not-allowed"
                   >
-                    Next
+                    Continue
                   </button>
                 ) : (
                   <button
                     type="submit"
-                    className="flex-1 stamp-button"
+                    className="flex-1 premium-button"
                   >
-                    Register
+                    Submit Registration
                   </button>
                 )}
               </div>
@@ -197,19 +201,19 @@ export default function RegistrationForm({ wardName, onClose }: RegistrationForm
               initial="hidden"
               animate="visible"
               exit="exit"
-              className="text-center py-8"
+              className="text-center py-10"
             >
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                transition={{ type: 'spring', stiffness: 100 }}
-                className="mb-4"
+                transition={{ type: 'spring', stiffness: 200, damping: 15 }}
+                className="mb-6 inline-flex p-4 rounded-full bg-primary/20 text-primary"
               >
-                <CheckCircle size={64} className="mx-auto text-primary" />
+                <CheckCircle size={64} />
               </motion.div>
-              <h3 className="text-2xl font-black mb-2">Success!</h3>
-              <p className="text-sm text-muted-foreground">
-                You're registered for {wardName}. See you at the townhall!
+              <h3 className="text-3xl font-black mb-3 italic">Success!</h3>
+              <p className="text-muted-foreground max-w-[240px] mx-auto">
+                You're registered for {wardName}. We'll contact you soon!
               </p>
             </motion.div>
           )}

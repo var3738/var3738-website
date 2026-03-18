@@ -12,23 +12,24 @@ interface HeroSectionProps {
 export default function HeroSection({
   headline,
   subheadline,
-  backgroundColor = 'bg-gradient-to-b from-background via-card to-background',
+  backgroundColor = 'aurora-bg',
   textColor = 'text-foreground',
 }: HeroSectionProps) {
   return (
-    <section className={`w-full ${backgroundColor} ${textColor} py-20 md:py-32 border-b border-border/50 overflow-hidden relative`}>
-      {/* Animated background orbs */}
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse"></div>
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-secondary/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+    <section className={`w-full ${backgroundColor} ${textColor} py-24 md:py-40 border-b border-white/5 overflow-hidden relative`}>
+      {/* Dynamic Aurora Orbs */}
+      <div className="absolute -top-24 -left-24 w-[500px] h-[500px] bg-primary/20 rounded-full blur-[120px] animate-pulse"></div>
+      <div className="absolute -bottom-24 -right-24 w-[500px] h-[500px] bg-secondary/20 rounded-full blur-[120px] animate-pulse delay-1000"></div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center flex flex-col items-center">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
+          transition={{ duration: 1, ease: "easeOut" }}
+          className="max-w-4xl"
         >
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-black tracking-tight text-balance mb-6">
-            {headline}
+          <h1 className="text-5xl md:text-8xl font-black tracking-tighter text-balance mb-8 leading-[0.95]">
+            <span className="gradient-text">{headline}</span>
           </h1>
         </motion.div>
 
@@ -36,13 +37,28 @@ export default function HeroSection({
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
+            transition={{ duration: 0.8, delay: 0.3 }}
+            className="max-w-2xl mb-12"
           >
-            <p className="text-lg md:text-xl max-w-2xl text-balance leading-relaxed text-muted-foreground">
+            <p className="text-xl md:text-2xl font-medium text-muted-foreground leading-relaxed balance">
               {subheadline}
             </p>
           </motion.div>
         )}
+
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, delay: 0.5 }}
+          className="flex flex-col sm:flex-row gap-4"
+        >
+          <button className="premium-button text-lg px-10 py-4">
+            Start Building Now
+          </button>
+          <button className="px-10 py-4 rounded-full border border-white/10 glass-card font-bold hover:bg-white/5 transition-all">
+            Watch Video
+          </button>
+        </motion.div>
       </div>
     </section>
   );

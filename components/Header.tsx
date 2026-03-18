@@ -11,36 +11,38 @@ export default function Header() {
   const navItems = [
     { id: 'home', label: 'Home', href: '/' },
     { id: 'democracy', label: 'Democracy Activated', href: '/democracy-activated' },
-    { id: 'resilience', label: 'Digital Resilience', href: '/reports' },
     { id: 'reports', label: 'Reports', href: '/reports' },
   ];
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur-md border-b border-border/50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <header className="glass-header w-full px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-            <Image
-              src="/var-logo.png"
-              alt="VAR 37-38 Logo"
-              width={50}
-              height={50}
-              className="h-12 w-auto"
-            />
+          <Link href="/" className="flex items-center gap-3 group transition-transform hover:scale-105">
+            <div className="relative">
+              <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full group-hover:bg-primary/40 transition-colors"></div>
+              <Image
+                src="/var-logo.png"
+                alt="VAR 37-38 Logo"
+                width={50}
+                height={50}
+                className="h-10 w-auto relative z-10"
+              />
+            </div>
             <div className="hidden sm:flex flex-col">
-              <span className="font-bold text-sm leading-none text-primary">VAR</span>
-              <span className="text-xs font-bold text-muted-foreground">37-38</span>
+              <span className="font-black text-lg leading-none gradient-text">VAR</span>
+              <span className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">37-38</span>
             </div>
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-8">
+          <nav className="hidden md:flex items-center gap-10">
             {navItems.map((item) => (
               <Link
                 key={item.id}
                 href={item.href}
-                className="font-bold text-sm hover:text-primary transition-colors"
+                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-all hover:tracking-wider"
               >
                 {item.label}
               </Link>
@@ -49,15 +51,15 @@ export default function Header() {
 
           {/* CTA Button - Desktop */}
           <div className="hidden md:block">
-            <button className="glow-button text-sm">
-              Join the Movement
+            <button className="premium-button text-sm">
+              Get Started
             </button>
           </div>
 
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden p-2 hover:text-primary transition-colors"
+            className="md:hidden p-2 text-foreground/80 hover:text-primary transition-colors"
             aria-label="Toggle menu"
           >
             {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -66,19 +68,19 @@ export default function Header() {
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <nav className="md:hidden pb-6 space-y-4 border-t border-border/50 pt-4">
+          <nav className="md:hidden pb-10 space-y-6 pt-6 animate-in slide-in-from-top-4 duration-300">
             {navItems.map((item) => (
               <Link
                 key={item.id}
                 href={item.href}
-                className="block font-bold text-sm hover:text-primary transition-colors"
+                className="block text-lg font-bold hover:text-primary transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
                 {item.label}
               </Link>
             ))}
-            <button className="w-full glow-button text-sm mt-4">
-              Join the Movement
+            <button className="w-full premium-button text-base">
+              Get Started
             </button>
           </nav>
         )}
