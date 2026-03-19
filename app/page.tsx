@@ -3,6 +3,7 @@ import HeroSection from '@/components/HeroSection';
 import LiveImpactTicker from '@/components/LiveImpactTicker';
 import PillarsGrid from '@/components/PillarsGrid';
 import TiltButton from '@/components/TiltButton';
+import TeamSection from '@/components/TeamSection';
 
 export default function Home() {
   const impactItems = [
@@ -95,6 +96,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Team Section */}
+      <TeamSection />
 
       {/* Mission Statement */}
       <section className="w-full bg-black text-background py-16 md:py-24 border-y-4 border-foreground">
