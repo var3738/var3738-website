@@ -7,12 +7,25 @@
   --color-background: #fdfde1;
   --color-foreground: #000000;
   
-  --color-primary: #ccf381;
-  --color-secondary: #ffc0ad;
-  --color-accent: #818cf8;
+  --color-primary: #022855;
+  --color-secondary: #D0171D;
+  --color-accent: #445068;
   
   --radius-xl: 1rem;
   --radius-2xl: 1.5rem;
+  
+  --animate-bounce-slow: bounce-slow 4s infinite;
+  --animate-pulse-slow: pulse-slow 6s infinite;
+}
+
+@keyframes bounce-slow {
+  0%, 100% { transform: translateY(0) rotate(12deg); }
+  50% { transform: translateY(-20px) rotate(12deg); }
+}
+
+@keyframes pulse-slow {
+  0%, 100% { opacity: 1; transform: scale(1) rotate(-6deg); }
+  50% { opacity: 0.8; transform: scale(1.05) rotate(-6deg); }
 }
 
 /* NeuBrutalist Utilities and Components */
@@ -55,6 +68,7 @@
     text-transform: uppercase;
     letter-spacing: -0.02em;
     background-color: var(--color-primary);
+    color: #ffffff;
     border: 4px solid #000;
     box-shadow: 4px 4px 0px 0px #000;
     border-radius: 0.75rem;
@@ -75,6 +89,7 @@
     text-transform: uppercase;
     letter-spacing: -0.02em;
     background-color: var(--color-secondary);
+    color: #ffffff;
     border: 4px solid #000;
     box-shadow: 4px 4px 0px 0px #000;
     border-radius: 0.75rem;
@@ -121,6 +136,10 @@
     border: 2px solid #000;
     border-radius: 9999px;
   }
+
+  /* Handle text on primary/secondary backgrounds */
+  .bg-primary { color: #ffffff; }
+  .bg-secondary { color: #ffffff; }
 }
 
 @layer base {

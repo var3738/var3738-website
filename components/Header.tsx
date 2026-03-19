@@ -23,13 +23,7 @@ export default function Header() {
           href="/" 
           className="flex items-center gap-3 group active:translate-x-1 active:translate-y-1 transition-all"
         >
-          <div className="w-12 h-12 bg-primary border-4 border-black rounded-xl flex items-center justify-center neu-shadow">
-            <span className="font-black text-2xl italic">V</span>
-          </div>
-          <div className="flex flex-col">
-            <span className="font-black text-2xl leading-none uppercase tracking-tighter">VAR</span>
-            <span className="text-xs font-black uppercase tracking-widest">37-38</span>
-          </div>
+          <Image src="/var-logo-nobg.png" alt="VAR 37-38 Logo" width={100} height={100} />
         </Link>
 
         {/* Desktop Navigation */}

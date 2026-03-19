@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { Facebook, Linkedin, Youtube, Instagram } from 'lucide-react';
+import Image from 'next/image';
 
 export default function Footer() {
   const socialLinks = [
@@ -17,7 +18,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-16 mb-16">
           {/* Brand */}
           <div className="flex flex-col items-start translate-y-2">
-            <h3 className="font-black text-5xl mb-6 italic tracking-tighter uppercase text-primary">VAR 37-38</h3>
+            <Image src="/var-logo-nobg.png" alt="VAR 37-38 Logo" width={100} height={100} />
             <p className="text-lg font-bold leading-tight max-w-sm text-white/80">
               The Voice of a Generation. Institutionalizing youth energy into democratic power through innovation and grassroots action.
             </p>

@@ -8,6 +8,7 @@ import RegistrationForm from '@/components/RegistrationForm';
 import StatCard from '@/components/StatCard';
 import PartnerCard from '@/components/PartnerCard';
 import Image from 'next/image';
+import CreativeNeuCard from '@/components/CreativeNeuCard';
 
 export default function DemocracyActivatedPage() {
   const [selectedWard, setSelectedWard] = useState<string | null>(null);
@@ -41,11 +42,33 @@ export default function DemocracyActivatedPage() {
       />
 
       {/* Mission Statement */}
-      <section className="w-full bg-primary text-foreground py-12 md:py-16">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <p className="text-lg md:text-xl font-bold leading-relaxed text-balance">
-            From March through May, we activate democracy in nine wards across Trans Nzoia. Youth champions mobilize their communities for townhall discussions where people directly engage with government accountability and electoral participation.
-          </p>
+      <section className="w-full bg-primary text-foreground py-16 md:py-24 border-b-4 border-black">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+          <div>
+            <h2 className="text-5xl font-black mb-8 italic uppercase tracking-tighter text-black leading-none">
+              9 Wards. <br />
+              <span className="text-white">One Movement.</span>
+            </h2>
+            <p className="text-xl font-bold leading-tight text-black/80 mb-8">
+              From March through May, we activate democracy in nine wards across Trans Nzoia. Youth champions mobilize their communities for townhall discussions where people directly engage with government accountability and electoral participation.
+            </p>
+          </div>
+          <div className="hidden lg:block">
+            <CreativeNeuCard 
+              mainText="9"
+              hoverText="WARDS"
+              title="TRANS NZOIA"
+              subtitle="ACTIVATED"
+              accentColor="bg-secondary"
+              secondaryColor="text-primary"
+              floatingShapes={{
+                topRight: 'square',
+                bottomLeft: 'circle',
+                topRightColor: 'bg-accent',
+                bottomLeftColor: 'bg-white'
+              }}
+            />
+          </div>
         </div>
       </section>
 
