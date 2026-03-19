@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import CreativeNeuCard from './CreativeNeuCard';
+import BrutalistImage from './BrutalistImage';
 
 interface HeroSectionProps {
   headline: string;
@@ -59,7 +60,30 @@ export default function HeroSection({
             hoverText="POWER"
             title="YOUTH-LED"
             subtitle="REVOLUTION"
-            className="w-full"
+            className="w-full relative z-10"
+          />
+          
+          {/* Floating Action Photos */}
+          <BrutalistImage 
+            src="/trans-nzoia-townhall/tnts-image01.jpeg" 
+            alt="Townhall Action"
+            caption="MARCH 2026"
+            tilt="left"
+            className="absolute -top-12 -left-12 w-48 z-20"
+          />
+          <BrutalistImage 
+            src="/trans-nzoia-townhall/tnts-image02.jpeg" 
+            alt="Youth Mobilization"
+            caption="TRANS NZOIA"
+            tilt="right"
+            className="absolute top-1/2 -right-16 w-56 -translate-y-1/2 z-0"
+          />
+          <BrutalistImage 
+            src="/trans-nzoia-townhall/tnts-image03.jpeg" 
+            alt="Community Engagement"
+            caption="ACTIVATED"
+            tilt="left"
+            className="absolute -bottom-16 left-1/4 w-52 z-20"
           />
         </div>
       </div>

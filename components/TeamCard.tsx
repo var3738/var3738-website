@@ -23,7 +23,7 @@ export default function TeamCard({ name, position, image }: TeamCardProps) {
           src={`/team/${image}`}
           alt={name}
           fill
-          className="object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-500"
+          className="object-cover object-top grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-500"
         />
       </div>
       <div className="p-6">

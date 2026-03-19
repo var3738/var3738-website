@@ -9,6 +9,7 @@ import StatCard from '@/components/StatCard';
 import PartnerCard from '@/components/PartnerCard';
 import Image from 'next/image';
 import CreativeNeuCard from '@/components/CreativeNeuCard';
+import TownhallGallery from '@/components/TownhallGallery';
 
 export default function DemocracyActivatedPage() {
   const [selectedWard, setSelectedWard] = useState<string | null>(null);
@@ -72,6 +73,9 @@ export default function DemocracyActivatedPage() {
         </div>
       </section>
 
+      {/* Townhall Gallery */}
+      <TownhallGallery />
+
       {/* Events Grid */}
       <section className="w-full bg-background py-16 md:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -130,7 +134,7 @@ export default function DemocracyActivatedPage() {
       </section>
 
       {/* What is a Youth Champion */}
-      <section className="w-full bg-primary text-foreground py-16 md:py-24 border-y-4 border-foreground">
+      <section className="w-full bg-primary text-white py-16 md:py-24 border-y-4 border-foreground">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl md:text-4xl font-black mb-6 text-balance">
             What's a Youth Champion?

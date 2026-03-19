@@ -14,7 +14,10 @@ export default function RegistrationForm({ wardName, onClose }: RegistrationForm
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [formData, setFormData] = useState({
     fullName: '',
+    email: '',
     phoneNumber: '',
+    password: '',
+    nationalId: '',
     ward: wardName,
     isYouthChampion: false,
   });
@@ -28,7 +31,7 @@ export default function RegistrationForm({ wardName, onClose }: RegistrationForm
   };
 
   const handleNext = () => {
-    if (step < 3) setStep(step + 1);
+    if (step < 4) setStep(step + 1);
   };
 
   const handleBack = () => {
@@ -44,7 +47,10 @@ export default function RegistrationForm({ wardName, onClose }: RegistrationForm
       setStep(1);
       setFormData({
         fullName: '',
+        email: '',
         phoneNumber: '',
+        password: '',
+        nationalId: '',
         ward: wardName,
         isYouthChampion: false,
       });
@@ -89,7 +95,7 @@ export default function RegistrationForm({ wardName, onClose }: RegistrationForm
                   Register for <span className="bg-primary px-3 border-4 border-black inline-block transform rotate-1">{wardName}</span>
                 </h2>
                 <div className="flex gap-3 mt-6">
-                  {[1, 2, 3].map((s) => (
+                  {[1, 2, 3, 4].map((s) => (
                     <div 
                       key={s} 
                       className={`h-4 flex-1 border-4 border-black transition-all duration-500 ${s <= step ? 'bg-secondary' : 'bg-white'}`}
@@ -115,6 +121,18 @@ export default function RegistrationForm({ wardName, onClose }: RegistrationForm
                         autoFocus
                       />
                     </div>
+                    <div>
+                      <label className="block text-sm font-black uppercase tracking-widest text-black/60 mb-3 ml-2">Email Address</label>
+                      <input
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        placeholder="NAME@EXAMPLE.COM"
+                        className="neu-input"
+                        required
+                      />
+                    </div>
                   </motion.div>
                 )}
 
@@ -133,10 +151,39 @@ export default function RegistrationForm({ wardName, onClose }: RegistrationForm
                         autoFocus
                       />
                     </div>
+                    <div>
+                      <label className="block text-sm font-black uppercase tracking-widest text-black/60 mb-3 ml-2">National ID (Optional)</label>
+                      <input
+                        type="text"
+                        name="nationalId"
+                        value={formData.nationalId}
+                        onChange={handleInputChange}
+                        placeholder="ENTER ID NUMBER"
+                        className="neu-input"
+                      />
+                    </div>
                   </motion.div>
                 )}
 
                 {step === 3 && (
+                  <motion.div variants={stepVariants} className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-black uppercase tracking-widest text-black/60 mb-3 ml-2">Create Password</label>
+                      <input
+                        type="password"
+                        name="password"
+                        value={formData.password}
+                        onChange={handleInputChange}
+                        placeholder="MIN. 8 CHARACTERS"
+                        className="neu-input"
+                        required
+                        autoFocus
+                      />
+                    </div>
+                  </motion.div>
+                )}
+
+                {step === 4 && (
                   <motion.div variants={stepVariants} className="space-y-6">
                     <div className="flex items-start gap-6 p-6 bg-white border-4 border-black neu-shadow">
                       <div className="relative mt-1">
@@ -174,13 +221,14 @@ export default function RegistrationForm({ wardName, onClose }: RegistrationForm
                     Back
                   </button>
                 )}
-                {step < 3 ? (
+                {step < 4 ? (
                   <button
                     type="button"
                     onClick={handleNext}
                     disabled={
-                      (step === 1 && !formData.fullName) ||
-                      (step === 2 && !formData.phoneNumber)
+                      (step === 1 && (!formData.fullName || !formData.email)) ||
+                      (step === 2 && !formData.phoneNumber) ||
+                      (step === 3 && !formData.password)
                     }
                     className="neu-button flex-1 text-lg disabled:opacity-50 disabled:grayscale"
                   >
