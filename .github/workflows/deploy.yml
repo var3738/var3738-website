@@ -1,0 +1,39 @@
+name: Deploy VAR 37-38 Website
+
+on:
+  push:
+    branches:
+      - main  # Trigger only on pushes to the main branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Execute Remote SSH Commands
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          port: 22
+          script: |
+            # Navigate to the project directory
+            cd /var/www/var-next-app # <--- UPDATE THIS TO YOUR ACTUAL PATH
+            
+            # Pull the latest changes
+            git pull origin main
+            
+            # Install dependencies and build
+            pnpm install
+            pnpm run build
+            
+            # Restart the app with PM2
+            # We use 'restart' so it picks up the new Server Action IDs
+            pm2 restart var3738-website 
+            
+            # Optional: Clear Nginx cache if you're using it
+            # sudo systemctl reload nginx
