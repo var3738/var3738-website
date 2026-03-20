@@ -21,8 +21,12 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: 22
           script: |
+            set -e
             # Navigate to the project directory
             cd /root/prod/var3738-website
+            
+            # Force discard local server changes (like next-env.d.ts)
+            git reset --hard
             
             # Pull the latest changes
             git pull origin main
