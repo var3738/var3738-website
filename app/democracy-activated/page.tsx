@@ -6,10 +6,9 @@ import HeroSection from '@/components/HeroSection';
 import EventCard from '@/components/EventCard';
 import RegistrationForm from '@/components/RegistrationForm';
 import StatCard from '@/components/StatCard';
-import PartnerCard from '@/components/PartnerCard';
-import Image from 'next/image';
 import CreativeNeuCard from '@/components/CreativeNeuCard';
 import TownhallGallery from '@/components/TownhallGallery';
+import PartnersSection from '@/components/PartnersSection';
 
 export default function DemocracyActivatedPage() {
   const [selectedWard, setSelectedWard] = useState<string | null>(null);
@@ -26,11 +25,6 @@ export default function DemocracyActivatedPage() {
     { name: 'Kabuchai', date: 'March 31, 2026', capacity: 67, maxCapacity: 100 },
   ];
 
-  const partners = [
-    { name: 'Uamuzi', logo: '🔧' },
-    { name: 'CMD Kenya', logo: '📊' },
-    { name: 'U.S. Embassy', logo: '🇺🇸' },
-  ];
 
   return (
     <>
@@ -99,23 +93,7 @@ export default function DemocracyActivatedPage() {
       </section>
 
       {/* Partners Section */}
-      <section className="w-full bg-black text-background py-16 md:py-24 border-y-4 border-foreground">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl md:text-3xl font-black mb-12 text-center">
-            Strategic Partners
-          </h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
-            {partners.map((partner, idx) => (
-              <PartnerCard key={partner.name} name={partner.name} logo={partner.logo} index={idx} />
-            ))}
-          </div>
-
-          <p className="text-center text-sm mt-12 text-muted-foreground">
-            Powered by partnerships that believe in youth-led change. Strategic collaboration across civil society, technology, and government.
-          </p>
-        </div>
-      </section>
+      <PartnersSection />
 
       {/* Impact Stats */}
       <section className="w-full bg-background py-16 md:py-24">

@@ -1,40 +1,38 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 
 interface PartnerCardProps {
   name: string;
   logo: string;
+  url: string;
   index: number;
 }
 
-export default function PartnerCard({ name, logo, index }: PartnerCardProps) {
+export default function PartnerCard({ name, logo, url, index }: PartnerCardProps) {
   return (
-    <motion.div
-      className="stamp-card bg-background border-4 border-foreground text-center py-12"
+    <motion.a
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="neu-card flex flex-col items-center justify-center p-8 bg-white group cursor-pointer"
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: index * 0.1 }}
       viewport={{ once: true }}
-      whileHover={{
-        shadow: '6px 6px 0px 0px rgba(0,0,0,1)',
-        scale: 1.02,
-      }}
     >
-      <motion.div
-        className="text-6xl mb-4"
-        initial={{ scale: 0, rotate: -180 }}
-        whileInView={{ scale: 1, rotate: 0 }}
-        transition={{
-          delay: index * 0.1 + 0.2,
-          type: 'spring',
-          stiffness: 100,
-        }}
-        viewport={{ once: true }}
-      >
-        {logo}
-      </motion.div>
-      <h3 className="font-bold text-lg text-foreground">{name}</h3>
-    </motion.div>
+      <div className="relative w-full aspect-video mb-4 overflow-hidden grayscale group-hover:grayscale-0 transition-all duration-500 transform group-hover:scale-110">
+        <Image
+          src={logo}
+          alt={name}
+          fill
+          className="object-contain"
+        />
+      </div>
+      <h3 className="font-black text-xl text-black border-t-2 border-black pt-4 w-full text-center group-hover:bg-primary group-hover:text-white transition-colors uppercase italic tracking-tighter">
+        {name}
+      </h3>
+    </motion.a>
   );
 }

@@ -5,6 +5,7 @@ import PillarsGrid from '@/components/PillarsGrid';
 import TiltButton from '@/components/TiltButton';
 import TeamSection from '@/components/TeamSection';
 import BrutalistImage from '@/components/BrutalistImage';
+import PartnersSection from '@/components/PartnersSection';
 
 export default function Home() {
   const impactItems = [
@@ -150,6 +151,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Partners Section */}
+      <PartnersSection />
     </>
   );
 }
