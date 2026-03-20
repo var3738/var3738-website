@@ -1,82 +1,103 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
-import { Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useState } from 'react';
+import { Menu, X } from 'lucide-react';
+import RegistrationForm from './RegistrationForm';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showRegister, setShowRegister] = useState(false);
 
-  const navItems = [
-    { id: 'home', label: 'Home', href: '/' },
-    { id: 'democracy', label: 'Democracy Activated', href: '/democracy-activated' },
-    { id: 'reports', label: 'Reports', href: '/reports' },
+  const navLinks = [
+    { label: 'Home', href: '/' },
+    { label: 'Democracy Activated', href: '/democracy-activated' },
+    { label: 'Impact', href: '/impact' },
+    { label: 'Partners', href: '/partners' },
   ];
 
   return (
-    <header className="w-full bg-background border-b-4 border-black p-4 md:p-6 sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
-        {/* Logo */}
-        <Link 
-          href="/" 
-          className="flex items-center gap-3 group active:translate-x-1 active:translate-y-1 transition-all"
-        >
-          <Image src="/var-logo-nobg.png" alt="VAR 37-38 Logo" width={100} height={100} />
+    <header className="glass-header">
+      <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
+        <Link href="/" className="flex items-center gap-2 group">
+          <div className="w-8 h-8 bg-primary rounded-full group-hover:scale-110 transition-transform"></div>
+          <span className="text-2xl font-black tracking-tighter italic transition-colors">
+            VAR 37-38
+          </span>
         </Link>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-10">
-          {navItems.map((item) => (
-            <Link
-              key={item.id}
-              href={item.href}
-              className="text-sm font-black uppercase tracking-widest hover:bg-secondary px-3 py-1 rounded-lg border-2 border-transparent hover:border-black transition-all"
+        {/* Desktop Nav */}
+        <nav className="hidden md:flex items-center gap-8">
+          {navLinks.map((link) => (
+            <Link 
+              key={link.href} 
+              href={link.href}
+              className="text-xs font-bold uppercase tracking-widest text-white/70 hover:text-primary transition-colors"
             >
-              {item.label}
+              {link.label}
             </Link>
           ))}
-          <button className="neu-button text-sm py-2 px-6">
-            Get Started
-          </button>
         </nav>
 
-        {/* Mobile Menu Button */}
-        <button
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-          className="md:hidden p-2 bg-white border-4 border-black rounded-xl neu-shadow active:shadow-none transition-all"
-          aria-label="Toggle menu"
-        >
-          {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
+        <div className="flex items-center gap-4">
+          <button 
+            onClick={() => setShowRegister(true)}
+            className="crimson-btn-outline text-xs py-2 px-5 hidden md:block"
+          >
+            Register
+          </button>
+          
+          {/* Mobile Toggle */}
+          <button
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="md:hidden p-2 text-white hover:text-primary transition-colors"
+          >
+            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
       </div>
 
-      {/* Mobile Navigation */}
+      {/* Mobile Nav Overlay */}
       <AnimatePresence>
         {isMenuOpen && (
-          <motion.nav
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="md:hidden absolute top-full left-0 w-full bg-background border-b-4 border-black p-6 space-y-6 z-40"
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="md:hidden bg-background border-b border-border overflow-hidden"
           >
-            {navItems.map((item) => (
-              <Link
-                key={item.id}
-                href={item.href}
-                className="block text-xl font-black uppercase border-b-4 border-black/10 pb-2"
-                onClick={() => setIsMenuOpen(false)}
+            <div className="flex flex-col p-6 gap-6">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="text-lg font-bold uppercase tracking-tight text-white hover:text-primary"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  {link.label}
+                </Link>
+              ))}
+              <button
+                onClick={() => {
+                  setShowRegister(true);
+                  setIsMenuOpen(false);
+                }}
+                className="crimson-btn w-full"
               >
-                {item.label}
-              </Link>
-            ))}
-            <button className="neu-button w-full text-lg">
-              Get Started
-            </button>
-          </motion.nav>
+                Register
+              </button>
+            </div>
+          </motion.div>
         )}
       </AnimatePresence>
+
+      {showRegister && (
+        <RegistrationForm 
+          wardName="Join the Movement" 
+          onClose={() => setShowRegister(false)} 
+        />
+      )}
     </header>
   );
 }

@@ -12,7 +12,6 @@ export default function TownhallGallery() {
   const [displayCount, setDisplayCount] = useState(INITIAL_COUNT);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
-  // Generate image paths: tnts-image01.jpeg to tnts-image45.jpeg
   const images = Array.from({ length: IMAGES_COUNT }, (_, i) => {
     const num = (i + 1).toString().padStart(2, '0');
     return `/trans-nzoia-townhall/tnts-image${num}.jpeg`;
@@ -21,41 +20,40 @@ export default function TownhallGallery() {
   const displayedImages = images.slice(0, displayCount);
 
   return (
-    <section className="w-full py-24 bg-[#ffc0ad]/10">
+    <section className="w-full py-32 bg-background border-t border-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-16">
-          <h2 className="text-6xl font-black mb-4 italic uppercase tracking-tighter leading-none">
-            Movement in <span className="bg-[#D0171D] text-white px-4 border-4 border-black inline-block transform rotate-1">Action</span>
-          </h2>
-          <p className="text-xl font-bold max-w-2xl text-black/70">
-            Moments from our very first Town Hall series in Trans Nzoia. Voices heard, energy captured, democracy activated.
-          </p>
+        <div className="mb-20 text-center lg:text-left">
+           <h2 className="mb-6 font-black tracking-tighter">
+             Voices <br />
+             <span className="text-primary italic">Captured</span>
+           </h2>
+           <p className="text-white/40 max-w-xl text-lg font-medium">
+             Full-color highlights from our Trans Nzoia series. Authentic moments of civic activation and community leadership.
+           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-6 space-y-6">
           {displayedImages.map((src, idx) => (
             <motion.div
               key={src}
               layoutId={src}
               onClick={() => setSelectedImage(src)}
-              initial={{ opacity: 0, scale: 0.9, rotate: idx % 2 === 0 ? -2 : 2 }}
-              whileInView={{ opacity: 1, scale: 1, rotate: 0 }}
-              whileHover={{ 
-                scale: 1.05, 
-                rotate: idx % 2 === 0 ? 2 : -2,
-                zIndex: 10
-              }}
-              transition={{ duration: 0.3 }}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: idx % 4 * 0.1 }}
               viewport={{ once: true }}
-              className="relative aspect-square neu-card overflow-hidden bg-white group cursor-pointer"
+              className="relative break-inside-avoid modern-card overflow-hidden group cursor-pointer"
             >
               <Image
                 src={src}
                 alt={`Townhall moment ${idx + 1}`}
-                fill
-                className="object-cover transition-transform duration-500 group-hover:scale-110"
+                width={500}
+                height={500}
+                className="w-full object-contain bg-black/20 group-hover:scale-105 transition-transform duration-700"
               />
-              <div className="absolute inset-0 border-4 border-black pointer-events-none"></div>
+              <div className="absolute inset-x-0 bottom-0 p-4 bg-linear-to-t from-black to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                 <span className="text-[10px] font-black uppercase tracking-widest text-primary">View Full Scale</span>
+              </div>
             </motion.div>
           ))}
         </div>
@@ -66,10 +64,10 @@ export default function TownhallGallery() {
         />
 
         {displayCount < IMAGES_COUNT && (
-          <div className="mt-16 text-center">
+          <div className="mt-20 text-center">
             <button
               onClick={() => setDisplayCount(prev => Math.min(prev + 12, IMAGES_COUNT))}
-              className="neu-button bg-[#022855] text-white text-xl hover:scale-105 active:scale-95 transition-all"
+              className="crimson-btn-outline px-12"
             >
               Load More Moments
             </button>

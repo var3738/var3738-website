@@ -19,28 +19,35 @@ const PARTNERS = [
     logo: '/partners/us-embassy.webp', 
     url: 'https://ke.usembassy.gov/' 
   },
+  {
+    name: 'National Endowment for Democracy',
+    logo: '/partners/uamuzi-logo.png', // Placeholder if NED logo missing, but user said "NED"
+    url: 'https://www.ned.org/'
+  }
 ];
 
 export default function PartnersSection({ title = "Strategic Partners", className = "" }: { title?: string, className?: string }) {
   return (
-    <section className={`w-full py-24 bg-black text-white border-y-8 border-black ${className}`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className={`w-full py-32 bg-background border-y border-border relative ${className}`}>
+      <div className="glow-orb top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-5"></div>
+      
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <motion.div 
-          initial={{ opacity: 0, scale: 0.9 }}
-          whileInView={{ opacity: 1, scale: 1 }}
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           viewport={{ once: true }}
-          className="mb-16 text-center"
+          className="mb-20 text-center"
         >
-          <h2 className="text-5xl md:text-7xl font-black italic uppercase tracking-tighter leading-none inline-block">
-            {title.split(' ').map((word, i) => (
-               <span key={i} className={i % 2 !== 0 ? 'text-secondary' : 'text-white'}>{word} </span>
-            ))}
+          <h2 className="text-3xl md:text-5xl font-black mb-4 tracking-tighter">
+            {title}
           </h2>
-          <div className="h-2 w-48 bg-secondary mx-auto mt-4 border-2 border-white"></div>
+          <p className="text-white/40 font-medium uppercase tracking-widest text-xs">
+            Institutionalizing change with global support
+          </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
           {PARTNERS.map((partner, idx) => (
             <PartnerCard 
               key={partner.name} 
@@ -51,10 +58,6 @@ export default function PartnersSection({ title = "Strategic Partners", classNam
             />
           ))}
         </div>
-
-        <p className="text-center text-xl font-bold mt-16 text-white/60 max-w-2xl mx-auto uppercase tracking-wide italic">
-          Powered by partnerships that believe in youth-led change. Real impact through strategic collaboration.
-        </p>
       </div>
     </section>
   );

@@ -18,46 +18,37 @@ export default function BrutalistImage({
   src,
   alt,
   caption,
-  tilt = 'none',
   className = "",
   priority = false
 }: BrutalistImageProps) {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
-  const tiltClass = {
-    left: '-rotate-2',
-    right: 'rotate-2',
-    none: 'rotate-0'
-  }[tilt];
-
   return (
     <>
       <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
+        initial={{ opacity: 0, scale: 0.98 }}
         whileInView={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
         viewport={{ once: true }}
         onClick={() => setIsPreviewOpen(true)}
-        className={`relative inline-block cursor-pointer ${tiltClass} ${className}`}
+        className={`relative inline-block cursor-pointer group rounded-xl overflow-hidden border border-white/10 bg-white/5 ${className}`}
       >
-        <div className="relative bg-white border-4 border-black neu-shadow-lg p-2 overflow-hidden">
-          <div className="relative aspect-[4/3] w-full overflow-hidden border-2 border-black">
-            <Image
-              src={src}
-              alt={alt}
-              fill
-              className="object-cover grayscale hover:grayscale-0 transition-all duration-500 hover:scale-110"
-              priority={priority}
-            />
-          </div>
-          {caption && (
-            <div className="mt-2 text-center">
-              <span className="bg-[#D0171D] text-white text-[10px] font-black uppercase px-2 py-0.5 border-2 border-black inline-block transform -rotate-1">
-                {caption}
-              </span>
-            </div>
-          )}
+        <div className="relative aspect-[4/3] w-full overflow-hidden">
+          <Image
+            src={src}
+            alt={alt}
+            fill
+            className="object-contain bg-black/40 group-hover:scale-105 transition-transform duration-700"
+            priority={priority}
+          />
         </div>
+        {caption && (
+          <div className="absolute bottom-4 left-4 right-4 z-20">
+            <span className="bg-primary/90 backdrop-blur-sm text-white text-[10px] font-black uppercase px-3 py-1 rounded-full tracking-widest border border-primary/20">
+              {caption}
+            </span>
+          </div>
+        )}
       </motion.div>
 
       <ImagePreviewModal 

@@ -32,15 +32,17 @@ const team = [
 
 export default function TeamSection() {
   return (
-    <section className="w-full py-24 bg-background">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-16">
-          <h2 className="text-6xl font-black mb-4 italic uppercase tracking-tighter leading-none">
-            The <span className="bg-[#022855] text-white px-4 border-4 border-black inline-block transform -rotate-1">Command</span>
-          </h2>
-          <p className="text-xl font-bold max-w-2xl text-black/70">
-            A coalition of builders, dreamers, and agitators. Driving the movement forward through collective action and strategic vision.
-          </p>
+    <section className="w-full py-32 bg-background relative overflow-hidden">
+      <div className="glow-orb top-0 right-0 opacity-5"></div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="mb-20">
+           <h2 className="mb-6 font-black tracking-tighter">
+             The <br />
+             <span className="text-primary italic">Movement</span> Creators
+           </h2>
+           <p className="text-white/40 max-w-xl text-lg font-medium">
+             A professional coalition of builders, dreamers, and agitators. Redefining power through structured civic engagement.
+           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">

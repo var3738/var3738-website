@@ -16,21 +16,22 @@ export default function TeamCard({ name, position, image }: TeamCardProps) {
       whileInView={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
       viewport={{ once: true }}
-      className="neu-card bg-white group overflow-hidden"
+      className="modern-card bg-black/40 backdrop-blur-sm group overflow-hidden border border-white/5"
     >
-      <div className="relative h-80 w-full overflow-hidden border-b-4 border-black bg-accent/20">
+      <div className="relative aspect-4/5 w-full overflow-hidden bg-white/5">
         <Image
           src={`/team/${image}`}
           alt={name}
           fill
-          className="object-cover object-top grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-500"
+          className="object-contain p-4 group-hover:scale-105 transition-transform duration-700"
         />
+        <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent"></div>
       </div>
-      <div className="p-6">
-        <h3 className="text-2xl font-black mb-1 uppercase italic tracking-tighter">
+      <div className="p-8">
+        <h3 className="text-2xl font-black mb-1 uppercase tracking-tighter">
           {name}
         </h3>
-        <p className="text-sm font-black uppercase tracking-widest text-[#D0171D]">
+        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">
           {position}
         </p>
       </div>

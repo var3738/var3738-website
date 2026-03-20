@@ -13,77 +13,81 @@ export default function Footer() {
   ];
 
   return (
-    <footer className="w-full bg-[#000] text-white mt-32 border-t-8 border-primary relative overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 relative z-10">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-16 mb-16">
+    <footer className="w-full bg-black text-white py-32 border-t border-white/5 relative overflow-hidden">
+      <div className="glow-orb -bottom-20 -left-20 opacity-10"></div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-20 mb-32">
           {/* Brand */}
-          <div className="flex flex-col items-start translate-y-2">
-            <Image src="/var-logo-nobg.png" alt="VAR 37-38 Logo" width={100} height={100} />
-            <p className="text-lg font-bold leading-tight max-w-sm text-white/80">
-              The Voice of a Generation. Institutionalizing youth energy into democratic power through innovation and grassroots action.
+          <div className="lg:col-span-2">
+            <Link href="/" className="inline-block mb-10">
+              <Image src="/var-logo-nobg.png" alt="VAR 37-38 Logo" width={80} height={80} className="brightness-200" />
+            </Link>
+            <p className="text-xl font-black tracking-tighter max-w-sm mb-10">
+              Institutionalizing youth energy into structured civic participation and electoral power.
             </p>
-          </div>
-
-          {/* Quick Links */}
-          <div className="flex flex-col items-start md:items-center">
-            <div className="w-full max-w-xs p-8 bg-white/5 border-4 border-white/10 rounded-[2rem]">
-              <h4 className="font-black text-xs uppercase tracking-widest text-primary mb-8">Navigation</h4>
-              <ul className="space-y-4 text-xl font-black italic">
-                <li>
-                  <Link href="/" className="hover:text-primary transition-all flex items-center gap-2 group">
-                    <div className="w-2 h-2 bg-primary transform scale-0 group-hover:scale-100 transition-transform"></div>
-                    Home
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/democracy-activated" className="hover:text-primary transition-all flex items-center gap-2 group">
-                    <div className="w-2 h-2 bg-primary transform scale-0 group-hover:scale-100 transition-transform"></div>
-                    Democracy Activated
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/reports" className="hover:text-primary transition-all flex items-center gap-2 group">
-                    <div className="w-2 h-2 bg-primary transform scale-0 group-hover:scale-100 transition-transform"></div>
-                    Research & Reports
-                  </Link>
-                </li>
-              </ul>
+            <div className="flex gap-4">
+              {socialLinks.map((link) => {
+                const Icon = link.icon;
+                return (
+                  <a
+                    key={link.label}
+                    href={link.href}
+                    aria-label={link.label}
+                    className="w-10 h-10 flex items-center justify-center bg-white/5 border border-white/10 rounded-full text-white/40 hover:text-primary hover:border-primary transition-all shadow-sm"
+                  >
+                    <Icon size={18} />
+                  </a>
+                );
+              })}
             </div>
           </div>
 
-          {/* Social Links */}
-          <div className="flex flex-col items-start md:items-end">
-            <div className="w-full max-w-xs md:text-right">
-              <h4 className="font-black text-xs uppercase tracking-widest text-secondary mb-8">Connect</h4>
-              <div className="flex gap-4 md:justify-end">
-                {socialLinks.map((link) => {
-                  const Icon = link.icon;
-                  return (
-                    <a
-                      key={link.label}
-                      href={link.href}
-                      aria-label={link.label}
-                      className="w-14 h-14 flex items-center justify-center bg-white border-4 border-black rounded-2xl text-black hover:bg-primary transition-all neu-shadow active:translate-x-1 active:translate-y-1 active:shadow-none"
-                    >
-                      <Icon size={24} />
-                    </a>
-                  );
-                })}
-              </div>
-            </div>
+          {/* Practical Links */}
+          <div>
+            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 mb-8">Ecosystem</h4>
+            <ul className="space-y-4">
+              {[
+                { label: 'Democracy Activated', href: '/democracy-activated' },
+                { label: 'Impact Dashboard', href: '/impact' },
+                { label: 'National Agenda', href: '/agenda' },
+                { label: 'Digital Resilience', href: '/tech' },
+              ].map((link) => (
+                <li key={link.label}>
+                  <Link href={link.href} className="text-sm font-medium text-white/50 hover:text-white transition-colors">
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Legal */}
+          <div>
+            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 mb-8">Governance</h4>
+            <ul className="space-y-4">
+              {[
+                { label: 'Privacy Protocol', href: '#' },
+                { label: 'Terms of Action', href: '#' },
+                { label: 'Strategic Partners', href: '/partners' },
+              ].map((link) => (
+                <li key={link.label}>
+                  <Link href={link.href} className="text-sm font-medium text-white/50 hover:text-white transition-colors">
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
 
-        {/* Copyright */}
-        <div className="border-t-4 border-white/10 pt-10 flex flex-col md:flex-row justify-between items-center gap-6 text-sm">
-          <p className="font-black italic text-xl text-primary/60 uppercase tracking-tighter">
+        {/* Bottom Bar */}
+        <div className="pt-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20">
             Building the future of Kenyan Democracy.
           </p>
-          <div className="flex flex-col md:items-end">
-            <p className="font-black uppercase tracking-widest text-xs opacity-40">
-              © {new Date().getFullYear()} VAR 37-38. All rights reserved.
-            </p>
-          </div>
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20">
+            © {new Date().getFullYear()} VAR 37-38. Systems for Continuity.
+          </p>
         </div>
       </div>
     </footer>
