@@ -4,14 +4,14 @@ import TeamCard from './TeamCard';
 
 const team = [
   {
-    name: 'Ivy Muchoki',
-    position: 'National Cordinator/ Cofounder',
-    image: 'IvyMuchoki.jpeg',
-  },
-  {
     name: 'Keno Manwar',
     position: 'Founder',
     image: 'KenoManwar.jpeg',
+  },
+  {
+    name: 'Ivy Muchoki',
+    position: 'National Cordinator/ Cofounder',
+    image: 'IvyMuchoki.jpeg',
   },
   {
     name: 'Madzao Rocha',
