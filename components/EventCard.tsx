@@ -21,35 +21,42 @@ export default function EventCard({
 
   return (
     <motion.div
-      className="neu-card flex flex-col p-8 bg-white group relative overflow-hidden"
-      whileHover={{ x: 4, y: 4 }}
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      viewport={{ once: true }}
+      className="modern-card flex flex-col p-8 bg-black/40 backdrop-blur-sm group relative overflow-hidden h-full"
     >
-      <div className="absolute top-0 right-0 p-4 transform translate-x-4 -translate-y-4">
-        <div className="w-16 h-16 bg-primary/20 border-4 border-black rounded-full"></div>
-      </div>
+      {/* Background Accent */}
+      <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-primary/10 transition-colors" />
 
       {/* Header */}
-      <div className="mb-8 relative z-10">
-        <h3 className="text-4xl font-black mb-3 italic tracking-tighter uppercase">{wardName}</h3>
-        <div className="neu-badge bg-secondary">
-          {date}
+      <div className="mb-10 relative z-10">
+        <div className="text-[10px] font-black uppercase tracking-[0.2em] text-primary mb-2">
+          Townhall Series
         </div>
+        <h3 className="text-3xl font-black mb-1 uppercase tracking-tighter transition-colors group-hover:text-primary">
+          {wardName}
+        </h3>
+        <p className="text-white/40 font-medium text-sm">
+          {date}
+        </p>
       </div>
 
-      {/* Capacity Bar */}
-      <div className="mb-10 flex-grow relative z-10">
-        <div className="flex justify-between items-end mb-4">
-          <span className="text-xs font-black uppercase tracking-widest text-black/40">Availability</span>
-          <span className="text-xl font-black text-black">
-            {capacity}<span className="text-black/40 text-sm font-bold">/{maxCapacity}</span>
+      {/* Capacity Section */}
+      <div className="mb-12 flex-grow relative z-10">
+        <div className="flex justify-between items-end mb-3">
+          <span className="text-[10px] font-black uppercase tracking-widest text-white/20">Seat Availability</span>
+          <span className="text-lg font-black">
+            {capacity}<span className="text-white/20 text-xs font-bold ml-1">/{maxCapacity}</span>
           </span>
         </div>
-        <div className="w-full h-6 bg-white border-4 border-black rounded-full relative overflow-hidden">
+        <div className="w-full h-1 bg-white/5 rounded-full relative overflow-hidden">
           <motion.div
-            className="h-full bg-primary border-r-4 border-black"
+            className="h-full bg-primary"
             initial={{ width: 0 }}
             whileInView={{ width: `${capacityPercentage}%` }}
-            transition={{ duration: 1, ease: "circOut" }}
+            transition={{ duration: 1.5, ease: "circOut" }}
           />
         </div>
       </div>
@@ -57,9 +64,9 @@ export default function EventCard({
       {/* CTA Button */}
       <button
         onClick={onRegister}
-        className="neu-button-secondary w-full text-center font-black text-lg"
+        className="crimson-btn w-full text-xs uppercase tracking-widest py-4"
       >
-        Claim Your Spot
+        Secure a Seat
       </button>
     </motion.div>
   );

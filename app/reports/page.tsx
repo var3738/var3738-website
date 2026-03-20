@@ -1,189 +1,127 @@
 'use client';
 
-import { Download, FileText, Calendar } from 'lucide-react';
 import { motion } from 'framer-motion';
 import HeroSection from '@/components/HeroSection';
-import ReportCard from '@/components/ReportCard';
 import StatCard from '@/components/StatCard';
+import PartnersSection from '@/components/PartnersSection';
+
+const WARD_FINDINGS = [
+  {
+    ward: 'Matisi',
+    issues: ['CDF Ineffectiveness', 'Voter Frustration', 'Ethnic Favoritism', 'Boundary Disputes'],
+    summary: 'One of the most complex governance regions with high political exploitation of unemployed youth.'
+  },
+  {
+    ward: 'Sikhendu',
+    issues: ['Maternal Health Cutbacks', 'School Fee Barriers', 'Gender-Based Violence'],
+    summary: 'Significant social barriers affecting families and access to education.'
+  },
+  {
+    ward: 'Saboti',
+    issues: ['Youth Unemployment', 'Limited Credit Access', 'Resource Mismanagement'],
+    summary: 'Economic stagnation remains a primary concern for the youth population.'
+  },
+  {
+    ward: 'Chepchoina',
+    issues: ['ID Regularities', 'Electoral Trust', 'Foreign Participation Allegations'],
+    summary: 'Critical challenges in electoral administration and citizen identity verification.'
+  },
+  {
+    ward: 'Kitale Town (Polytechnic)',
+    issues: ['Academic Facility Gaps', 'Skepticism of Tech Voting', 'Relatable Civic Ed Needs'],
+    summary: 'The student population demands more relatable, youth-culture-oriented civic education.'
+  }
+];
 
 export default function ReportsPage() {
-  const reports = [
-    {
-      id: 1,
-      title: 'VAR 37-38 Movement Manifesto',
-      date: 'March 2026',
-      description: 'The foundational document outlining VAR 37-38\'s vision, strategy, and action plan for institutionalizing youth power in Kenyan democracy.',
-      type: 'Manifesto',
-      pages: 24,
-    },
-    {
-      id: 2,
-      title: 'Trans Nzoia Townhall Series: Mid-Point Report',
-      date: 'April 2026',
-      description: 'Impact assessment and learning from the first four wards. Attendance metrics, youth engagement data, and key civic insights.',
-      type: 'Progress Report',
-      pages: 18,
-    },
-    {
-      id: 3,
-      title: 'Digital Resilience: Tech Infrastructure for Democracy',
-      date: 'February 2026',
-      description: 'How Uamuzi Tech enables seamless civic participation. Data privacy, accessibility, and digital inclusion strategies.',
-      type: 'Technical',
-      pages: 15,
-    },
-    {
-      id: 4,
-      title: 'Youth Political Participation in Kenya: Research Findings',
-      date: 'January 2026',
-      description: 'Quantitative and qualitative research on barriers and opportunities for youth electoral engagement in Trans Nzoia County.',
-      type: 'Research',
-      pages: 32,
-    },
-    {
-      id: 5,
-      title: 'Partnership Framework: Government, Civil Society, and Tech',
-      date: 'December 2025',
-      description: 'Detailed documentation of VAR\'s strategic partnerships and collaborative governance model.',
-      type: 'Strategic',
-      pages: 12,
-    },
-    {
-      id: 6,
-      title: 'Youth Champion Training Curriculum',
-      date: 'March 2026',
-      description: 'Complete training materials, competency frameworks, and ongoing development pathways for Youth Champions.',
-      type: 'Training',
-      pages: 28,
-    },
-  ];
-
-  const reportTypes = [
-    { type: 'Manifesto', color: 'bg-primary' },
-    { type: 'Progress Report', color: 'bg-secondary' },
-    { type: 'Technical', color: 'bg-black' },
-    { type: 'Research', color: 'bg-primary' },
-    { type: 'Strategic', color: 'bg-secondary' },
-    { type: 'Training', color: 'bg-black' },
-  ];
-
-  const getTypeColor = (type: string) => {
-    const found = reportTypes.find((t) => t.type === type);
-    return found?.color || 'bg-muted';
-  };
-
   return (
-    <>
-      {/* Hero Section */}
+    <div className="bg-background text-foreground min-h-screen">
       <HeroSection
-        headline="RESEARCH & IMPACT REPORTS"
-        subheadline="Transparent documentation of VAR 37-38's movement. Data-driven insights. Evidence of change. Tools for replication."
-        backgroundColor="bg-black"
-        textColor="text-background"
+        headline="Strategic Reports & Findings"
+        subheadline="Evidence-based insights from the Trans Nzoia Pilot. Tracking the intersection of governance and democratic participation."
+        imageSrc="/trans-nzoia-townhall/tnts-image06.jpeg"
       />
 
-      {/* Overview Section */}
-      <section className="w-full bg-primary text-foreground py-12 md:py-16">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <p className="text-lg md:text-xl font-bold leading-relaxed text-balance">
-            Our reports are open-source tools for democracy. We believe in radical transparency and continuous learning. Download, study, adapt, and replicate our frameworks in your community.
-          </p>
-        </div>
-      </section>
-
-      {/* Reports Grid */}
-      <section className="w-full bg-background py-16 md:py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl md:text-4xl font-black mb-12 text-balance">
-            Published Documents
-          </h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-            {reports.map((report, index) => (
-              <ReportCard
-                key={report.id}
-                title={report.title}
-                date={report.date}
-                description={report.description}
-                type={report.type}
-                pages={report.pages}
-                typeColor={getTypeColor(report.type)}
-                index={index}
-              />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Impact Metrics */}
-      <section className="w-full bg-black text-background py-16 md:py-24 border-y-4 border-foreground">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl md:text-4xl font-black mb-12 text-center text-balance">
-            Movement Impact So Far
-          </h2>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
-            {[
-              { number: '1,000+', label: 'Youths Mobilized' },
-              { number: '45+', label: 'Partner Organizations' },
-              { number: '3', label: 'Counties Active' },
-              { number: '50+', label: 'Community Events' },
-            ].map((metric, idx) => (
-              <StatCard key={idx} number={metric.number} label={metric.label} index={idx} />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Research Methodology */}
-      <section className="w-full bg-background py-16 md:py-24">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl md:text-4xl font-black mb-8 text-balance">
-            Our Research Approach
-          </h2>
-
-          <div className="space-y-8">
-            {[
-              {
-                title: 'Participatory Action Research',
-                description: 'Communities aren\'t data sources—they\'re co-researchers. Youth drive our inquiry, interpretation, and action.',
-              },
-              {
-                title: 'Mixed Methods',
-                description: 'Quantitative surveys, qualitative interviews, focus groups, and observational studies combine for holistic understanding.',
-              },
-              {
-                title: 'Rapid Feedback Cycles',
-                description: 'Every two weeks, findings inform strategy adjustments. Real-time learning enables adaptive implementation.',
-              },
-              {
-                title: 'Open Data Commons',
-                description: 'All anonymized datasets are publicly available for academic research, policy advocacy, and movement replication.',
-              },
-            ].map((item, idx) => (
-              <div key={idx} className="stamp-card bg-background">
-                <h3 className="text-xl font-black mb-3">{item.title}</h3>
-                <p className="text-muted-foreground">{item.description}</p>
+      {/* Main Implications */}
+      <section className="w-full py-32 relative overflow-hidden">
+        <div className="glow-orb top-0 right-0 opacity-10"></div>
+        <div className="max-w-7xl mx-auto px-4 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+            >
+              <h2 className="mb-10 font-black tracking-tighter">
+                Key <br />
+                <span className="text-primary italic">Implications</span>
+              </h2>
+              <div className="grid grid-cols-1 gap-6">
+                 {[
+                   'Declining trust in electoral institutions',
+                   'Widespread socio-economic frustration',
+                   'Youth disillusionment with political processes',
+                   'Structural barriers to voter registration'
+                 ].map((item, i) => (
+                   <div key={i} className="flex items-center gap-4 p-6 bg-white/5 border border-white/10 rounded-2xl group hover:border-primary/20 transition-all">
+                      <div className="w-2 h-2 rounded-full bg-primary"></div>
+                      <span className="text-lg font-black uppercase tracking-tighter text-white/60 group-hover:text-white transition-colors">
+                        {item}
+                      </span>
+                   </div>
+                 ))}
               </div>
+            </motion.div>
+            
+            <div className="modern-card p-12">
+              <h3 className="text-3xl font-black mb-10 uppercase tracking-tighter italic">Movement Conclusion</h3>
+              <p className="text-white/50 text-xl font-medium leading-relaxed mb-10">
+                VAR's findings highlight a population deeply concerned about governance and integrity. Our "From the Streets to the Ballot" initiative is the direct response to rebuild public confidence and empower citizens.
+              </p>
+              <div className="flex gap-4">
+                 <StatCard number="11" label="Wards Studied" index={0} />
+                 <StatCard number="2026" label="Analysis Year" index={1} />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Ward Granularity */}
+      <section className="w-full py-32 bg-black border-y border-white/5">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="mb-20">
+            <div className="text-[10px] font-black uppercase tracking-[0.2em] text-primary mb-6">Ward Granularity</div>
+            <h2 className="text-5xl font-black tracking-tighter uppercase leading-none">Field <br /><span className="text-white/20 italic">Intelligence</span></h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {WARD_FINDINGS.map((finding, idx) => (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: idx * 0.1 }}
+                viewport={{ once: true }}
+                className="modern-card p-10 flex flex-col h-full group"
+              >
+                <h3 className="text-2xl font-black mb-6 uppercase tracking-tighter text-primary">{finding.ward}</h3>
+                <p className="text-white/60 font-medium mb-8 grow italic">&ldquo;{finding.summary}&rdquo;</p>
+                <div className="space-y-3 pt-6 border-t border-white/5">
+                  {finding.issues.map((issue, iIdx) => (
+                    <div key={iIdx} className="flex items-center gap-3">
+                      <div className="w-1.5 h-1.5 bg-primary/40 rounded-full"></div>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-white/30">{issue}</span>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="w-full bg-primary text-foreground py-16 md:py-24 border-t-4 border-foreground">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl md:text-4xl font-black mb-6 text-balance">
-            Want to Collaborate?
-          </h2>
-          <p className="text-lg mb-8">
-            Organizations, researchers, and movements: Let's build together. Our frameworks are open. Our data is shared. Our movement is collaborative.
-          </p>
-          <button className="stamp-button text-lg px-8 py-4">
-            Get in Touch
-          </button>
-        </div>
-      </section>
-    </>
+      <PartnersSection />
+    </div>
   );
 }

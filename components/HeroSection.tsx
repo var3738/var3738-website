@@ -1,91 +1,71 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import CreativeNeuCard from './CreativeNeuCard';
-import BrutalistImage from './BrutalistImage';
+import Image from 'next/image';
 
 interface HeroSectionProps {
-  headline: string;
+  headline?: string;
   subheadline?: string;
+  imageSrc?: string; // Added imageSrc prop
   backgroundColor?: string;
   textColor?: string;
 }
 
 export default function HeroSection({
-  headline,
-  subheadline,
-  backgroundColor = 'bg-background',
-  textColor = 'text-foreground',
+  headline = "Empowering the Next Generation of Kenyan Leaders", // Updated default headline
+  subheadline = "Institutionalizing youth power through civic engagement, digital resilience, and ideological clarity.", // Updated default subheadline
+  imageSrc = "/trans-nzoia-townhall/tnts-image04.jpeg", // Added default imageSrc
 }: HeroSectionProps) {
   return (
-    <section className={`w-full ${backgroundColor} ${textColor} py-20 px-4 md:py-32 overflow-hidden relative border-b-4 border-black`}>
-      <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-16 items-center">
+    <section className="relative w-full min-h-[90vh] flex flex-col items-center justify-center bg-background overflow-hidden px-4 py-32 border-b border-border">
+      {/* Background Orbs */}
+      <div className="glow-orb -top-20 -left-20 opacity-20"></div>
+      <div className="glow-orb top-1/2 -right-20 opacity-10 blur-[120px]"></div>
+
+      <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-20 items-center relative z-10">
         <motion.div
-          initial={{ opacity: 0, x: -30 }}
+          initial={{ opacity: 0, x: -50 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8 }}
-          className="flex-1 text-left"
         >
-          <div className="inline-block px-4 py-2 bg-secondary border-4 border-black font-black uppercase tracking-widest mb-8 neu-shadow transform -rotate-2">
-            Movement in Action
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-primary/30 bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest mb-8">
+             <span className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse"></span>
+             Strategic Civic Engagement
           </div>
-          
-          <h1 className="text-6xl md:text-8xl font-black italic uppercase leading-[0.85] mb-8 tracking-tighter">
-            {headline.split(' ').map((word, i) => (
-              <span key={i} className={i % 2 === 1 ? 'bg-primary px-4 py-1 border-4 border-black inline-block transform rotate-1 m-1' : ''}>
-                {word}{' '}
-              </span>
-            ))}
+          <h1 className="mb-10 block tracking-tight">
+            {headline}
           </h1>
-          
-          {subheadline && (
-            <p className="text-xl md:text-2xl font-bold leading-tight mb-12 max-w-xl">
-              {subheadline}
-            </p>
-          )}
-          
-          <div className="flex flex-wrap gap-6">
-            <button className="neu-button text-lg px-10 py-4 transform hover:-translate-x-1 hover:-translate-y-1 active:translate-x-1 active:translate-y-1 transition-all">
-              Start building
+          <p className="text-xl md:text-2xl text-white/60 mb-12 max-w-xl font-medium leading-tight">
+            {subheadline}
+          </p>
+          <div className="flex flex-wrap gap-4">
+            <button className="crimson-btn text-lg px-10 py-4">
+              Explore Our Strategy
             </button>
-            <button className="neu-button-outline text-lg px-10 py-4 transform hover:-translate-x-1 hover:-translate-y-1 active:translate-x-1 active:translate-y-1 transition-all">
-              Learn more
+            <button className="px-10 py-4 rounded-lg border border-white/10 hover:bg-white/5 transition-colors font-bold uppercase tracking-widest text-sm">
+              Impact Dashboard
             </button>
           </div>
         </motion.div>
 
-        <div className="flex-1 relative hidden lg:block">
-          <CreativeNeuCard 
-            image="/group-pics/group-pic2.jpeg"
-            hoverText="VIEW HUB"
-            title="YOUTH-LED"
-            subtitle="REVOLUTION"
-            className="w-full relative z-10"
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 1, delay: 0.2 }}
+          className="relative aspect-square w-full rounded-2xl border border-white/10 bg-white/5 overflow-hidden group shadow-2xl"
+        >
+          <Image
+            src={imageSrc}
+            alt="Hero Image"
+            fill
+            className="object-cover opacity-80 group-hover:scale-105 transition-transform duration-1000"
+            priority
           />
-          
-          {/* Floating Action Photos */}
-          <BrutalistImage 
-            src="/trans-nzoia-townhall/tnts-image01.jpeg" 
-            alt="Townhall Action"
-            caption="MARCH 2026"
-            tilt="left"
-            className="absolute -top-12 -left-12 w-48 z-20"
-          />
-          <BrutalistImage 
-            src="/trans-nzoia-townhall/tnts-image02.jpeg" 
-            alt="Youth Mobilization"
-            caption="TRANS NZOIA"
-            tilt="right"
-            className="absolute top-1/2 -right-16 w-56 -translate-y-1/2 z-0"
-          />
-          <BrutalistImage 
-            src="/trans-nzoia-townhall/tnts-image03.jpeg" 
-            alt="Community Engagement"
-            caption="ACTIVATED"
-            tilt="left"
-            className="absolute -bottom-16 left-1/4 w-52 z-20"
-          />
-        </div>
+          <div className="absolute inset-x-0 bottom-0 p-10 pt-32 bg-linear-to-t from-black via-black/40 to-transparent">
+             <h3 className="text-2xl font-black mb-2 italic">Trans Nzoia Series</h3>
+             <p className="text-white/50 font-medium">Institutionalizing the youth voice into formal systemic power.</p>
+          </div>
+        </motion.div>
       </div>
     </section>
   );

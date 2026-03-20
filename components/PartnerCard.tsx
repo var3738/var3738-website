@@ -16,13 +16,13 @@ export default function PartnerCard({ name, logo, url, index }: PartnerCardProps
       href={url}
       target="_blank"
       rel="noopener noreferrer"
-      className="neu-card flex flex-col items-center justify-center p-8 bg-white group cursor-pointer"
+      className="modern-card flex flex-col items-center justify-center p-8 bg-black/40 backdrop-blur-sm group cursor-pointer h-48"
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: index * 0.1 }}
       viewport={{ once: true }}
     >
-      <div className="relative w-full aspect-video mb-4 overflow-hidden grayscale group-hover:grayscale-0 transition-all duration-500 transform group-hover:scale-110">
+      <div className="relative w-full h-20 mb-4 overflow-hidden md:grayscale group-hover:grayscale-0 transition-all duration-700">
         <Image
           src={logo}
           alt={name}
@@ -30,9 +30,9 @@ export default function PartnerCard({ name, logo, url, index }: PartnerCardProps
           className="object-contain"
         />
       </div>
-      <h3 className="font-black text-xl text-black border-t-2 border-black pt-4 w-full text-center group-hover:bg-primary group-hover:text-white transition-colors uppercase italic tracking-tighter">
+      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 group-hover:text-primary transition-colors">
         {name}
-      </h3>
+      </p>
     </motion.a>
   );
 }
