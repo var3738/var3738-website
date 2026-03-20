@@ -56,8 +56,8 @@ export default function DemocracyActivatedPage() {
           </div>
           <div className="hidden lg:block">
             <CreativeNeuCard 
-              mainText="9"
-              hoverText="WARDS"
+              image="/trans-nzoia-townhall/tnts-image04.jpeg"
+              hoverText="ACTIVATE"
               title="TRANS NZOIA"
               subtitle="ACTIVATED"
               accentColor="bg-secondary"

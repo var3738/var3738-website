@@ -1,9 +1,9 @@
 'use client';
 
 import Image from 'next/image';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useState } from 'react';
-import { X } from 'lucide-react';
+import ImagePreviewModal from './ImagePreviewModal';
 
 const IMAGES_COUNT = 45;
 const INITIAL_COUNT = 12;
@@ -60,36 +60,10 @@ export default function TownhallGallery() {
           ))}
         </div>
 
-        <AnimatePresence>
-          {selectedImage && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setSelectedImage(null)}
-              className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 cursor-zoom-out"
-            >
-              <motion.div
-                layoutId={selectedImage}
-                className="relative max-w-5xl w-full aspect-[4/3] neu-card bg-white overflow-hidden cursor-default"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <Image
-                  src={selectedImage}
-                  alt="Full size preview"
-                  fill
-                  className="object-contain"
-                />
-                <button
-                  onClick={() => setSelectedImage(null)}
-                  className="absolute top-4 right-4 w-12 h-12 bg-white border-4 border-black rounded-xl flex items-center justify-center neu-shadow active:shadow-none transition-all z-20"
-                >
-                  <X className="w-6 h-6 text-black" />
-                </button>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        <ImagePreviewModal 
+          src={selectedImage} 
+          onClose={() => setSelectedImage(null)} 
+        />
 
         {displayCount < IMAGES_COUNT && (
           <div className="mt-16 text-center">

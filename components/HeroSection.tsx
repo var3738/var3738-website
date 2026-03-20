@@ -56,8 +56,8 @@ export default function HeroSection({
 
         <div className="flex-1 relative hidden lg:block">
           <CreativeNeuCard 
-            mainText="VAR"
-            hoverText="POWER"
+            image="/group-pics/group-pic2.jpeg"
+            hoverText="VIEW HUB"
             title="YOUTH-LED"
             subtitle="REVOLUTION"
             className="w-full relative z-10"
