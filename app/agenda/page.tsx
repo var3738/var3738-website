@@ -14,9 +14,10 @@ export default function AgendaPage() {
 
   return (
     <div className="bg-background text-foreground min-h-screen">
-      <HeroSection 
-        headline="National Youth Agenda: Movement-to-System."
-        subheadline="A professional framework for shifting KENYA from emotional politics to issue-based dialogue."
+      <HeroSection
+        headline="The National Youth Agenda"
+        subheadline="A movement-to-system roadmap for radical transformation and governance excellence."
+        imageSrc="/trans-nzoia-townhall/tnts-image07.jpeg"
       />
 
       <section className="w-full py-32 bg-background relative overflow-hidden">

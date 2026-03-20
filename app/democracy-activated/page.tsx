@@ -14,22 +14,25 @@ export default function DemocracyActivatedPage() {
 
   const wards = [
     { name: 'Saboti', date: 'March 15, 2026', capacity: 45, maxCapacity: 100 },
-    { name: 'Kiminini', date: 'March 17, 2026', capacity: 62, maxCapacity: 100 },
-    { name: 'Webuye East', date: 'March 19, 2026', capacity: 38, maxCapacity: 100 },
-    { name: 'Webuye West', date: 'March 21, 2026', capacity: 71, maxCapacity: 100 },
-    { name: 'Bumula', date: 'March 23, 2026', capacity: 54, maxCapacity: 100 },
-    { name: 'Kanduyi', date: 'March 25, 2026', capacity: 85, maxCapacity: 100 },
-    { name: 'Kimilili', date: 'March 27, 2026', capacity: 42, maxCapacity: 100 },
-    { name: 'Bungoma', date: 'March 29, 2026', capacity: 91, maxCapacity: 100 },
-    { name: 'Kabuchai', date: 'March 31, 2026', capacity: 67, maxCapacity: 100 },
+    { name: 'Mowlem', date: 'March 17, 2026', capacity: 62, maxCapacity: 100 },
+    { name: 'Chepchoina', date: 'March 19, 2026', capacity: 38, maxCapacity: 100 },
+    { name: 'Kapkoi', date: 'March 21, 2026', capacity: 71, maxCapacity: 100 },
+    { name: 'Kwanza', date: 'March 23, 2026', capacity: 54, maxCapacity: 100 },
+    { name: 'Cherenganyi', date: 'March 25, 2026', capacity: 85, maxCapacity: 100 },
+    { name: 'Kaplamai', date: 'March 27, 2026', capacity: 42, maxCapacity: 100 },
+    { name: 'Sirende', date: 'March 29, 2026', capacity: 91, maxCapacity: 100 },
+    { name: 'Sikhendu', date: 'March 31, 2026', capacity: 67, maxCapacity: 100 },
+    { name: 'Matisi', date: 'April 02, 2026', capacity: 78, maxCapacity: 100 },
+    { name: 'Kitale Town', date: 'April 04, 2026', capacity: 95, maxCapacity: 100 },
   ];
 
   return (
     <div className="bg-background text-foreground min-h-screen">
       {/* Hero Section */}
       <HeroSection
-        headline="Democracy Activated: The Trans Nzoia Series"
-        subheadline="Converting protest energy into civic oversight and voter registration. One movement. Unstoppable momentum."
+        headline="Democracy Activated: Trans Nzoia Pilot"
+        subheadline="Ideology Meets Technology | From the Streets to the Ballot. Converting protest energy into structured democratic participation."
+        imageSrc="/trans-nzoia-townhall/tnts-image05.jpeg"
       />
 
       {/* Strategic Vision */}
@@ -43,35 +46,31 @@ export default function DemocracyActivatedPage() {
               viewport={{ once: true }}
             >
               <h2 className="mb-10 font-black tracking-tighter">
-                Systemic <br />
-                <span className="text-primary italic">Activation</span>
+                The Triple <br />
+                <span className="text-primary italic">Pillar Model</span>
               </h2>
-              <p className="text-xl text-white/60 mb-8 font-medium leading-relaxed">
-                From March through May, we activate democracy across nine wards in Trans Nzoia. Youth champions mobilize their communities for townhall discussions where people directly engage with government accountability and electoral participation.
-              </p>
-              <div className="flex flex-col gap-6">
-                 {[
-                   'Voter Registration Drives',
-                   'Civic Oversight Training',
-                   'Policy Dialogue Series',
-                   'Digital Engagement Onboarding'
-                 ].map((item, i) => (
-                   <div key={i} className="flex items-center gap-4 group">
-                      <div className="w-2 h-2 rounded-full bg-primary group-hover:scale-150 transition-transform"></div>
-                      <span className="text-sm font-black uppercase tracking-widest text-white/40 group-hover:text-white transition-colors">
-                        {item}
-                      </span>
-                   </div>
-                 ))}
+              <div className="space-y-8 mb-12">
+                <div>
+                  <h3 className="text-xl font-black uppercase tracking-widest text-primary mb-2">01. Streets (Connect)</h3>
+                  <p className="text-white/60 font-medium">Led by VAR: Grassroots mobilization and lived-experience storytelling.</p>
+                </div>
+                <div>
+                  <h3 className="text-xl font-black uppercase tracking-widest text-primary mb-2">02. Ideology (Converse)</h3>
+                  <p className="text-white/60 font-medium">Led by NEDP Youth League: Shifting from emotional politics to issue-based policy dialogue.</p>
+                </div>
+                <div>
+                  <h3 className="text-xl font-black uppercase tracking-widest text-primary mb-2">03. Technology (Continue)</h3>
+                  <p className="text-white/60 font-medium">Powered by Uamuzi: Building digital long-term infrastructure for civic power.</p>
+                </div>
               </div>
             </motion.div>
             
             <div className="grid grid-cols-2 gap-4">
                {[
-                 { number: '9', label: 'Wards' },
-                 { number: '1,000+', label: 'Expected' },
-                 { number: '100%', label: 'Commitment' },
-                 { number: '3', label: 'Partners' },
+                 { number: '11', label: 'Locations' },
+                 { number: '1,000+', label: 'Youth Targets' },
+                 { number: 'KES 5M', label: 'Pilot Budget' },
+                 { number: '3', label: 'Core Partners' },
                ].map((stat, idx) => (
                  <StatCard key={idx} number={stat.number} label={stat.label} index={idx} />
                ))}
@@ -80,18 +79,15 @@ export default function DemocracyActivatedPage() {
         </div>
       </section>
 
-      {/* Townhall Gallery */}
-      <TownhallGallery />
-
       {/* Events Schedule */}
-      <section className="w-full py-32 bg-background border-t border-border">
+      <section className="w-full py-32 bg-background border-t border-white/5">
         <div className="max-w-7xl mx-auto px-4">
           <div className="mb-20 text-center">
-            <h2 className="mb-6 font-black tracking-tighter">Townhall Schedule</h2>
-            <p className="text-white/40 font-medium uppercase tracking-[0.3em] text-[10px]">Secure Your Seat in the Movement</p>
+            <div className="text-[10px] font-black uppercase tracking-[0.2em] text-primary mb-6">Series Schedule</div>
+            <h2 className="mb-6 font-black tracking-tighter uppercase leading-none">Townhall <br /><span className="text-white/20 italic">Activations</span></h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {wards.map((ward) => (
               <EventCard
                 key={ward.name}
@@ -106,19 +102,25 @@ export default function DemocracyActivatedPage() {
         </div>
       </section>
 
+      
+      {/* Townhall Gallery */}
+      <TownhallGallery />
+
+
       {/* The Champion Framework */}
-      <section className="w-full py-32 bg-black border-y border-border relative overflow-hidden">
+      <section className="w-full py-32 bg-black border-y border-white/5 relative overflow-hidden">
         <div className="glow-orb -bottom-20 -left-20 opacity-10"></div>
         <div className="max-w-4xl mx-auto px-4 text-center relative z-10">
-          <h2 className="mb-10 font-black tracking-tighter">Become a Youth Champion</h2>
+          <div className="text-[10px] font-black uppercase tracking-[0.2em] text-primary mb-10">Community Leadership</div>
+          <h2 className="mb-10 font-black tracking-tighter text-5xl lg:text-7xl">BECOME A <br /><span className="text-white/20 italic">YOUTH CHAMPION</span></h2>
           <p className="text-lg text-white/50 mb-12 font-medium leading-relaxed">
             Youth Champions are community leaders who co-facilitate townhalls and drive voter registration in their wards. They bridge government and grassroots, ensuring every voice is heard. Champions receive training, leadership development, and ongoing support.
           </p>
           <button 
             onClick={() => setSelectedWard("Youth Champion Program")}
-            className="crimson-btn-outline px-12 py-5"
+            className="crimson-btn px-12 py-5 text-[10px] uppercase tracking-[0.2em]"
           >
-            Apply for the Program
+            Apply for Certification
           </button>
         </div>
       </section>

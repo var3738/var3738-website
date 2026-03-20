@@ -22,7 +22,7 @@ export default function PartnerCard({ name, logo, url, index }: PartnerCardProps
       transition={{ duration: 0.5, delay: index * 0.1 }}
       viewport={{ once: true }}
     >
-      <div className="relative w-full h-20 mb-4 overflow-hidden grayscale group-hover:grayscale-0 transition-all duration-700">
+      <div className="relative w-full h-20 mb-4 overflow-hidden md:grayscale group-hover:grayscale-0 transition-all duration-700">
         <Image
           src={logo}
           alt={name}

@@ -9,8 +9,9 @@ export default function TechPage() {
   return (
     <div className="bg-background text-foreground min-h-screen">
       <HeroSection 
-        headline="Digital Resilience: Powering Continuity."
-        subheadline="In partnership with Uamuzi Foundation, we build secure systems for long-term civic engagement."
+        headline="Digital Resilience & Sovereignty"
+        subheadline="Leveraging the Uamuzi platform to translate digital energy into structured, secure civic power."
+        imageSrc="/trans-nzoia-townhall/tnts-image08.jpeg"
       />
 
       <section className="w-full py-32">

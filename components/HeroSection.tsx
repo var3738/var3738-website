@@ -6,13 +6,15 @@ import Image from 'next/image';
 interface HeroSectionProps {
   headline?: string;
   subheadline?: string;
+  imageSrc?: string; // Added imageSrc prop
   backgroundColor?: string;
   textColor?: string;
 }
 
 export default function HeroSection({
-  headline = "Institutionalizing Youth Power: From the Streets to the Ballot.",
-  subheadline = "Transforming Kenya’s youthful energy into structured civic participation and electoral power.",
+  headline = "Empowering the Next Generation of Kenyan Leaders", // Updated default headline
+  subheadline = "Institutionalizing youth power through civic engagement, digital resilience, and ideological clarity.", // Updated default subheadline
+  imageSrc = "/trans-nzoia-townhall/tnts-image04.jpeg", // Added default imageSrc
 }: HeroSectionProps) {
   return (
     <section className="relative w-full min-h-[90vh] flex flex-col items-center justify-center bg-background overflow-hidden px-4 py-32 border-b border-border">
@@ -53,8 +55,8 @@ export default function HeroSection({
           className="relative aspect-square w-full rounded-2xl border border-white/10 bg-white/5 overflow-hidden group shadow-2xl"
         >
           <Image
-            src="/group-pics/group-pic2.jpeg"
-            alt="VAR 37-38 Movement"
+            src={imageSrc}
+            alt="Hero Image"
             fill
             className="object-cover opacity-80 group-hover:scale-105 transition-transform duration-1000"
             priority

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle, X } from 'lucide-react';
+import { CheckCircle, X, ArrowRight, User, Mail, Phone, Lock, Hash } from 'lucide-react';
 
 interface RegistrationFormProps {
   wardName: string;
@@ -54,28 +54,30 @@ export default function RegistrationForm({ wardName, onClose }: RegistrationForm
         ward: wardName,
         isYouthChampion: false,
       });
-    }, 2000);
+    }, 2500);
   };
 
   const stepVariants = {
-    hidden: { opacity: 0, x: 50 },
-    visible: { opacity: 1, x: 0 },
-    exit: { opacity: 0, x: -50 },
+    hidden: { opacity: 0, y: 10 },
+    visible: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -10 },
   };
 
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-none flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 overflow-y-auto px-4 py-10 md:py-20 flex justify-center items-start md:items-center">
       <motion.div
-        className="neu-card max-w-lg w-full p-8 md:p-12 relative bg-[#fdfde1]"
-        initial={{ opacity: 0, scale: 0.9, y: 40 }}
+        className="modern-card max-w-xl w-full p-8 md:p-12 relative overflow-hidden"
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.9, y: 40 }}
+        exit={{ opacity: 0, scale: 0.95, y: 20 }}
       >
+        <div className="glow-orb -top-20 -right-20 opacity-20"></div>
+        
         <button 
           onClick={onClose}
-          className="absolute top-6 right-6 w-12 h-12 bg-white border-4 border-black rounded-xl flex items-center justify-center neu-shadow active:shadow-none transition-all"
+          className="absolute top-6 right-6 w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors z-20"
         >
-          <X size={24} className="text-black" />
+          <X size={20} className="text-white" />
         </button>
 
         <AnimatePresence mode="wait">
@@ -87,105 +89,122 @@ export default function RegistrationForm({ wardName, onClose }: RegistrationForm
               initial="hidden"
               animate="visible"
               exit="exit"
-              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="relative z-10"
             >
               {/* Header */}
-              <div className="mb-10">
-                <h2 className="text-4xl font-black mb-4 leading-tight uppercase italic tracking-tighter">
-                  Register for <span className="bg-primary px-3 border-4 border-black inline-block transform rotate-1">{wardName}</span>
+              <div className="mb-12">
+                <div className="text-[10px] font-black uppercase tracking-[0.2em] text-primary mb-4">Activation Registry</div>
+                <h2 className="text-4xl font-black mb-4 tracking-tighter leading-none italic">
+                  SECURE YOUR SEAT <br />
+                  <span className="text-white/20">AT {wardName}</span>
                 </h2>
-                <div className="flex gap-3 mt-6">
+                
+                <div className="flex gap-2 mt-8">
                   {[1, 2, 3, 4].map((s) => (
                     <div 
                       key={s} 
-                      className={`h-4 flex-1 border-4 border-black transition-all duration-500 ${s <= step ? 'bg-secondary' : 'bg-white'}`}
+                      className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${s <= step ? 'bg-primary' : 'bg-white/5'}`}
                     ></div>
                   ))}
                 </div>
               </div>
 
               {/* Steps Content */}
-              <div className="min-h-[160px] mb-10">
+              <div className="min-h-[220px] mb-12">
                 {step === 1 && (
-                  <motion.div variants={stepVariants} className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-black uppercase tracking-widest text-black/60 mb-3 ml-2">Full Name</label>
-                      <input
-                        type="text"
-                        name="fullName"
-                        value={formData.fullName}
-                        onChange={handleInputChange}
-                        placeholder="ENTER YOUR NAME"
-                        className="neu-input"
-                        required
-                        autoFocus
-                      />
+                  <motion.div variants={stepVariants} className="space-y-6">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Full Name</label>
+                      <div className="relative">
+                        <User className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={18} />
+                        <input
+                          type="text"
+                          name="fullName"
+                          value={formData.fullName}
+                          onChange={handleInputChange}
+                          placeholder="EX: JOHN DOE"
+                          className="w-full bg-white/5 border border-white/10 rounded-xl px-12 py-4 text-white focus:border-primary/50 focus:outline-none transition-all placeholder:text-white/10 font-bold uppercase tracking-tight"
+                          required
+                          autoFocus
+                        />
+                      </div>
                     </div>
-                    <div>
-                      <label className="block text-sm font-black uppercase tracking-widest text-black/60 mb-3 ml-2">Email Address</label>
-                      <input
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        placeholder="NAME@EXAMPLE.COM"
-                        className="neu-input"
-                        required
-                      />
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Email Address</label>
+                      <div className="relative">
+                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={18} />
+                        <input
+                          type="email"
+                          name="email"
+                          value={formData.email}
+                          onChange={handleInputChange}
+                          placeholder="EX: CITIZEN@VAR3738.ORG"
+                          className="w-full bg-white/5 border border-white/10 rounded-xl px-12 py-4 text-white focus:border-primary/50 focus:outline-none transition-all placeholder:text-white/10 font-bold uppercase tracking-tight"
+                          required
+                        />
+                      </div>
                     </div>
                   </motion.div>
                 )}
 
                 {step === 2 && (
-                  <motion.div variants={stepVariants} className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-black uppercase tracking-widest text-black/60 mb-3 ml-2">Phone Number</label>
-                      <input
-                        type="tel"
-                        name="phoneNumber"
-                        value={formData.phoneNumber}
-                        onChange={handleInputChange}
-                        placeholder="+254 XXX XXX XXX"
-                        className="neu-input"
-                        required
-                        autoFocus
-                      />
+                  <motion.div variants={stepVariants} className="space-y-6">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Phone Number</label>
+                      <div className="relative">
+                        <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={18} />
+                        <input
+                          type="tel"
+                          name="phoneNumber"
+                          value={formData.phoneNumber}
+                          onChange={handleInputChange}
+                          placeholder="+254 XXX XXX XXX"
+                          className="w-full bg-white/5 border border-white/10 rounded-xl px-12 py-4 text-white focus:border-primary/50 focus:outline-none transition-all placeholder:text-white/10 font-bold tracking-tight"
+                          required
+                        />
+                      </div>
                     </div>
-                    <div>
-                      <label className="block text-sm font-black uppercase tracking-widest text-black/60 mb-3 ml-2">National ID (Optional)</label>
-                      <input
-                        type="text"
-                        name="nationalId"
-                        value={formData.nationalId}
-                        onChange={handleInputChange}
-                        placeholder="ENTER ID NUMBER"
-                        className="neu-input"
-                      />
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">National ID (Optional)</label>
+                      <div className="relative">
+                        <Hash className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={18} />
+                        <input
+                          type="text"
+                          name="nationalId"
+                          value={formData.nationalId}
+                          onChange={handleInputChange}
+                          placeholder="ID NUMBER"
+                          className="w-full bg-white/5 border border-white/10 rounded-xl px-12 py-4 text-white focus:border-primary/50 focus:outline-none transition-all placeholder:text-white/10 font-bold tracking-tight"
+                        />
+                      </div>
                     </div>
                   </motion.div>
                 )}
 
                 {step === 3 && (
-                  <motion.div variants={stepVariants} className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-black uppercase tracking-widest text-black/60 mb-3 ml-2">Create Password</label>
-                      <input
-                        type="password"
-                        name="password"
-                        value={formData.password}
-                        onChange={handleInputChange}
-                        placeholder="MIN. 8 CHARACTERS"
-                        className="neu-input"
-                        required
-                        autoFocus
-                      />
+                  <motion.div variants={stepVariants} className="space-y-6">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Establish Security</label>
+                      <div className="relative">
+                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={18} />
+                        <input
+                          type="password"
+                          name="password"
+                          value={formData.password}
+                          onChange={handleInputChange}
+                          placeholder="••••••••"
+                          className="w-full bg-white/5 border border-white/10 rounded-xl px-12 py-4 text-white focus:border-primary/50 focus:outline-none transition-all placeholder:text-white/10"
+                          required
+                        />
+                      </div>
+                      <p className="text-[10px] text-white/20 ml-1">Minimum 8 characters with at least one symbol.</p>
                     </div>
                   </motion.div>
                 )}
 
                 {step === 4 && (
                   <motion.div variants={stepVariants} className="space-y-6">
-                    <div className="flex items-start gap-6 p-6 bg-white border-4 border-black neu-shadow">
+                    <label className="flex items-start gap-6 p-6 bg-white/2 border border-white/10 rounded-2xl cursor-pointer hover:bg-white/5 hover:border-primary/30 transition-all group">
                       <div className="relative mt-1">
                         <input
                           type="checkbox"
@@ -193,32 +212,33 @@ export default function RegistrationForm({ wardName, onClose }: RegistrationForm
                           name="isYouthChampion"
                           checked={formData.isYouthChampion}
                           onChange={handleInputChange}
-                          className="w-8 h-8 border-4 border-black bg-white appearance-none checked:bg-primary cursor-pointer transition-colors"
+                          className="w-6 h-6 border-2 border-white/10 bg-transparent rounded-md appearance-none checked:bg-primary checked:border-primary transition-all cursor-pointer"
                         />
-                        {formData.isYouthChampion && <CheckCircle size={20} className="absolute top-1 left-1 text-black pointer-events-none" />}
+                        {formData.isYouthChampion && <CheckCircle size={14} className="absolute top-1 left-1 text-white pointer-events-none" />}
                       </div>
                       <div>
-                        <label htmlFor="champion" className="font-black text-xl uppercase italic cursor-pointer block mb-2">
-                          Become a Champion
-                        </label>
-                        <p className="text-sm font-bold text-black/60 leading-tight">
-                          Champions help lead townhall discussions and mobilize their local communities.
+                        <span className="font-black text-lg uppercase tracking-tighter block mb-1 group-hover:text-primary transition-colors">
+                          Apply for Champion Certification
+                        </span>
+                        <p className="text-xs font-medium text-white/30 leading-relaxed">
+                          Youth Champions lead townhall dialogues and drive civic mobilization. 
+                          Check this to be considered for our leadership program.
                         </p>
                       </div>
-                    </div>
+                    </label>
                   </motion.div>
                 )}
               </div>
 
-              {/* Navigation Buttons */}
-              <div className="flex gap-6">
+              {/* Navigation */}
+              <div className="flex gap-4">
                 {step > 1 && (
                   <button
                     type="button"
                     onClick={handleBack}
-                    className="neu-button-outline flex-1 text-lg"
+                    className="crimson-btn-outline grow py-4 text-[10px] uppercase tracking-[0.2em]"
                   >
-                    Back
+                    Previous
                   </button>
                 )}
                 {step < 4 ? (
@@ -230,16 +250,16 @@ export default function RegistrationForm({ wardName, onClose }: RegistrationForm
                       (step === 2 && !formData.phoneNumber) ||
                       (step === 3 && !formData.password)
                     }
-                    className="neu-button flex-1 text-lg disabled:opacity-50 disabled:grayscale"
+                    className="crimson-btn grow py-4 text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 disabled:opacity-20 transition-all font-black"
                   >
-                    Continue
+                    Connect <ArrowRight size={14} />
                   </button>
                 ) : (
                   <button
                     type="submit"
-                    className="neu-button-secondary flex-1 text-lg"
+                    className="crimson-btn grow py-4 text-[10px] uppercase tracking-[0.2em] font-black"
                   >
-                    Register now
+                    Activate Profile
                   </button>
                 )}
               </div>
@@ -247,23 +267,16 @@ export default function RegistrationForm({ wardName, onClose }: RegistrationForm
           ) : (
             <motion.div
               key="success"
-              variants={stepVariants}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-              className="text-center py-12"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="text-center py-12 relative z-10"
             >
-              <motion.div
-                initial={{ scale: 0, rotate: -20 }}
-                animate={{ scale: 1, rotate: 0 }}
-                transition={{ type: 'spring', stiffness: 200, damping: 15 }}
-                className="mb-8 inline-flex p-6 bg-primary border-4 border-black neu-shadow-lg"
-              >
-                <CheckCircle size={80} className="text-black" />
-              </motion.div>
-              <h3 className="text-5xl font-black italic uppercase tracking-tighter mb-4">You're in!</h3>
-              <p className="text-xl font-bold text-black/60 max-w-sm mx-auto leading-tight">
-                Welcome to the movement. We'll contact you at {wardName}.
+              <div className="mb-10 inline-flex p-8 bg-primary/10 border border-primary/20 rounded-full text-primary">
+                <CheckCircle size={64} />
+              </div>
+              <h3 className="text-4xl font-black italic uppercase tracking-tighter mb-4 leading-none">Registration <br /><span className="text-white/20">Authorized</span></h3>
+              <p className="text-white/40 font-medium max-w-sm mx-auto">
+                Welcome to the movement. Your digital seat at <span className="text-white">{wardName}</span> has been secured.
               </p>
             </motion.div>
           )}

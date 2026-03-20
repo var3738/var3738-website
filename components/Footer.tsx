@@ -64,19 +64,12 @@ export default function Footer() {
           {/* Legal */}
           <div>
             <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 mb-8">Governance</h4>
-            <ul className="space-y-4">
-              {[
-                { label: 'Privacy Protocol', href: '#' },
-                { label: 'Terms of Action', href: '#' },
-                { label: 'Strategic Partners', href: '/partners' },
-              ].map((link) => (
-                <li key={link.label}>
-                  <Link href={link.href} className="text-sm font-medium text-white/50 hover:text-white transition-colors">
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+            <div className="flex flex-col gap-4">
+              <div className="text-[10px] font-black uppercase tracking-widest text-primary mb-2">Resources</div>
+              <a href="/privacy" className="text-sm font-medium text-white/40 hover:text-white transition-colors">Privacy Protocol</a>
+              <a href="/terms" className="text-sm font-medium text-white/40 hover:text-white transition-colors">Terms of Action</a>
+              <a href="/reports" className="text-sm font-medium text-white/40 hover:text-white transition-colors">Impact Reports</a>
+            </div>
           </div>
         </div>
 

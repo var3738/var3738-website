@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 import { Menu, X } from 'lucide-react';
 import RegistrationForm from './RegistrationForm';
+import Image from 'next/image';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -14,17 +15,13 @@ export default function Header() {
     { label: 'Home', href: '/' },
     { label: 'Democracy Activated', href: '/democracy-activated' },
     { label: 'Impact', href: '/impact' },
-    { label: 'Partners', href: '/partners' },
   ];
 
   return (
     <header className="glass-header">
       <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 group">
-          <div className="w-8 h-8 bg-primary rounded-full group-hover:scale-110 transition-transform"></div>
-          <span className="text-2xl font-black tracking-tighter italic transition-colors">
-            VAR 37-38
-          </span>
+          <Image src="/var-logo-nobg.png" alt="VAR 37-38 Logo" width={80} height={80} className="brightness-200"  />
         </Link>
 
         {/* Desktop Nav */}

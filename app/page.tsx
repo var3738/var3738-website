@@ -2,18 +2,30 @@ import HeroSection from '@/components/HeroSection';
 import LifecycleBento from '@/components/LifecycleBento';
 import PartnersSection from '@/components/PartnersSection';
 import TeamSection from '@/components/TeamSection';
+import WhoWeAre from '@/components/WhoWeAre';
+import StrategicAlignment from '@/components/StrategicAlignment';
+import ProvenTrackRecord from '@/components/ProvenTrackRecord';
+import DetailedPillars from '@/components/DetailedPillars';
+import PartnershipFramework from '@/components/PartnershipFramework';
 
 export default function Home() {
   return (
     <>
-      {/* Hero Section */}
       <HeroSection />
-
-      {/* 3-Stage Lifecycle (Bento Grid) */}
+      
+      {/* 3-Stage Lifecycle (Bento Grid) - Keeping for visual impact */}
       <LifecycleBento />
 
-      {/* Impact Overview (Mini Section) */}
-      <section className="w-full py-32 bg-background border-t border-border relative overflow-hidden">
+      <WhoWeAre />
+      
+      <DetailedPillars />
+
+      <StrategicAlignment />
+
+      <ProvenTrackRecord />
+
+      {/* Impact Overview (Stats) */}
+      <section className="w-full py-32 bg-background border-t border-white/5 relative overflow-hidden">
         <div className="glow-orb top-0 right-0 opacity-10"></div>
         <div className="max-w-7xl mx-auto px-4 relative z-10">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
@@ -36,10 +48,10 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Team Section */}
+      <PartnershipFramework />
+
       <TeamSection />
 
-      {/* Strategic Partners Section */}
       <PartnersSection />
     </>
   );
