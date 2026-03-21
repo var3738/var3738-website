@@ -37,7 +37,7 @@ export default function DetailedPillars() {
           </div>
           <h2 className="text-5xl lg:text-7xl font-black mb-10 tracking-tighter leading-none">
             THE 3-STAGE <br />
-            <span className="text-white/20 italic">PILLARS</span>
+            <span className="text-primary italic">PILLARS</span>
           </h2>
         </div>
 

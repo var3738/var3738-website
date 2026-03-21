@@ -83,7 +83,7 @@ export default function WhoWeAre() {
               viewport={{ once: true }}
               className="modern-card p-12 relative"
             >
-              <div className="text-6xl font-black text-primary/50 absolute top-10 right-10 leading-none">
+              <div className="text-6xl font-black text-primary/50 absolute top-18 md:top-8 right-10 leading-none">
                 75%
               </div>
               <h3 className="text-3xl font-black mb-8 uppercase tracking-tighter italic">Demographic Power</h3>

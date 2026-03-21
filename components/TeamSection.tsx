@@ -10,7 +10,7 @@ const team = [
   },
   {
     name: 'Ivy Muchoki',
-    position: 'National Cordinator/ Cofounder',
+    position: 'National Cordinator/ Co-founder',
     image: 'IvyMuchoki.jpeg',
   },
   {

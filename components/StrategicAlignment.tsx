@@ -36,7 +36,7 @@ export default function StrategicAlignment() {
           </div>
           <h2 className="text-5xl lg:text-7xl font-black mb-10 tracking-tighter leading-none">
             SHARED OBJECTIVES <br />
-            <span className="text-white/20 italic text-4xl lg:text-6xl">WITH U.S. EMBASSY</span>
+            <span className="text-primary italic text-4xl lg:text-6xl">WITH U.S. EMBASSY</span>
           </h2>
         </div>
 

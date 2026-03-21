@@ -20,7 +20,7 @@ export default function PartnershipFramework() {
             </div>
             <h2 className="text-5xl lg:text-7xl font-black mb-10 tracking-tighter leading-none">
               PARTNERSHIP <br />
-              <span className="text-white/20 italic">FRAMEWORK</span>
+              <span className="text-primary italic">FRAMEWORK</span>
             </h2>
             <p className="text-white/60 text-xl font-medium leading-relaxed mb-12">
               VAR is ready to serve as a key implementing partner for youth and democracy objectives in Kenya. 
