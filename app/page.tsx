@@ -81,12 +81,13 @@ export default function Home() {
 
       <PartnershipFramework />
 
-      <TeamSection />
 
       <DUAEventSection />
       
       <ByElectionsSection />
 
+      <TeamSection />
+      
       <PartnersSection />
     </>
   );
