@@ -26,7 +26,12 @@ const team = [
   {
     name: 'Benjamin Mkapa',
     position: 'Youth Thought Advocate',
-    image: 'BenjaminMkapa.jpeg',
+    image: 'BenjaminMkapa2.jpeg',
+  },
+  {
+    name: 'Mongare Okilo',
+    position: 'Youth Thought Advocate',
+    image: 'MongareOkilo.jpeg',
   },
 ];
 

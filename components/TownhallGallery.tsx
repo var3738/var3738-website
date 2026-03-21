@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { useState } from 'react';
 import ImagePreviewModal from './ImagePreviewModal';
 
-const IMAGES_COUNT = 45;
+const IMAGES_COUNT = 44;
 const INITIAL_COUNT = 12;
 
 export default function TownhallGallery() {

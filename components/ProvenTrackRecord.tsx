@@ -1,32 +1,52 @@
-'use client';
+"use client";
 
-import { motion } from 'framer-motion';
-import Image from 'next/image';
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
+
+const IMAGES_COUNT = 40;
+const IMAGES = Array.from({ length: IMAGES_COUNT }, (_, i) => {
+    const num = (i + 1).toString().padStart(2, '0');
+    return `/trans-nzoia-townhall/tnts-image${num}.jpeg`;
+  });
 
 const TRACKS = [
   {
-    id: '01',
-    title: 'Election Integrity & Observation',
-    content: 'Deployed trained youth observers for November 2025 by-elections, providing independent oversight.'
+    id: "01",
+    title: "Election Integrity & Observation",
+    content:
+      "Deployed trained youth observers for November 2025 by-elections, providing independent oversight.",
   },
   {
-    id: '02',
+    id: "02",
     title: '"Variant Voices" Podcast',
-    content: 'Digital platform fostering substantive, issue-based political discourse, moving away from tribal politics.'
+    content:
+      "Digital platform fostering substantive, issue-based political discourse, moving away from tribal politics.",
   },
   {
-    id: '03',
-    title: 'Youth Dialogue Forums',
-    content: 'County-level "Barazas" convening youth for intergenerational dialogue essential for stability.'
+    id: "03",
+    title: "Youth Dialogue Forums",
+    content:
+      'County-level "Barazas" convening youth for intergenerational dialogue essential for stability.',
   },
   {
-    id: '04',
-    title: 'Grassroots Network',
-    content: 'National presence ensures initiatives have local legitimacy and reach beyond Nairobi.'
-  }
+    id: "04",
+    title: "Grassroots Network",
+    content:
+      "National presence ensures initiatives have local legitimacy and reach beyond Nairobi.",
+  },
 ];
 
 export default function ProvenTrackRecord() {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prev) => (prev + 1) % IMAGES.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <section className="w-full py-32 bg-black relative overflow-hidden px-4 border-t border-white/5">
       <div className="glow-orb -top-20 -right-20 opacity-10"></div>
@@ -38,7 +58,7 @@ export default function ProvenTrackRecord() {
             </div>
             <h2 className="text-5xl lg:text-7xl font-black mb-10 tracking-tighter leading-none">
               PROVEN <br />
-              <span className="text-white/20 italic">TRACK RECORD</span>
+              <span className="text-primary italic">TRACK RECORD</span>
             </h2>
           </div>
           <motion.div
@@ -47,13 +67,24 @@ export default function ProvenTrackRecord() {
             viewport={{ once: true }}
             className="modern-card p-4 relative aspect-video overflow-hidden w-full"
           >
-            <Image 
-              src="/trans-nzoia-townhall/tnts-image11.jpeg"
-              alt="Track Record"
-              fill
-              className="object-cover opacity-60"
-            />
-            <div className="absolute inset-0 bg-linear-to-t from-black via-transparent to-transparent"></div>
+            <AnimatePresence mode="popLayout">
+              <motion.div
+                key={currentImageIndex}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 1 }}
+                className="absolute inset-0"
+              >
+                <Image
+                  src={IMAGES[currentImageIndex]}
+                  alt={`Track Record ${currentImageIndex + 1}`}
+                  fill
+                  className="object-cover opacity-60"
+                />
+              </motion.div>
+            </AnimatePresence>
+            <div className="absolute inset-0 bg-linear-to-t from-black via-transparent to-transparent z-10"></div>
           </motion.div>
         </div>
 
@@ -68,7 +99,9 @@ export default function ProvenTrackRecord() {
               className="bg-black p-12 group hover:bg-white/2 transition-colors"
             >
               <div className="flex items-start gap-6">
-                <span className="text-4xl font-black text-primary/20 group-hover:text-primary transition-colors">{track.id}</span>
+                <span className="text-4xl font-black text-primary/20 group-hover:text-primary transition-colors">
+                  {track.id}
+                </span>
                 <div>
                   <h3 className="text-2xl font-black mb-6 uppercase tracking-tighter">
                     {track.title}

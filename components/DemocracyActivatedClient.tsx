@@ -1,16 +1,32 @@
 'use client';
 
-import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import HeroSection from '@/components/HeroSection';
 import EventCard from '@/components/EventCard';
 import RegistrationForm from '@/components/RegistrationForm';
 import StatCard from '@/components/StatCard';
 import TownhallGallery from '@/components/TownhallGallery';
 import PartnersSection from '@/components/PartnersSection';
+import Image from 'next/image';
+
+const IMAGES_COUNT = 40;
+const IMAGES = Array.from({ length: IMAGES_COUNT }, (_, i) => {
+    const num = (i + 1).toString().padStart(2, '0');
+    return `/trans-nzoia-townhall/tnts-image${num}.jpeg`;
+});
 
 export default function DemocracyActivatedClient() {
   const [selectedWard, setSelectedWard] = useState<string | null>(null);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prev) => (prev + 1) % IMAGES.length);
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -136,10 +152,31 @@ export default function DemocracyActivatedClient() {
 
       {/* The Champion Framework */}
       <section className="w-full py-32 bg-black border-y border-white/5 relative overflow-hidden">
-        <div className="glow-orb -bottom-20 -left-20 opacity-10"></div>
+        {/* Background Slideshow */}
+        <div className="absolute inset-0 w-full h-full opacity-40">
+          <AnimatePresence mode="popLayout">
+            <motion.div
+              key={currentImageIndex}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 1 }}
+              className="absolute inset-0"
+            >
+              <Image 
+                src={IMAGES[currentImageIndex]}
+                alt="Champion Framework"
+                fill
+                className="object-cover"
+              />
+            </motion.div>
+          </AnimatePresence>
+        </div>
+        <div className="absolute inset-0 bg-black/70 z-0"></div>
+        <div className="glow-orb -bottom-20 -left-20 opacity-10 z-0"></div>
         <div className="max-w-4xl mx-auto px-4 text-center relative z-10">
           <div className="text-[10px] font-black uppercase tracking-[0.2em] text-primary mb-10">Community Leadership</div>
-          <h2 className="mb-10 font-black tracking-tighter text-5xl lg:text-7xl">BECOME A <br /><span className="text-white/20 italic">YOUTH CHAMPION</span></h2>
+          <h2 className="mb-10 font-black tracking-tighter text-5xl lg:text-7xl">BECOME A <br /><span className="text-primary italic">YOUTH CHAMPION</span></h2>
           <p className="text-lg text-white/50 mb-12 font-medium leading-relaxed">
             Youth Champions are community leaders who co-facilitate townhalls and drive voter registration in their wards. They bridge government and grassroots, ensuring every voice is heard. Champions receive training, leadership development, and ongoing support.
           </p>

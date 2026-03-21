@@ -2,8 +2,29 @@
 
 import { motion } from 'framer-motion';
 import Image from 'next/image';
+import { useState, useEffect } from 'react';
+
+
+
+const IMAGES_COUNT = 40;
+const IMAGES = Array.from({ length: IMAGES_COUNT }, (_, i) => {
+    const num = (i + 1).toString().padStart(2, '0');
+    return `/trans-nzoia-townhall/tnts-image${num}.jpeg`;
+  });
 
 export default function WhoWeAre() {
+
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  
+    useEffect(() => {
+      const interval = setInterval(() => {
+        setCurrentImageIndex((prev) => (prev + 1) % IMAGES.length);
+      }, 4000);
+      return () => clearInterval(interval);
+    }, []);
+
+
+
   return (
     <section className="w-full py-32 bg-black relative overflow-hidden px-4 border-t border-white/5">
       <div className="glow-orb -bottom-20 -left-20 opacity-10"></div>
@@ -20,7 +41,7 @@ export default function WhoWeAre() {
             </div>
             <h2 className="text-5xl lg:text-7xl font-black mb-10 tracking-tighter leading-none">
               WHO WE ARE: <br />
-              <span className="text-white/20 italic">VAR 37-38</span>
+              <span className="text-primary italic">VAR 37-38</span>
             </h2>
             <div className="space-y-6 text-xl font-medium text-white/60 leading-relaxed">
               <p>
@@ -45,7 +66,7 @@ export default function WhoWeAre() {
               className="modern-card p-4 relative aspect-video overflow-hidden"
             >
               <Image 
-                src="/trans-nzoia-townhall/tnts-image10.jpeg"
+                src={IMAGES[currentImageIndex]}
                 alt="VAR 37-38 youth movement members engaging in civic dialogue"
                 fill
                 className="object-cover opacity-60 group-hover:scale-105 transition-transform duration-700"
@@ -62,7 +83,7 @@ export default function WhoWeAre() {
               viewport={{ once: true }}
               className="modern-card p-12 relative"
             >
-              <div className="text-6xl font-black text-primary/10 absolute top-10 right-10 leading-none">
+              <div className="text-6xl font-black text-primary/50 absolute top-10 right-10 leading-none">
                 75%
               </div>
               <h3 className="text-3xl font-black mb-8 uppercase tracking-tighter italic">Demographic Power</h3>

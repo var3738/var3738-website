@@ -20,13 +20,18 @@ const PARTNERS = [
     url: 'https://ke.usembassy.gov/' 
   },
   {
-    name: 'National Endowment for Democracy',
-    logo: '/partners/uamuzi-logo.png', // Placeholder if NED logo missing, but user said "NED"
-    url: 'https://www.ned.org/'
+    name: 'IEBC',
+    logo: '/partners/IEBC_Emblem-nobg.png', // Placeholder if NED logo missing, but user said "NED"
+    url: 'https://www.iebc.or.ke/'
+  },
+  {
+    name: 'Allan Chesang Foundation',
+    logo: '/partners/allan-chesang-foundation-logo.png', // Placeholder if NED logo missing, but user said "NED"
+    url: 'https://acfkenya.com/'
   }
 ];
 
-export default function PartnersSection({ title = "Strategic Partners", className = "" }: { title?: string, className?: string }) {
+export default function PartnersSection({ title = "Engaged Partners", className = "" }: { title?: string, className?: string }) {
   return (
     <section className={`w-full py-32 bg-background border-y border-border relative ${className}`}>
       <div className="glow-orb top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-5"></div>

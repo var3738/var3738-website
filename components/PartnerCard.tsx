@@ -25,7 +25,7 @@ export default function PartnerCard({ name, logo, url, index }: PartnerCardProps
       <div className="relative w-full h-20 mb-4 overflow-hidden md:grayscale group-hover:grayscale-0 transition-all duration-700">
         <Image
           src={logo}
-          alt={`VAR 37/38 Strategic Partner: ${name}`}
+          alt={`VAR 37/38 Partner Engaged: ${name}`}
           fill
           className="object-contain"
         />
