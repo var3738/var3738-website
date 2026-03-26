@@ -141,14 +141,15 @@ export default function RegistrationForm({ wardName, onClose }: RegistrationForm
     setIsLoading(true);
 
     try {
-      // 1. Register the user
       const user = await api.register({
         full_name: formData.fullName,
         email: formData.email,
         phone: formData.phoneNumber,
+        national_id: formData.nationalId,
         password: formData.password,
         county: formData.county,
         sub_county: formData.subCounty,
+
         ward: formData.ward,
         role: (formData.isYouthChampion ? 'youth_champion' : 'guest') as UserRole,
       });
@@ -276,6 +277,22 @@ export default function RegistrationForm({ wardName, onClose }: RegistrationForm
 
                 {step === 2 && (
                   <motion.div variants={stepVariants} className="space-y-6">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">National ID</label>
+                      <div className="relative">
+                        <User className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={18} />
+                        <input
+                          type="text"
+                          name="nationalId"
+                          value={formData.nationalId}
+                          onChange={handleInputChange}
+                          placeholder="EX: 12345678"
+                          className="w-full bg-white/5 border border-white/10 rounded-xl px-12 py-4 text-white focus:border-primary/50 focus:outline-none transition-all placeholder:text-white/10 font-bold uppercase tracking-tight"
+                          required
+                        />
+                      </div>
+                    </div>
+                    
                     <div className="space-y-2">
                       <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Phone Number</label>
                       <div className="relative">

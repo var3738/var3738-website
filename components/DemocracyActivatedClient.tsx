@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import HeroSection from '@/components/HeroSection';
 import EventCard from '@/components/EventCard';
 import RegistrationForm from '@/components/RegistrationForm';
+import EventFeedbackModal from '@/components/EventFeedbackModal';
 import StatCard from '@/components/StatCard';
 import TownhallGallery from '@/components/TownhallGallery';
 import PartnersSection from '@/components/PartnersSection';
@@ -19,6 +20,7 @@ const IMAGES = Array.from({ length: IMAGES_COUNT }, (_, i) => {
 
 export default function DemocracyActivatedClient() {
   const [selectedWard, setSelectedWard] = useState<string | null>(null);
+  const [feedbackEvent, setFeedbackEvent] = useState<{ id: number; name: string } | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
@@ -151,9 +153,10 @@ export default function DemocracyActivatedClient() {
                   key={ward.id}
                   wardName={ward.ward || ward.title}
                   date={new Date(ward.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-                  capacity={0} // Default to 0 for now
+                  capacity={ward.registration_count || 0}
                   maxCapacity={ward.max_capacity}
                   onRegister={() => setSelectedWard(ward.title)}
+                  onFeedback={() => setFeedbackEvent({ id: ward.id, name: ward.title })}
                 />
               ))
             ) : (
@@ -216,6 +219,15 @@ export default function DemocracyActivatedClient() {
         <RegistrationForm
           wardName={selectedWard}
           onClose={() => setSelectedWard(null)}
+        />
+      )}
+
+      {/* Feedback Modal */}
+      {feedbackEvent && (
+        <EventFeedbackModal
+          eventId={feedbackEvent.id}
+          eventName={feedbackEvent.name}
+          onClose={() => setFeedbackEvent(null)}
         />
       )}
     </div>

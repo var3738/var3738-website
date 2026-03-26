@@ -14,6 +14,7 @@ export interface User {
   full_name: string;
   email: string;
   phone?: string;
+  national_id?: string;
   county: string;
   sub_county: string;
   ward: string;
@@ -35,6 +36,18 @@ export interface Event {
   location_name: string;
   max_capacity: number;
   is_active: boolean;
+  registration_count?: number;
+}
+
+export interface EventCreate extends Omit<Event, 'id' | 'registration_count'> {}
+
+export interface Feedback {
+  id: number;
+  rating: number;
+  comment?: string;
+  event_id: number;
+  user_id: string;
+  created_at: string;
 }
 
 export interface Post {
@@ -55,6 +68,8 @@ export interface Product {
   image_url?: string;
   is_active: boolean;
 }
+
+export interface ProductCreate extends Omit<Product, 'id'> {}
 
 export interface AuthResponse {
   access_token: string;
@@ -139,6 +154,68 @@ export const api = {
   },
 
   // Geo-spatial
+  // Admin / Feedback / Merch endpoints
+  async submitFeedback(eventId: number, rating: number, comment?: string): Promise<Feedback> {
+    const response = await fetch(`${BASE_URL}/events/${eventId}/feedback`, {
+      method: 'POST',
+      headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ rating, comment, event_id: eventId, user_id: 'auto' }) // user_id overridden by backend
+    });
+    return handleResponse<Feedback>(response);
+  },
+
+  async getFeedback(eventId: number): Promise<Feedback[]> {
+    const response = await fetch(`${BASE_URL}/events/${eventId}/feedback`, {
+      headers: { ...getAuthHeaders() }
+    });
+    return handleResponse<Feedback[]>(response);
+  },
+
+  async createEvent(eventData: EventCreate): Promise<Event> {
+    const response = await fetch(`${BASE_URL}/events/`, {
+      method: 'POST',
+      headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+      body: JSON.stringify(eventData),
+    });
+    return handleResponse<Event>(response);
+  },
+
+  async updateEvent(eventId: number, eventData: Partial<EventCreate>): Promise<Event> {
+    const response = await fetch(`${BASE_URL}/events/${eventId}`, {
+      method: 'PUT',
+      headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+      body: JSON.stringify(eventData),
+    });
+    return handleResponse<Event>(response);
+  },
+
+  async importEvents(eventsData: EventCreate[]): Promise<Event[]> {
+    const response = await fetch(`${BASE_URL}/events/import`, {
+      method: 'POST',
+      headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+      body: JSON.stringify(eventsData),
+    });
+    return handleResponse<Event[]>(response);
+  },
+
+  async createProduct(productData: ProductCreate): Promise<Product> {
+    const response = await fetch(`${BASE_URL}/merch/products`, {
+      method: 'POST',
+      headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+      body: JSON.stringify(productData),
+    });
+    return handleResponse<Product>(response);
+  },
+
+  async updateProduct(productId: string, productData: Partial<ProductCreate>): Promise<Product> {
+    const response = await fetch(`${BASE_URL}/merch/products/${productId}`, {
+      method: 'PUT',
+      headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+      body: JSON.stringify(productData),
+    });
+    return handleResponse<Product>(response);
+  },
+
   async getGeoBoundaries(adminLevel: number, parentPcode?: string): Promise<any> {
     const url = new URL(`${BASE_URL}/geo/boundaries`);
     url.searchParams.append('admin_level', adminLevel.toString());

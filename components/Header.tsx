@@ -15,6 +15,9 @@ export default function Header() {
     { label: 'Home', href: '/' },
     { label: 'Democracy Activated', href: '/democracy-activated' },
     { label: 'Impact', href: '/impact' },
+    { label: 'Blog', href: '/blog' },
+    { label: 'Merch', href: '/merch' },
+    
   ];
 
   return (
