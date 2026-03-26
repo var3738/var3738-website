@@ -48,11 +48,21 @@
     width: 400px;
     height: 400px;
     border-radius: 50%;
-    background: radial-gradient(circle, var(--color-primary) 0%, transparent 70%);
+    background: radial-gradient(circle at 50% 100%, var(--primary) 0%, transparent 70%);
     filter: blur(80px);
     opacity: 0.15;
     z-index: 0;
     pointer-events: none;
+  }
+
+  @keyframes radar-sweep {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  .animate-radar-sweep {
+    animation: radar-sweep 4s linear infinite;
+    transform-origin: top center;
   }
 
   .crimson-btn {

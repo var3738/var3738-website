@@ -96,12 +96,15 @@ export default function RegistrationForm({ wardName, onClose }: RegistrationForm
           const location = await api.reverseGeocode(latitude, longitude);
           setFormData(prev => ({
             ...prev,
-            county: location.county,
-            subCounty: location.sub_county,
-            ward: location.ward
+            county: location.county.name,
+            subCounty: location.sub_county.name,
+            ward: location.ward.name,
           }));
-          // We might not have the pcodes from reverse geocode in this simple mock API,
-          // but in a real app we would.
+          setPcodes({
+            county: location.county.pcode,
+            subCounty: location.sub_county.pcode,
+            ward: location.ward.pcode,
+          });
         } catch (err) {
           setIsError("Could not determine location automatically.");
         } finally {

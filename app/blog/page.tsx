@@ -72,7 +72,7 @@ export default function BlogListingPage() {
             <p className="text-[10px] font-black uppercase tracking-widest text-white/30">Syncing with Central Registry...</p>
           </div>
         ) : error ? (
-          <div className="w-full py-20 text-center border border-white/5 rounded-2xl bg-white/[0.02]">
+          <div className="w-full py-20 text-center border border-white/5 rounded-2xl bg-white/2">
             <p className="text-[10px] font-black uppercase tracking-widest text-white/20">{error}</p>
           </div>
         ) : (
