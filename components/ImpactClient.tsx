@@ -5,6 +5,9 @@ import Image from 'next/image';
 import HeroSection from '@/components/HeroSection';
 import StatCard from '@/components/StatCard';
 import PartnersSection from '@/components/PartnersSection';
+import PulseMap from '@/components/geo/PulseMap';
+import ActivationRadar from '@/components/geo/ActivationRadar';
+import DataExportPortal from '@/components/geo/DataExportPortal';
 
 export default function ImpactClient() {
   return (
@@ -15,9 +18,19 @@ export default function ImpactClient() {
         imageSrc="/trans-nzoia-townhall/tnts-image03.jpeg"
       />
 
-      {/* Advanced Analytics */}
-      <section className="w-full py-32 bg-background border-t border-white/5">
+      {/* Main Visualization Grid */}
+      <section className="w-full py-32 bg-background border-t border-white/5 relative overflow-hidden">
+        <div className="glow-orb top-0 right-0 opacity-10"></div>
         <div className="max-w-7xl mx-auto px-4">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-32">
+             <div className="lg:col-span-2 h-[600px]">
+                <PulseMap />
+             </div>
+             <div className="h-[600px]">
+                <ActivationRadar />
+             </div>
+          </div>
+
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Movement Health */}
             <div className="lg:col-span-2 space-y-8">
@@ -46,29 +59,6 @@ export default function ImpactClient() {
                     </div>
                   ))}
                 </div>
-              </div>
-
-              {/* Voter Density Grid (Mock) */}
-              <div className="modern-card p-12">
-                 <h3 className="text-3xl font-black mb-10 tracking-tighter italic uppercase">Activation Density</h3>
-                 <div className="grid grid-cols-6 md:grid-cols-12 gap-2">
-                    {Array.from({ length: 48 }).map((_, i) => (
-                      <motion.div 
-                        key={i}
-                        initial={{ opacity: 0 }}
-                        whileInView={{ opacity: 1 }}
-                        transition={{ delay: i * 0.01 }}
-                        className={`aspect-square rounded-[2px] ${i % 3 === 0 ? 'bg-primary' : i % 5 === 0 ? 'bg-primary/20' : 'bg-white/5'}`}
-                      />
-                    ))}
-                 </div>
-                 <div className="mt-8 flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-white/20">
-                    <span>Trans Nzoia Coverage Map</span>
-                    <span className="flex items-center gap-4">
-                       <span className="flex items-center gap-1"><div className="w-2 h-2 bg-primary rounded-full"></div> High</span>
-                       <span className="flex items-center gap-1"><div className="w-2 h-2 bg-white/5 rounded-full"></div> Baseline</span>
-                    </span>
-                 </div>
               </div>
             </div>
 
@@ -99,54 +89,15 @@ export default function ImpactClient() {
                   ))}
                 </div>
               </div>
-              <div className="pt-10">
-                 <p className="text-xs text-white/40 font-medium italic border-l-2 border-primary pl-4">
-                   "We don't measure likes; we measure institutional participation."
-                 </p>
-              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Ward Granularity (Existing) */}
+      {/* Data Sovereignty Section */}
       <section className="w-full py-32 bg-black border-t border-white/5">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-            >
-              <h2 className="mb-10 font-black tracking-tighter">WARD-LEVEL <br /><span className="text-primary italic">ENGAGEMENT</span></h2>
-              <div className="space-y-6">
-                 {['Saboti', 'Kiminini', 'Cherangany', 'Endebess', 'Kitale'].map((ward, i) => (
-                   <div key={i} className="flex items-center justify-between p-6 modern-card group hover:border-primary/40 transition-all">
-                      <span className="font-black uppercase tracking-widest group-hover:text-primary transition-colors">{ward}</span>
-                      <span className="text-primary font-black uppercase tracking-widest text-[10px]">Activated</span>
-                   </div>
-                 ))}
-              </div>
-            </motion.div>
-            
-            <div className="modern-card p-4 relative aspect-square overflow-hidden rounded-full border-primary/20">
-               <Image 
-                 src="/trans-nzoia-townhall/tnts-image12.jpeg"
-                 alt="Impact Focus"
-                 fill
-                 className="object-cover opacity-50 grayscale hover:grayscale-0 transition-all duration-1000"
-               />
-               <div className="absolute inset-0 bg-radial-to-t from-black via-transparent to-transparent"></div>
-               <div className="relative z-10 h-full flex items-center justify-center text-center p-12">
-                  <div className="bg-black/80 backdrop-blur-md p-10 border border-white/10 rounded-3xl">
-                    <h3 className="text-5xl font-black mb-4 tracking-tighter italic">BLUEPRINT</h3>
-                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 leading-relaxed">
-                      Trans Nzoia serves as the pilot for Kenya's national youth activation strategy.
-                    </p>
-                  </div>
-               </div>
-            </div>
-          </div>
+          <DataExportPortal />
         </div>
       </section>
 

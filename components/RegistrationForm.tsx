@@ -45,7 +45,7 @@ export default function RegistrationForm({ wardName, onClose }: RegistrationForm
     async function fetchCounties() {
       try {
         const list = await api.getGeoBoundariesList(1);
-        setCounties(list);
+        setCounties(Array.isArray(list) ? list : (list as any).boundaries || []);
       } catch (err) {
         console.warn('Geo API not available, using fallback.');
         setCounties([{ name: 'Trans Nzoia', pcode: 'KE026' }]);
@@ -60,7 +60,7 @@ export default function RegistrationForm({ wardName, onClose }: RegistrationForm
     async function fetchSubCounties() {
       try {
         const list = await api.getGeoBoundariesList(2, pcodes.county);
-        setSubCounties(list);
+        setSubCounties(Array.isArray(list) ? list : (list as any).boundaries || []);
       } catch (err) {
         setSubCounties([{ name: 'Saboti', pcode: 'KE02601' }]);
       }
@@ -74,13 +74,14 @@ export default function RegistrationForm({ wardName, onClose }: RegistrationForm
     async function fetchWards() {
       try {
         const list = await api.getGeoBoundariesList(3, pcodes.subCounty);
-        setWardsList(list);
+        setWardsList(Array.isArray(list) ? list : (list as any).boundaries || []);
       } catch (err) {
         setWardsList([{ name: wardName, pcode: 'KE0260101' }]);
       }
     }
     fetchWards();
   }, [pcodes.subCounty, wardName]);
+
 
   const detectLocation = () => {
     if (!navigator.geolocation) {
@@ -96,12 +97,15 @@ export default function RegistrationForm({ wardName, onClose }: RegistrationForm
           const location = await api.reverseGeocode(latitude, longitude);
           setFormData(prev => ({
             ...prev,
-            county: location.county,
-            subCounty: location.sub_county,
-            ward: location.ward
+            county: location.county.name,
+            subCounty: location.sub_county.name,
+            ward: location.ward.name,
           }));
-          // We might not have the pcodes from reverse geocode in this simple mock API,
-          // but in a real app we would.
+          setPcodes({
+            county: location.county.pcode,
+            subCounty: location.sub_county.pcode,
+            ward: location.ward.pcode,
+          });
         } catch (err) {
           setIsError("Could not determine location automatically.");
         } finally {

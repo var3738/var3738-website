@@ -154,15 +154,26 @@ export const api = {
     if (parentPcode) url.searchParams.append('parent_pcode', parentPcode);
 
     const response = await fetch(url.toString());
-    return handleResponse<{name: string, pcode: string}[]>(response);
+    const data = await handleResponse<{count: number, boundaries: {name: string, pcode: string}[]}>(response);
+    return data.boundaries;
   },
 
-  async reverseGeocode(lat: number, lon: number): Promise<{county: string, sub_county: string, ward: string}> {
+  async reverseGeocode(lat: number, lon: number): Promise<{county: {name: string, pcode: string}, sub_county: {name: string, pcode: string}, ward: {name: string, pcode: string}}> {
     const url = new URL(`${BASE_URL}/geo/reverse-geocode`);
     url.searchParams.append('lat', lat.toString());
     url.searchParams.append('lon', lon.toString());
 
     const response = await fetch(url.toString());
-    return handleResponse<{county: string, sub_county: string, ward: string}>(response);
+    return handleResponse<{county: {name: string, pcode: string}, sub_county: {name: string, pcode: string}, ward: {name: string, pcode: string}}>(response);
+  },
+
+  async getNearbyEvents(lat: number, lon: number, radiusKm = 50.0): Promise<{query: any, count: number, events: any[]}> {
+    const url = new URL(`${BASE_URL}/geo/events/nearby`);
+    url.searchParams.append('lat', lat.toString());
+    url.searchParams.append('lon', lon.toString());
+    url.searchParams.append('radius_km', radiusKm.toString());
+
+    const response = await fetch(url.toString());
+    return handleResponse<{query: any, count: number, events: any[]}>(response);
   }
 };
