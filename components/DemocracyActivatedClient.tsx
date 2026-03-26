@@ -8,6 +8,7 @@ import RegistrationForm from '@/components/RegistrationForm';
 import StatCard from '@/components/StatCard';
 import TownhallGallery from '@/components/TownhallGallery';
 import PartnersSection from '@/components/PartnersSection';
+import { api } from '@/lib/api';
 import Image from 'next/image';
 
 const IMAGES_COUNT = 40;
@@ -51,19 +52,22 @@ export default function DemocracyActivatedClient() {
     }
   };
 
-  const wards = [
-    { name: 'Saboti', date: 'March 15, 2026', capacity: 45, maxCapacity: 100 },
-    { name: 'Mowlem', date: 'March 17, 2026', capacity: 62, maxCapacity: 100 },
-    { name: 'Chepchoina', date: 'March 19, 2026', capacity: 38, maxCapacity: 100 },
-    { name: 'Kapkoi', date: 'March 21, 2026', capacity: 71, maxCapacity: 100 },
-    { name: 'Kwanza', date: 'March 23, 2026', capacity: 54, maxCapacity: 100 },
-    { name: 'Cherenganyi', date: 'March 25, 2026', capacity: 85, maxCapacity: 100 },
-    { name: 'Kaplamai', date: 'March 27, 2026', capacity: 42, maxCapacity: 100 },
-    { name: 'Sirende', date: 'March 29, 2026', capacity: 91, maxCapacity: 100 },
-    { name: 'Sikhendu', date: 'March 31, 2026', capacity: 67, maxCapacity: 100 },
-    { name: 'Matisi', date: 'April 02, 2026', capacity: 78, maxCapacity: 100 },
-    { name: 'Kitale Town', date: 'April 04, 2026', capacity: 95, maxCapacity: 100 },
-  ];
+  const [wards, setWards] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadEvents() {
+      try {
+        const events = await api.getEvents();
+        setWards(events);
+      } catch (error) {
+        console.error('Failed to load events:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadEvents();
+  }, []);
 
   return (
     <div className="bg-background text-foreground min-h-screen">
@@ -127,20 +131,36 @@ export default function DemocracyActivatedClient() {
         <div className="max-w-7xl mx-auto px-4">
           <div className="mb-20 text-center">
             <div className="text-[10px] font-black uppercase tracking-[0.2em] text-primary mb-6">Series Schedule</div>
-            <h2 className="mb-6 font-black tracking-tighter uppercase leading-none">Townhall <br /><span className="text-white/20 italic">Activations</span></h2>
+            <h2 className="mb-6 font-black tracking-tighter uppercase leading-none">Townhall <br /><span className="text-primary italic">Activations</span></h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {wards.map((ward) => (
-              <EventCard
-                key={ward.name}
-                wardName={ward.name}
-                date={ward.date}
-                capacity={ward.capacity}
-                maxCapacity={ward.maxCapacity}
-                onRegister={() => setSelectedWard(ward.name)}
-              />
-            ))}
+            {loading ? (
+              // Loading Skeleton
+              Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="modern-card p-8 bg-black/40 h-[300px] animate-pulse">
+                  <div className="h-4 w-1/2 bg-white/5 mb-8 rounded"></div>
+                  <div className="h-8 w-3/4 bg-white/5 mb-4 rounded"></div>
+                  <div className="h-4 w-1/3 bg-white/5 mb-10 rounded"></div>
+                  <div className="mt-auto h-12 w-full bg-white/5 rounded-xl"></div>
+                </div>
+              ))
+            ) : wards.length > 0 ? (
+              wards.map((ward) => (
+                <EventCard
+                  key={ward.id}
+                  wardName={ward.ward || ward.title}
+                  date={new Date(ward.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                  capacity={0} // Default to 0 for now
+                  maxCapacity={ward.max_capacity}
+                  onRegister={() => setSelectedWard(ward.title)}
+                />
+              ))
+            ) : (
+              <div className="col-span-full py-20 text-center text-white/30 italic">
+                No events scheduled at this moment. Stay tuned.
+              </div>
+            )}
           </div>
         </div>
       </section>

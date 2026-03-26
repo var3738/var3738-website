@@ -29,9 +29,14 @@ const team = [
     image: 'BenjaminMkapa2.jpeg',
   },
   {
-    name: 'Mongare Okilo',
+    name: 'Mongare Okiro',
     position: 'Youth Thought Advocate',
     image: 'MongareOkilo.jpeg',
+  },
+  {
+    name: 'Joyson Joe Aliero Ayuko',
+    position: 'County Grassroot Mobiliser',
+    image: 'JoysonJoeAlieroAyuko.jpeg',
   },
 ];
 

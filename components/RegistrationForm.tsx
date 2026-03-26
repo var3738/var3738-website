@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle, X, ArrowRight, User, Mail, Phone, Lock, Hash } from 'lucide-react';
+import { CheckCircle, X, ArrowRight, User, Mail, Phone, Lock, Hash, MapPin } from 'lucide-react';
 import Portal from './Portal';
+import { api, UserRole } from '@/lib/api';
 
 interface RegistrationFormProps {
   wardName: string;
@@ -13,15 +14,106 @@ interface RegistrationFormProps {
 export default function RegistrationForm({ wardName, onClose }: RegistrationFormProps) {
   const [step, setStep] = useState(1);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isError, setIsError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isGeoLoading, setIsGeoLoading] = useState(false);
+  
+  const [counties, setCounties] = useState<{name: string, pcode: string}[]>([]);
+  const [subCounties, setSubCounties] = useState<{name: string, pcode: string}[]>([]);
+  const [wardsList, setWardsList] = useState<{name: string, pcode: string}[]>([]);
+
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
     phoneNumber: '',
     password: '',
     nationalId: '',
+    county: '',
+    subCounty: '',
     ward: wardName,
     isYouthChampion: false,
   });
+
+  const [pcodes, setPcodes] = useState({
+    county: '',
+    subCounty: '',
+    ward: '',
+  });
+
+  // Fetch counties on mount
+  useEffect(() => {
+    async function fetchCounties() {
+      try {
+        const list = await api.getGeoBoundariesList(1);
+        setCounties(list);
+      } catch (err) {
+        console.warn('Geo API not available, using fallback.');
+        setCounties([{ name: 'Trans Nzoia', pcode: 'KE026' }]);
+      }
+    }
+    fetchCounties();
+  }, []);
+
+  // Fetch sub-counties when county changes
+  useEffect(() => {
+    if (!pcodes.county) return;
+    async function fetchSubCounties() {
+      try {
+        const list = await api.getGeoBoundariesList(2, pcodes.county);
+        setSubCounties(list);
+      } catch (err) {
+        setSubCounties([{ name: 'Saboti', pcode: 'KE02601' }]);
+      }
+    }
+    fetchSubCounties();
+  }, [pcodes.county]);
+
+  // Fetch wards when sub-county changes
+  useEffect(() => {
+    if (!pcodes.subCounty) return;
+    async function fetchWards() {
+      try {
+        const list = await api.getGeoBoundariesList(3, pcodes.subCounty);
+        setWardsList(list);
+      } catch (err) {
+        setWardsList([{ name: wardName, pcode: 'KE0260101' }]);
+      }
+    }
+    fetchWards();
+  }, [pcodes.subCounty, wardName]);
+
+  const detectLocation = () => {
+    if (!navigator.geolocation) {
+      setIsError("Geolocation is not supported by your browser");
+      return;
+    }
+
+    setIsGeoLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const { latitude, longitude } = position.coords;
+          const location = await api.reverseGeocode(latitude, longitude);
+          setFormData(prev => ({
+            ...prev,
+            county: location.county,
+            subCounty: location.sub_county,
+            ward: location.ward
+          }));
+          // We might not have the pcodes from reverse geocode in this simple mock API,
+          // but in a real app we would.
+        } catch (err) {
+          setIsError("Could not determine location automatically.");
+        } finally {
+          setIsGeoLoading(false);
+        }
+      },
+      (error) => {
+        setIsError("Location access denied.");
+        setIsGeoLoading(false);
+      }
+    );
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -39,23 +131,52 @@ export default function RegistrationForm({ wardName, onClose }: RegistrationForm
     if (step > 1) setStep(step - 1);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitted(true);
-    setTimeout(() => {
-      onClose();
-      setIsSubmitted(false);
-      setStep(1);
-      setFormData({
-        fullName: '',
-        email: '',
-        phoneNumber: '',
-        password: '',
-        nationalId: '',
-        ward: wardName,
-        isYouthChampion: false,
+    setIsError(null);
+    setIsLoading(true);
+
+    try {
+      // 1. Register the user
+      const user = await api.register({
+        full_name: formData.fullName,
+        email: formData.email,
+        phone: formData.phoneNumber,
+        password: formData.password,
+        county: formData.county,
+        sub_county: formData.subCounty,
+        ward: formData.ward,
+        role: (formData.isYouthChampion ? 'youth_champion' : 'guest') as UserRole,
       });
-    }, 2500);
+
+      // 2. Automatically login to get access token
+      await api.login(formData.email, formData.password);
+
+      // 3. Mark as submitted
+      setIsSubmitted(true);
+      
+      setTimeout(() => {
+        onClose();
+        setIsSubmitted(false);
+        setStep(1);
+        setFormData({
+          fullName: '',
+          email: '',
+          phoneNumber: '',
+          password: '',
+          nationalId: '',
+          county: 'Trans Nzoia',
+          subCounty: 'Saboti',
+          ward: wardName,
+          isYouthChampion: false,
+        });
+      }, 3000);
+    } catch (error: any) {
+      console.error('Registration failed:', error);
+      setIsError(error.message || 'Registration failed. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const stepVariants = {
@@ -166,6 +287,91 @@ export default function RegistrationForm({ wardName, onClose }: RegistrationForm
                         />
                       </div>
                     </div>
+                    
+                    <div className="flex justify-between items-center mb-4 pt-4 border-t border-white/5">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Location Details</label>
+                      <button 
+                        type="button"
+                        onClick={detectLocation}
+                        disabled={isGeoLoading}
+                        className="text-[9px] font-black uppercase tracking-widest text-primary flex items-center gap-2 hover:underline disabled:opacity-50"
+                      >
+                        {isGeoLoading ? 'Detecting...' : <><MapPin size={10} /> Detect Location</>}
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-4">
+                      {/* County Dropdown */}
+                      <div className="space-y-2">
+                        <div className="relative">
+                          <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={18} />
+                          <select
+                            name="county"
+                            value={pcodes.county}
+                            onChange={(e) => {
+                              const selected = counties.find(c => c.pcode === e.target.value);
+                              setPcodes(prev => ({ ...prev, county: e.target.value, subCounty: '', ward: '' }));
+                              setFormData(prev => ({ ...prev, county: selected?.name || '', subCounty: '', ward: '' }));
+                            }}
+                            className="w-full bg-white/5 border border-white/10 rounded-xl px-12 py-4 text-white focus:border-primary/50 focus:outline-none transition-all font-bold uppercase tracking-tight appearance-none"
+                            required
+                          >
+                            <option value="" className="bg-black">SELECT COUNTY</option>
+                            {counties.map(c => (
+                              <option key={c.pcode} value={c.pcode} className="bg-black">{c.name.toUpperCase()}</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        {/* Sub-County Dropdown */}
+                        <div className="space-y-2">
+                          <div className="relative">
+                            <select
+                              name="subCounty"
+                              value={pcodes.subCounty}
+                              onChange={(e) => {
+                                const selected = subCounties.find(sc => sc.pcode === e.target.value);
+                                setPcodes(prev => ({ ...prev, subCounty: e.target.value, ward: '' }));
+                                setFormData(prev => ({ ...prev, subCounty: selected?.name || '', ward: '' }));
+                              }}
+                              className="w-full bg-white/5 border border-white/10 rounded-xl px-6 py-4 text-white focus:border-primary/50 focus:outline-none transition-all font-bold uppercase tracking-tight appearance-none"
+                              required
+                              disabled={!pcodes.county}
+                            >
+                              <option value="" className="bg-black">SUB-COUNTY</option>
+                              {subCounties.map(sc => (
+                                <option key={sc.pcode} value={sc.pcode} className="bg-black">{sc.name.toUpperCase()}</option>
+                              ))}
+                            </select>
+                          </div>
+                        </div>
+
+                        {/* Ward Dropdown */}
+                        <div className="space-y-2">
+                          <div className="relative">
+                            <select
+                              name="ward"
+                              value={pcodes.ward}
+                              onChange={(e) => {
+                                const selected = wardsList.find(w => w.pcode === e.target.value);
+                                setPcodes(prev => ({ ...prev, ward: e.target.value }));
+                                setFormData(prev => ({ ...prev, ward: selected?.name || '' }));
+                              }}
+                              className="w-full bg-white/5 border border-white/10 rounded-xl px-6 py-4 text-white focus:border-primary/50 focus:outline-none transition-all font-bold uppercase tracking-tight appearance-none"
+                              required
+                              disabled={!pcodes.subCounty}
+                            >
+                              <option value="" className="bg-black">WARD</option>
+                              {wardsList.map(w => (
+                                <option key={w.pcode} value={w.pcode} className="bg-black">{w.name.toUpperCase()}</option>
+                              ))}
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                     <div className="space-y-2">
                       <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">National ID (Optional)</label>
                       <div className="relative">
@@ -259,12 +465,19 @@ export default function RegistrationForm({ wardName, onClose }: RegistrationForm
                 ) : (
                   <button
                     type="submit"
-                    className="crimson-btn grow py-4 text-[10px] uppercase tracking-[0.2em] font-black"
+                    disabled={isLoading}
+                    className="crimson-btn grow py-4 text-[10px] uppercase tracking-[0.2em] font-black flex items-center justify-center gap-3 disabled:opacity-50"
                   >
-                    Activate Profile
+                    {isLoading ? 'Processing...' : 'Activate Profile'}
                   </button>
                 )}
               </div>
+
+              {isError && (
+                <div className="mt-6 p-4 bg-primary/10 border border-primary/20 rounded-xl text-primary text-[10px] font-black uppercase tracking-widest text-center animate-shake">
+                  {isError}
+                </div>
+              )}
             </motion.form>
           ) : (
             <motion.div

@@ -1,0 +1,168 @@
+/**
+ * VAR 37/38 API Service Layer
+ * This module provides a typed interface to the FastAPI backend.
+ */
+
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+
+// --- Types ---
+
+export type UserRole = 'guest' | 'activated_youth' | 'youth_champion' | 'content_creator' | 'admin';
+
+export interface User {
+  id: string;
+  full_name: string;
+  email: string;
+  phone?: string;
+  county: string;
+  sub_county: string;
+  ward: string;
+  role: UserRole;
+  is_active: boolean;
+}
+
+export interface UserCreate extends Omit<User, 'id' | 'is_active' | 'role'> {
+  password: string;
+  role?: UserRole;
+}
+
+export interface Event {
+  id: number;
+  title: string;
+  description: string;
+  ward: string;
+  date: string;
+  location_name: string;
+  max_capacity: number;
+  is_active: boolean;
+}
+
+export interface Post {
+  id: number;
+  title: string;
+  content: string;
+  author_id: string;
+  is_published: boolean;
+  created_at: string;
+}
+
+export interface Product {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  stock_quantity: number;
+  image_url?: string;
+  is_active: boolean;
+}
+
+export interface AuthResponse {
+  access_token: string;
+  token_type: string;
+}
+
+// --- Helper Functions ---
+
+async function handleResponse<T>(response: Response): Promise<T> {
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({ detail: 'Unknown error' }));
+    throw new Error(errorData.detail || `API request failed with status ${response.status}`);
+  }
+  return response.json();
+}
+
+function getAuthHeaders(): HeadersInit {
+  if (typeof window === 'undefined') return {};
+  const token = localStorage.getItem('var3738_token');
+  return token ? { 'Authorization': `Bearer ${token}` } : {};
+}
+
+// --- API Endpoints ---
+
+export const api = {
+  // Auth
+  async login(username: string, password: string): Promise<AuthResponse> {
+    const formData = new URLSearchParams();
+    formData.append('username', username);
+    formData.append('password', password);
+
+    const response = await fetch(`${BASE_URL}/auth/login`, {
+      method: 'POST',
+      body: formData,
+    });
+    const data = await handleResponse<AuthResponse>(response);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('var3738_token', data.access_token);
+    }
+    return data;
+  },
+
+  async register(userData: UserCreate): Promise<User> {
+    const response = await fetch(`${BASE_URL}/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(userData),
+    });
+    return handleResponse<User>(response);
+  },
+
+  logout() {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('var3738_token');
+    }
+  },
+
+  // Events
+  async getEvents(): Promise<Event[]> {
+    const response = await fetch(`${BASE_URL}/events/`);
+    return handleResponse<Event[]>(response);
+  },
+
+  async registerForEvent(eventId: number): Promise<{ message: string }> {
+    const response = await fetch(`${BASE_URL}/events/${eventId}/register`, {
+      method: 'POST',
+      headers: { ...getAuthHeaders() },
+    });
+    return handleResponse<{ message: string }>(response);
+  },
+
+  // CMS
+  async getPosts(): Promise<Post[]> {
+    const response = await fetch(`${BASE_URL}/cms/posts`);
+    return handleResponse<Post[]>(response);
+  },
+
+  // Merch
+  async getProducts(activeOnly = true): Promise<Product[]> {
+    const response = await fetch(`${BASE_URL}/merch/products?active_only=${activeOnly}`);
+    return handleResponse<Product[]>(response);
+  },
+
+  // Geo-spatial
+  async getGeoBoundaries(adminLevel: number, parentPcode?: string): Promise<any> {
+    const url = new URL(`${BASE_URL}/geo/boundaries`);
+    url.searchParams.append('admin_level', adminLevel.toString());
+    if (parentPcode) url.searchParams.append('parent_pcode', parentPcode);
+    
+    const response = await fetch(url.toString());
+    return handleResponse<any>(response);
+  },
+
+  async getGeoBoundariesList(adminLevel: number, parentPcode?: string): Promise<{name: string, pcode: string}[]> {
+    const url = new URL(`${BASE_URL}/geo/boundaries/list`);
+    url.searchParams.append('admin_level', adminLevel.toString());
+    if (parentPcode) url.searchParams.append('parent_pcode', parentPcode);
+
+    const response = await fetch(url.toString());
+    return handleResponse<{name: string, pcode: string}[]>(response);
+  },
+
+  async reverseGeocode(lat: number, lon: number): Promise<{county: string, sub_county: string, ward: string}> {
+    const url = new URL(`${BASE_URL}/geo/reverse-geocode`);
+    url.searchParams.append('lat', lat.toString());
+    url.searchParams.append('lon', lon.toString());
+
+    const response = await fetch(url.toString());
+    return handleResponse<{county: string, sub_county: string, ward: string}>(response);
+  }
+};
