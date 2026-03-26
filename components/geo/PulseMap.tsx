@@ -15,27 +15,50 @@ export default function PulseMap() {
     try {
       const geojson = await api.getGeoBoundaries(level, parentPcode);
       
+      // Augment with height for 3D wow factor
+      const augmentedGeojson = {
+        ...geojson,
+        features: (geojson as any).features.map((f: any, i: number) => ({
+          ...f,
+          id: i, // Ensure ID for feature state
+          properties: {
+            ...f.properties,
+            height: ((f.properties.pcode?.charCodeAt(5) || 10) * 300) % 5000 + 500
+          }
+        }))
+      };
+
       // Remove existing source/layer if any
+      if (targetMap.getLayer('boundaries-extrusion')) targetMap.removeLayer('boundaries-extrusion');
       if (targetMap.getLayer('boundaries-fill')) targetMap.removeLayer('boundaries-fill');
       if (targetMap.getLayer('boundaries-line')) targetMap.removeLayer('boundaries-line');
       if (targetMap.getSource('boundaries')) targetMap.removeSource('boundaries');
 
       targetMap.addSource('boundaries', {
         type: 'geojson',
-        data: geojson
+        data: augmentedGeojson,
+        generateId: true
       });
 
       targetMap.addLayer({
-        id: 'boundaries-fill',
-        type: 'fill',
+        id: 'boundaries-extrusion',
+        type: 'fill-extrusion',
         source: 'boundaries',
         paint: {
-          'fill-color': '#eab308',
-          'fill-opacity': [
+          'fill-extrusion-color': [
+            'interpolate',
+            ['linear'],
+            ['get', 'height'],
+            500, '#eab308',
+            5000, '#fde047'
+          ],
+          'fill-extrusion-height': ['get', 'height'],
+          'fill-extrusion-base': 0,
+          'fill-extrusion-opacity': [
             'case',
             ['boolean', ['feature-state', 'hover'], false],
-            0.4,
-            0.1
+            0.9,
+            0.6
           ]
         }
       });
@@ -45,9 +68,9 @@ export default function PulseMap() {
         type: 'line',
         source: 'boundaries',
         paint: {
-          'line-color': '#eab308',
-          'line-width': 1,
-          'line-opacity': 0.5
+          'line-color': '#ffffff',
+          'line-width': 0.5,
+          'line-opacity': 0.2
         }
       });
 
@@ -118,7 +141,12 @@ export default function PulseMap() {
 
   return (
     <div className="relative w-full h-full rounded-2xl overflow-hidden border border-white/5 bg-white/2">
-      <MapContainer onMapLoad={handleMapLoad} />
+      <MapContainer 
+        onMapLoad={handleMapLoad} 
+        pitch={adminLevel === 1 ? 45 : 60}
+        bearing={adminLevel === 1 ? -10 : 20}
+        zoom={adminLevel === 1 ? 6 : 9}
+      />
       
       {/* Map Controls */}
       <div className="absolute top-6 left-6 z-10 flex flex-col gap-2">

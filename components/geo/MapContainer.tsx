@@ -8,6 +8,8 @@ interface MapContainerProps {
   onMapLoad?: (map: maplibregl.Map) => void;
   center?: [number, number]; // [lon, lat]
   zoom?: number;
+  pitch?: number;
+  bearing?: number;
   className?: string;
 }
 
@@ -15,6 +17,8 @@ export default function MapContainer({
   onMapLoad, 
   center = [36.8219, -1.2921], // Nairobi Default
   zoom = 6,
+  pitch = 0,
+  bearing = 0,
   className = ""
 }: MapContainerProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
@@ -51,6 +55,8 @@ export default function MapContainer({
       },
       center: center,
       zoom: zoom,
+      pitch: pitch,
+      bearing: bearing,
       attributionControl: false
     });
 
@@ -69,10 +75,9 @@ export default function MapContainer({
   // Update center/zoom if props change (optional implementation)
   useEffect(() => {
     if (map.current && isReady) {
-      // Smoothly fly to new center if needed
-      // map.current.flyTo({ center, zoom });
+      map.current.easeTo({ center, zoom, pitch, bearing });
     }
-  }, [center, zoom, isReady]);
+  }, [center, zoom, pitch, bearing, isReady]);
 
   return (
     <div className={`relative w-full h-full overflow-hidden rounded-2xl border border-white/10 ${className}`}>

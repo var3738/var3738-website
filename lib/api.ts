@@ -154,7 +154,8 @@ export const api = {
     if (parentPcode) url.searchParams.append('parent_pcode', parentPcode);
 
     const response = await fetch(url.toString());
-    return handleResponse<{name: string, pcode: string}[]>(response);
+    const data = await handleResponse<{count: number, boundaries: {name: string, pcode: string}[]}>(response);
+    return data.boundaries;
   },
 
   async reverseGeocode(lat: number, lon: number): Promise<{county: {name: string, pcode: string}, sub_county: {name: string, pcode: string}, ward: {name: string, pcode: string}}> {
