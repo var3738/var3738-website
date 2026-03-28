@@ -43,12 +43,55 @@ export interface EventCreate extends Omit<Event, 'id' | 'registration_count'> {}
 
 export interface Feedback {
   id: number;
-  rating: number;
-  comment?: string;
   event_id: number;
   user_id: string;
+  rating: number;
+  comment?: string;
   created_at: string;
 }
+
+export interface TeamMember {
+  id: string;
+  name: string;
+  position: string;
+  image: string;
+}
+
+export interface Partner {
+  id: string;
+  name: string;
+  logo: string;
+  url: string;
+}
+
+export interface GalleryItem {
+  id: string;
+  title: string;
+  image_url: string;
+  created_at: string;
+}
+
+export interface DocumentItem {
+  id: string;
+  title: string;
+  file_url: string;
+  created_at: string;
+}
+
+// LocalStorage Mock Helpers
+const getLocalData = <T>(key: string): T[] => {
+  if (typeof window === 'undefined') return [];
+  try {
+    return JSON.parse(localStorage.getItem(key) || '[]');
+  } catch {
+    return [];
+  }
+};
+
+const saveLocalData = <T>(key: string, data: T[]) => {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(key, JSON.stringify(data));
+};
 
 export interface Post {
   id: number;
@@ -129,8 +172,43 @@ export const api = {
 
   // Events
   async getEvents(): Promise<Event[]> {
-    const response = await fetch(`${BASE_URL}/events/`);
-    return handleResponse<Event[]>(response);
+    try {
+      const response = await fetch(`${BASE_URL}/events/`);
+      const data = await handleResponse<Event[]>(response);
+      return [...data, ...getLocalData<Event>('var_events_mock')];
+    } catch {
+      return getLocalData<Event>('var_events_mock');
+    }
+  },
+
+  async getEvent(id: number | string): Promise<Event> {
+    const local = getLocalData<Event>('var_events_mock').find(e => e.id.toString() === id.toString());
+    if (local) return local;
+    const response = await fetch(`${BASE_URL}/events/${id}`);
+    return handleResponse<Event>(response);
+  },
+
+  async createEvent(event: Partial<Event>): Promise<Event> {
+    const newEvent = { ...event, id: Date.now() } as Event;
+    const current = getLocalData<Event>('var_events_mock');
+    saveLocalData('var_events_mock', [...current, newEvent]);
+    return newEvent;
+  },
+
+  async updateEvent(id: number | string, event: Partial<Event>): Promise<Event> {
+    const current = getLocalData<Event>('var_events_mock');
+    const index = current.findIndex(e => e.id.toString() === id.toString());
+    if (index !== -1) {
+      current[index] = { ...current[index], ...event };
+      saveLocalData('var_events_mock', current);
+      return current[index];
+    }
+    throw new Error('Fallback update only supports locally mocked events for now');
+  },
+
+  async deleteEvent(id: number | string): Promise<void> {
+    const current = getLocalData<Event>('var_events_mock');
+    saveLocalData('var_events_mock', current.filter(e => e.id.toString() !== id.toString()));
   },
 
   async registerForEvent(eventId: number): Promise<{ message: string }> {
@@ -141,19 +219,89 @@ export const api = {
     return handleResponse<{ message: string }>(response);
   },
 
-  // CMS
+  // CMS (Posts)
   async getPosts(): Promise<Post[]> {
-    const response = await fetch(`${BASE_URL}/cms/posts`);
-    return handleResponse<Post[]>(response);
+    try {
+      const response = await fetch(`${BASE_URL}/cms/posts`);
+      const data = await handleResponse<Post[]>(response);
+      return [...data, ...getLocalData<Post>('var_posts_mock')];
+    } catch {
+      return getLocalData<Post>('var_posts_mock');
+    }
+  },
+
+  async getPost(id: number | string): Promise<Post> {
+    const local = getLocalData<Post>('var_posts_mock').find(p => p.id.toString() === id.toString());
+    if (local) return local;
+    const response = await fetch(`${BASE_URL}/cms/posts/${id}`);
+    return handleResponse<Post>(response);
+  },
+
+  async createPost(post: Partial<Post>): Promise<Post> {
+    const newPost = { ...post, id: Date.now(), author_id: post.author_id || 'admin', created_at: new Date().toISOString() } as Post;
+    const current = getLocalData<Post>('var_posts_mock');
+    saveLocalData('var_posts_mock', [...current, newPost]);
+    return newPost;
+  },
+
+  async updatePost(id: string | number, post: Partial<Post>): Promise<Post> {
+    const current = getLocalData<Post>('var_posts_mock');
+    const index = current.findIndex(p => p.id.toString() === id.toString());
+    if (index !== -1) {
+      current[index] = { ...current[index], ...post };
+      saveLocalData('var_posts_mock', current);
+      return current[index];
+    }
+    throw new Error('Update requires backend endpoint');
+  },
+
+  async deletePost(id: string | number): Promise<void> {
+    const current = getLocalData<Post>('var_posts_mock');
+    saveLocalData('var_posts_mock', current.filter(p => p.id.toString() !== id.toString()));
   },
 
   // Merch
   async getProducts(activeOnly = true): Promise<Product[]> {
-    const response = await fetch(`${BASE_URL}/merch/products?active_only=${activeOnly}`);
-    
-    console.log("BASE_URL: ", BASE_URL)
-    return handleResponse<Product[]>(response);
+    try {
+      const response = await fetch(`${BASE_URL}/merch/products?active_only=${activeOnly}`);
+      const data = await handleResponse<any>(response);
+      const apiData = Array.isArray(data) ? data : (data.products || []);
+      return [...apiData, ...getLocalData<Product>('var_merch_mock')];
+    } catch {
+      return getLocalData<Product>('var_merch_mock');
+    }
   },
+
+  async getProduct(id: string): Promise<Product> {
+    const local = getLocalData<Product>('var_merch_mock').find(p => p.id === id);
+    if (local) return local;
+    const response = await fetch(`${BASE_URL}/merch/products/${id}`);
+    return handleResponse<Product>(response);
+  },
+
+  async createProduct(product: Partial<Product>): Promise<Product> {
+    const newProduct = { ...product, id: Date.now().toString(), stock_quantity: product.stock_quantity || 0, price: product.price || 0, is_active: true } as Product;
+    const current = getLocalData<Product>('var_merch_mock');
+    saveLocalData('var_merch_mock', [...current, newProduct]);
+    return newProduct;
+  },
+
+  async updateProduct(id: string, product: Partial<Product>): Promise<Product> {
+    const current = getLocalData<Product>('var_merch_mock');
+    const index = current.findIndex(p => p.id === id);
+    if (index !== -1) {
+      current[index] = { ...current[index], ...product };
+      saveLocalData('var_merch_mock', current);
+      return current[index];
+    }
+    throw new Error('Update requires backend');
+  },
+
+  async deleteProduct(id: string): Promise<void> {
+    const current = getLocalData<Product>('var_merch_mock');
+    saveLocalData('var_merch_mock', current.filter(p => p.id !== id));
+  },
+
 
   // Geo-spatial
   // Admin / Feedback / Merch endpoints
@@ -173,49 +321,132 @@ export const api = {
     return handleResponse<Feedback[]>(response);
   },
 
-  async createEvent(eventData: EventCreate): Promise<Event> {
-    const response = await fetch(`${BASE_URL}/events/`, {
-      method: 'POST',
-      headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
-      body: JSON.stringify(eventData),
-    });
-    return handleResponse<Event>(response);
+  // Team
+  async getTeamMembers(): Promise<TeamMember[]> {
+    const initialTeam: TeamMember[] = [
+      { id: '1', name: 'Keno Manwar', position: 'Founder', image: 'KenoManwar.jpeg' },
+      { id: '2', name: 'Ivy Muchoki', position: 'National Cordinator/ Co-founder', image: 'IvyMuchoki.jpeg' },
+      { id: '3', name: 'Madzao Rocha', position: 'Founding youth Leader', image: 'MadzaoRocha.jpeg' },
+      { id: '4', name: 'Sincere Shem', position: 'Youth Thought leader/ Host', image: 'SincereShem.jpeg' },
+      { id: '5', name: 'Benjamin Mkapa', position: 'Youth Thought Advocate', image: 'BenjaminMkapa2.jpeg' },
+      { id: '6', name: 'Mongare Okiro', position: 'Youth Thought Advocate', image: 'MongareOkilo.jpeg' },
+      { id: '7', name: 'Joyson Joe Aliero Ayuko', position: 'County Grassroot Mobiliser', image: 'JoysonJoeAlieroAyuko.jpeg' },
+    ];
+    return [...initialTeam, ...getLocalData<TeamMember>('var_team_mock')];
   },
 
-  async updateEvent(eventId: number, eventData: Partial<EventCreate>): Promise<Event> {
-    const response = await fetch(`${BASE_URL}/events/${eventId}`, {
-      method: 'PUT',
-      headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
-      body: JSON.stringify(eventData),
-    });
-    return handleResponse<Event>(response);
+  async createTeamMember(team: Partial<TeamMember>): Promise<TeamMember> {
+    const newTeam = { ...team, id: Date.now().toString() } as TeamMember;
+    const current = getLocalData<TeamMember>('var_team_mock');
+    saveLocalData('var_team_mock', [...current, newTeam]);
+    return newTeam;
   },
 
-  async importEvents(eventsData: EventCreate[]): Promise<Event[]> {
-    const response = await fetch(`${BASE_URL}/events/import`, {
-      method: 'POST',
-      headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
-      body: JSON.stringify(eventsData),
-    });
-    return handleResponse<Event[]>(response);
+  async updateTeamMember(id: string, team: Partial<TeamMember>): Promise<TeamMember> {
+    const current = getLocalData<TeamMember>('var_team_mock');
+    const index = current.findIndex(t => t.id === id);
+    if (index !== -1) {
+      current[index] = { ...current[index], ...team };
+      saveLocalData('var_team_mock', current);
+      return current[index];
+    }
+    throw new Error('Item not found');
   },
 
-  async createProduct(productData: ProductCreate): Promise<Product> {
-    const response = await fetch(`${BASE_URL}/merch/products`, {
-      method: 'POST',
-      headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
-      body: JSON.stringify(productData),
-    });
-    return handleResponse<Product>(response);
+  async deleteTeamMember(id: string): Promise<void> {
+    const current = getLocalData<TeamMember>('var_team_mock');
+    saveLocalData('var_team_mock', current.filter(t => t.id !== id));
   },
 
-  async updateProduct(productId: string, productData: Partial<ProductCreate>): Promise<Product> {
-    const response = await fetch(`${BASE_URL}/merch/products/${productId}`, {
-      method: 'PUT',
-      headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
-      body: JSON.stringify(productData),
-    });
-    return handleResponse<Product>(response);
+  // Partners
+  async getPartners(): Promise<Partner[]> {
+    const initialPartners: Partner[] = [
+      { id: '1', name: 'Uamuzi Foundation', logo: '/partners/uamuzi-logo.png', url: 'https://www.uamuzi.org' },
+      { id: '2', name: 'CMD Kenya', logo: '/partners/cmd-kenya.webp', url: 'https://cmd-kenya.org/' },
+      { id: '3', name: 'U.S Embassy', logo: '/partners/us-embassy.webp', url: 'https://ke.usembassy.gov/' },
+      { id: '4', name: 'IEBC', logo: '/partners/IEBC_Emblem-nobg.png', url: 'https://www.iebc.or.ke/' },
+      { id: '5', name: 'Allan Chesang Foundation', logo: '/partners/allan-chesang-foundation-logo.png', url: 'https://acfkenya.com/' },
+    ];
+    return [...initialPartners, ...getLocalData<Partner>('var_partners_mock')];
+  },
+
+  async createPartner(partner: Partial<Partner>): Promise<Partner> {
+    const newPartner = { ...partner, id: Date.now().toString() } as Partner;
+    const current = getLocalData<Partner>('var_partners_mock');
+    saveLocalData('var_partners_mock', [...current, newPartner]);
+    return newPartner;
+  },
+
+  async updatePartner(id: string, partner: Partial<Partner>): Promise<Partner> {
+    const current = getLocalData<Partner>('var_partners_mock');
+    const index = current.findIndex(p => p.id === id);
+    if (index !== -1) {
+      current[index] = { ...current[index], ...partner };
+      saveLocalData('var_partners_mock', current);
+      return current[index];
+    }
+    throw new Error('Item not found');
+  },
+
+  async deletePartner(id: string): Promise<void> {
+    const current = getLocalData<Partner>('var_partners_mock');
+    saveLocalData('var_partners_mock', current.filter(p => p.id !== id));
+  },
+
+  // Gallery
+  async getGallery(): Promise<GalleryItem[]> {
+    return getLocalData<GalleryItem>('var_gallery_mock');
+  },
+
+  async createGalleryItem(item: Partial<GalleryItem>): Promise<GalleryItem> {
+    const newItem = { ...item, id: Date.now().toString(), created_at: new Date().toISOString() } as GalleryItem;
+    const current = getLocalData<GalleryItem>('var_gallery_mock');
+    saveLocalData('var_gallery_mock', [...current, newItem]);
+    return newItem;
+  },
+
+  async updateGalleryItem(id: string, item: Partial<GalleryItem>): Promise<GalleryItem> {
+    const current = getLocalData<GalleryItem>('var_gallery_mock');
+    const index = current.findIndex(p => p.id === id);
+    if (index !== -1) {
+      current[index] = { ...current[index], ...item };
+      saveLocalData('var_gallery_mock', current);
+      return current[index];
+    }
+    throw new Error('Item not found');
+  },
+
+  async deleteGalleryItem(id: string): Promise<void> {
+    const current = getLocalData<GalleryItem>('var_gallery_mock');
+    saveLocalData('var_gallery_mock', current.filter(p => p.id !== id));
+  },
+
+  // Documents
+  async getDocuments(): Promise<DocumentItem[]> {
+    return getLocalData<DocumentItem>('var_documents_mock');
+  },
+
+  async createDocument(doc: Partial<DocumentItem>): Promise<DocumentItem> {
+    const newDoc = { ...doc, id: Date.now().toString(), created_at: new Date().toISOString() } as DocumentItem;
+    const current = getLocalData<DocumentItem>('var_documents_mock');
+    saveLocalData('var_documents_mock', [...current, newDoc]);
+    return newDoc;
+  },
+
+  async updateDocument(id: string, doc: Partial<DocumentItem>): Promise<DocumentItem> {
+    const current = getLocalData<DocumentItem>('var_documents_mock');
+    const index = current.findIndex(p => p.id === id);
+    if (index !== -1) {
+      current[index] = { ...current[index], ...doc };
+      saveLocalData('var_documents_mock', current);
+      return current[index];
+    }
+    throw new Error('Item not found');
+  },
+
+  async deleteDocument(id: string): Promise<void> {
+    const current = getLocalData<DocumentItem>('var_documents_mock');
+    saveLocalData('var_documents_mock', current.filter(p => p.id !== id));
   },
 
   async getGeoBoundaries(adminLevel: number, parentPcode?: string): Promise<any> {

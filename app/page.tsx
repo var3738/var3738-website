@@ -9,6 +9,7 @@ import DetailedPillars from '@/components/DetailedPillars';
 import PartnershipFramework from '@/components/PartnershipFramework';
 import DUAEventSection from '@/components/DUAEventSection';
 import ByElectionsSection from '@/components/ByElectionsSection';
+import LatestDispatches from '@/components/LatestDispatches';
 
 export default function Home() {
   const jsonLd = {
@@ -86,9 +87,12 @@ export default function Home() {
       
       <ByElectionsSection />
 
+      <LatestDispatches />
+
       <TeamSection />
       
       <PartnersSection />
     </>
   );
 }
+

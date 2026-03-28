@@ -1,37 +1,29 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import PartnerCard from './PartnerCard';
 import { motion } from 'framer-motion';
-
-const PARTNERS = [
-  { 
-    name: 'Uamuzi Foundation', 
-    logo: '/partners/uamuzi-logo.png', 
-    url: 'https://www.uamuzi.org' 
-  },
-  { 
-    name: 'CMD Kenya', 
-    logo: '/partners/cmd-kenya.webp', 
-    url: 'https://cmd-kenya.org/' 
-  },
-  { 
-    name: 'U.S Embassy', 
-    logo: '/partners/us-embassy.webp', 
-    url: 'https://ke.usembassy.gov/' 
-  },
-  {
-    name: 'IEBC',
-    logo: '/partners/IEBC_Emblem-nobg.png', // Placeholder if NED logo missing, but user said "NED"
-    url: 'https://www.iebc.or.ke/'
-  },
-  {
-    name: 'Allan Chesang Foundation',
-    logo: '/partners/allan-chesang-foundation-logo.png', // Placeholder if NED logo missing, but user said "NED"
-    url: 'https://acfkenya.com/'
-  }
-];
+import { api, Partner } from '@/lib/api';
+import { Loader2 } from 'lucide-react';
 
 export default function PartnersSection({ title = "Engaged Partners", className = "" }: { title?: string, className?: string }) {
+  const [partners, setPartners] = useState<Partner[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadPartners() {
+      try {
+        const data = await api.getPartners();
+        setPartners(data);
+      } catch (err) {
+        console.error('Failed to load partners:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadPartners();
+  }, []);
+
   return (
     <section className={`w-full py-32 bg-background border-y border-border relative ${className}`}>
       <div className="glow-orb top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-5"></div>
@@ -52,17 +44,23 @@ export default function PartnersSection({ title = "Engaged Partners", className 
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
-          {PARTNERS.map((partner, idx) => (
-            <PartnerCard 
-              key={partner.name} 
-              name={partner.name} 
-              logo={partner.logo} 
-              url={partner.url}
-              index={idx} 
-            />
-          ))}
-        </div>
+        {isLoading ? (
+          <div className="w-full flex justify-center py-10">
+            <Loader2 className="animate-spin text-primary" size={32} />
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
+            {partners.map((partner, idx) => (
+              <PartnerCard 
+                key={partner.id} 
+                name={partner.name} 
+                logo={partner.logo} 
+                url={partner.url}
+                index={idx} 
+              />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

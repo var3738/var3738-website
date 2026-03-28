@@ -17,7 +17,7 @@ export default function Header() {
     { label: 'Impact', href: '/impact' },
     { label: 'Blog', href: '/blog' },
     { label: 'Merch', href: '/merch' },
-    
+    { label: 'Admin', href: '/admin' },
   ];
 
   return (

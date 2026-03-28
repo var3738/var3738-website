@@ -15,21 +15,24 @@ export default function PulseMap() {
     try {
       const geojson = await api.getGeoBoundaries(level, parentPcode);
       
-      // Augment with height for 3D wow factor
+      // Augment with impact score for 2D density factor
       const augmentedGeojson = {
         ...geojson,
-        features: (geojson as any).features.map((f: any, i: number) => ({
-          ...f,
-          id: i, // Ensure ID for feature state
-          properties: {
-            ...f.properties,
-            height: ((f.properties.pcode?.charCodeAt(5) || 10) * 300) % 5000 + 500
-          }
-        }))
+        features: (geojson as any).features.map((f: any, i: number) => {
+          // Generate a pseudo-random stable score based on pcode
+          const score = ((f.properties.pcode?.charCodeAt(f.properties.pcode.length - 1) || 10) * 17) % 100;
+          return {
+            ...f,
+            id: i, // Ensure ID for feature state
+            properties: {
+              ...f.properties,
+              impact_score: score
+            }
+          };
+        })
       };
 
       // Remove existing source/layer if any
-      if (targetMap.getLayer('boundaries-extrusion')) targetMap.removeLayer('boundaries-extrusion');
       if (targetMap.getLayer('boundaries-fill')) targetMap.removeLayer('boundaries-fill');
       if (targetMap.getLayer('boundaries-line')) targetMap.removeLayer('boundaries-line');
       if (targetMap.getSource('boundaries')) targetMap.removeSource('boundaries');
@@ -41,20 +44,19 @@ export default function PulseMap() {
       });
 
       targetMap.addLayer({
-        id: 'boundaries-extrusion',
-        type: 'fill-extrusion',
+        id: 'boundaries-fill',
+        type: 'fill',
         source: 'boundaries',
         paint: {
-          'fill-extrusion-color': [
+          'fill-color': [
             'interpolate',
             ['linear'],
-            ['get', 'height'],
-            500, '#eab308',
-            5000, '#fde047'
+            ['get', 'impact_score'],
+            0, '#111111',       // Baseline (almost black)
+            50, '#dc2626',      // Emerging (red-600)
+            100, '#ef4444'      // High Impact (red-500)
           ],
-          'fill-extrusion-height': ['get', 'height'],
-          'fill-extrusion-base': 0,
-          'fill-extrusion-opacity': [
+          'fill-opacity': [
             'case',
             ['boolean', ['feature-state', 'hover'], false],
             0.9,
@@ -143,8 +145,8 @@ export default function PulseMap() {
     <div className="relative w-full h-full rounded-2xl overflow-hidden border border-white/5 bg-white/2">
       <MapContainer 
         onMapLoad={handleMapLoad} 
-        pitch={adminLevel === 1 ? 45 : 60}
-        bearing={adminLevel === 1 ? -10 : 20}
+        pitch={0}
+        bearing={0}
         zoom={adminLevel === 1 ? 6 : 9}
       />
       

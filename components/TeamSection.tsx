@@ -1,46 +1,28 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import TeamCard from './TeamCard';
-
-const team = [
-  {
-    name: 'Keno Manwar',
-    position: 'Founder',
-    image: 'KenoManwar.jpeg',
-  },
-  {
-    name: 'Ivy Muchoki',
-    position: 'National Cordinator/ Co-founder',
-    image: 'IvyMuchoki.jpeg',
-  },
-  {
-    name: 'Madzao Rocha',
-    position: 'Founding youth Leader',
-    image: 'MadzaoRocha.jpeg',
-  },
-  {
-    name: 'Sincere Shem',
-    position: 'Youth Thought leader/ Host',
-    image: 'SincereShem.jpeg',
-  },
-  {
-    name: 'Benjamin Mkapa',
-    position: 'Youth Thought Advocate',
-    image: 'BenjaminMkapa2.jpeg',
-  },
-  {
-    name: 'Mongare Okiro',
-    position: 'Youth Thought Advocate',
-    image: 'MongareOkilo.jpeg',
-  },
-  {
-    name: 'Joyson Joe Aliero Ayuko',
-    position: 'County Grassroot Mobiliser',
-    image: 'JoysonJoeAlieroAyuko.jpeg',
-  },
-];
+import { api, TeamMember } from '@/lib/api';
+import { Loader2 } from 'lucide-react';
 
 export default function TeamSection() {
+  const [team, setTeam] = useState<TeamMember[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadTeam() {
+      try {
+        const data = await api.getTeamMembers();
+        setTeam(data);
+      } catch (err) {
+        console.error('Failed to load team members:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadTeam();
+  }, []);
+
   return (
     <section className="w-full py-32 bg-background relative overflow-hidden">
       <div className="glow-orb top-0 right-0 opacity-5"></div>
@@ -55,16 +37,22 @@ export default function TeamSection() {
            </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {team.map((member) => (
-            <TeamCard
-              key={member.name}
-              name={member.name}
-              position={member.position}
-              image={member.image}
-            />
-          ))}
-        </div>
+        {isLoading ? (
+          <div className="w-full flex justify-center py-10">
+            <Loader2 className="animate-spin text-primary" size={32} />
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {team.map((member) => (
+              <TeamCard
+                key={member.id}
+                name={member.name}
+                position={member.position}
+                image={member.image}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
