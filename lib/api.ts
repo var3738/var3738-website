@@ -7,6 +7,100 @@ const BASE_URL = '/api/var3738'; // Rewritten by next.config.mjs to point to act
 
 // --- Types ---
 
+// export type UserRole = 'guest' | 'activated_youth' | 'youth_champion' | 'content_creator' | 'admin';
+
+// export interface User {
+//   id: string;
+//   full_name: string;
+//   email: string;
+//   phone?: string;
+//   national_id?: string;
+//   county: string;
+//   sub_county: string;
+//   ward: string;
+//   role: UserRole;
+//   is_active: boolean;
+// }
+
+// export interface UserCreate extends Omit<User, 'id' | 'is_active' | 'role'> {
+//   password: string;
+//   role?: UserRole;
+// }
+
+// export interface Event {
+//   id: number;
+//   title: string;
+//   description: string;
+//   ward: string;
+//   date: string;
+//   location_name: string;
+//   max_capacity: number;
+//   is_active: boolean;
+//   registration_count?: number;
+// }
+
+// export interface EventCreate extends Omit<Event, 'id' | 'registration_count'> {}
+
+// export interface Feedback {
+//   id: number;
+//   event_id: number;
+//   user_id: string;
+//   rating: number;
+//   comment?: string;
+//   created_at: string;
+// }
+
+// export interface TeamMember {
+//   id: string;
+//   name: string;
+//   position: string;
+//   image: string;
+// }
+
+// export interface Partner {
+//   id: string;
+//   name: string;
+//   logo: string;
+//   url: string;
+// }
+
+// export interface GalleryItem {
+//   id: string;
+//   title: string;
+//   image_url: string;
+//   created_at: string;
+// }
+
+// export interface DocumentItem {
+//   id: string;
+//   title: string;
+//   file_url: string;
+//   created_at: string;
+// }
+
+// export interface Post {
+//   id: number;
+//   title: string;
+//   content: string;
+//   author_id: string;
+//   is_published: boolean;
+//   created_at: string;
+// }
+
+// export interface Product {
+//   id: string;
+//   name: string;
+//   description: string;
+//   price: number;
+//   stock_quantity: number;
+//   image_url?: string;
+//   is_active: boolean;
+// }
+
+/**
+ * VAR 37/38 API Service Layer - Corrected Types
+ */
+
 export type UserRole = 'guest' | 'activated_youth' | 'youth_champion' | 'content_creator' | 'admin';
 
 export interface User {
@@ -54,27 +148,33 @@ export interface TeamMember {
   id: string;
   name: string;
   position: string;
-  image: string;
+  image_url: string; // ✅ Corrected from 'image'
 }
 
 export interface Partner {
   id: string;
   name: string;
-  logo: string;
+  logo_url: string; // ✅ Corrected from 'logo'
   url: string;
 }
 
 export interface GalleryItem {
   id: string;
   title: string;
-  image_url: string;
+  image_url: string; // ✅ Correct
   created_at: string;
+}
+
+// Used for bulk creation
+export interface GalleryBulkCreate {
+  title: string;
+  image_urls: string[]; // ✅ Correct
 }
 
 export interface DocumentItem {
   id: string;
   title: string;
-  file_url: string;
+  file_url: string; // ✅ Correct 
   created_at: string;
 }
 
@@ -96,6 +196,7 @@ export interface Product {
   image_url?: string;
   is_active: boolean;
 }
+
 
 export interface ProductCreate extends Omit<Product, 'id'> {}
 
@@ -163,7 +264,8 @@ export const api = {
   // Events
   async getEvents(): Promise<Event[]> {
     const response = await fetch(`${BASE_URL}/events/`);
-    return handleResponse<Event[]>(response);
+    const data = await handleResponse<any>(response);
+    return Array.isArray(data) ? data : (data.events || data.items || []);
   },
 
   async getEvent(id: number | string): Promise<Event> {
@@ -177,6 +279,9 @@ export const api = {
       headers: getAuthHeaders(),
       body: JSON.stringify(event)
     });
+
+    console.log("response: ", getAuthHeaders());
+    
     return handleResponse<Event>(response);
   },
 
@@ -207,7 +312,8 @@ export const api = {
   // Feedback (Ground Intel)
   async getFeedback(eventId: number): Promise<Feedback[]> {
     const response = await fetch(`${BASE_URL}/events/${eventId}/feedback`);
-    return handleResponse<Feedback[]>(response);
+    const data = await handleResponse<any>(response);
+    return Array.isArray(data) ? data : (data.feedback || data.items || []);
   },
 
   async submitFeedback(eventId: number, rating: number, comment?: string): Promise<Feedback> {
@@ -222,9 +328,10 @@ export const api = {
   // Store / Merch
   async getProducts(includeInactive = false): Promise<Product[]> {
     const response = await fetch(`${BASE_URL}/merch/products`);
-    let data = await handleResponse<Product[]>(response);
-    if (!includeInactive) data = data.filter(p => p.is_active !== false);
-    return data;
+    const data = await handleResponse<any>(response);
+    let items = Array.isArray(data) ? data : (data.products || data.items || []);
+    if (!includeInactive) items = items.filter((p: any) => p.is_active !== false);
+    return items;
   },
 
   async getProduct(id: string): Promise<Product> {
@@ -260,7 +367,8 @@ export const api = {
   // Posts / CMS
   async getPosts(): Promise<Post[]> {
     const response = await fetch(`${BASE_URL}/cms/posts`);
-    return handleResponse<Post[]>(response);
+    const data = await handleResponse<any>(response);
+    return Array.isArray(data) ? data : (data.posts || data.items || []);
   },
 
   async getPost(id: number | string): Promise<Post> {
@@ -296,7 +404,8 @@ export const api = {
   // Team
   async getTeamMembers(): Promise<TeamMember[]> {
     const response = await fetch(`${BASE_URL}/team`);
-    return handleResponse<TeamMember[]>(response);
+    const data = await handleResponse<any>(response);
+    return Array.isArray(data) ? data : (data.team || data.members || data.items || []);
   },
 
   async createTeamMember(member: Partial<TeamMember>): Promise<TeamMember> {
@@ -327,7 +436,8 @@ export const api = {
   // Partners
   async getPartners(): Promise<Partner[]> {
     const response = await fetch(`${BASE_URL}/partners`);
-    return handleResponse<Partner[]>(response);
+    const data = await handleResponse<any>(response);
+    return Array.isArray(data) ? data : (data.partners || data.items || []);
   },
 
   async createPartner(partner: Partial<Partner>): Promise<Partner> {
@@ -358,11 +468,12 @@ export const api = {
   // Gallery
   async getGallery(): Promise<GalleryItem[]> {
     const response = await fetch(`${BASE_URL}/gallery`);
-    return handleResponse<GalleryItem[]>(response);
+    const data = await handleResponse<any>(response);
+    return Array.isArray(data) ? data : (data.gallery || data.items || []);
   },
 
   async createGalleryItem(item: Partial<GalleryItem>): Promise<GalleryItem> {
-    const response = await fetch(`${BASE_URL}/gallery`, {
+    const response = await fetch(`${BASE_URL}/gallery/`, {
       method: 'POST',
       headers: getAuthHeaders(),
       body: JSON.stringify(item)
@@ -371,7 +482,7 @@ export const api = {
   },
 
   async createGalleryBulk(data: { title: string, image_urls: string[] }): Promise<GalleryItem[]> {
-    const response = await fetch(`${BASE_URL}/gallery/bulk`, {
+    const response = await fetch(`${BASE_URL}/gallery`, {
       method: 'POST',
       headers: getAuthHeaders(),
       body: JSON.stringify(data)
@@ -398,7 +509,8 @@ export const api = {
   // Documents
   async getDocuments(): Promise<DocumentItem[]> {
     const response = await fetch(`${BASE_URL}/documents`);
-    return handleResponse<DocumentItem[]>(response);
+    const data = await handleResponse<any>(response);
+    return Array.isArray(data) ? data : (data.documents || data.items || []);
   },
 
   async createDocument(doc: Partial<DocumentItem>): Promise<DocumentItem> {
@@ -453,3 +565,4 @@ export const api = {
     return handleResponse<{query: any, count: number, events: any[]}>(response);
   }
 };
+

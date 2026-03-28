@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Activity, Package, MessageSquare, ShieldAlert, Plus, Save, RefreshCw, PenSquare, Trash2, Users, Handshake, FileText, Image, File } from 'lucide-react';
+import { Activity, Package, MessageSquare, ShieldAlert, Plus, Save, RefreshCw, PenSquare, Trash2, Users, Handshake, FileText, Image, File, LogOut, Loader2, Lock } from 'lucide-react';
 import { api, Event, Product, Feedback, Post, TeamMember, Partner, GalleryItem, DocumentItem } from '@/lib/api';
 import CMSFormModal, { FormField } from './CMSFormModal';
 
@@ -12,6 +12,8 @@ export default function AdminDashboardClient() {
   const [activeTab, setActiveTab] = useState<Tab>('posts');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [authForm, setAuthForm] = useState({ username: '', password: '' });
+  const [authError, setAuthError] = useState('');
   
   // Data State
   const [events, setEvents] = useState<Event[]>([]);
@@ -31,8 +33,7 @@ export default function AdminDashboardClient() {
   
   useEffect(() => {
     const token = localStorage.getItem('var3738_token');
-    // Using a simpler auth check for demonstration
-    if (token || true) { // Bypassing for local testing purposes to ensure UI works
+    if (token) {
       setIsAuthenticated(true);
       fetchData(activeTab);
     }
@@ -42,7 +43,7 @@ export default function AdminDashboardClient() {
     if (isAuthenticated) {
       fetchData(activeTab);
     }
-  }, [activeTab]);
+  }, [activeTab, isAuthenticated]);
 
   const fetchData = async (tab: Tab) => {
     setIsLoading(true);
@@ -59,11 +60,34 @@ export default function AdminDashboardClient() {
         setEvents(eventsData);
         if (eventsData.length > 0) setFeedbacks(await api.getFeedback(eventsData[0].id));
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Admin fetch error', err);
+      if (err.message?.includes('401') || err.message?.toLowerCase().includes('unauthorized')) {
+        handleLogout();
+      }
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setAuthError('');
+    try {
+      await api.login(authForm.username, authForm.password);
+      setIsAuthenticated(true);
+      fetchData(activeTab);
+    } catch (err: any) {
+      setAuthError(err.message || 'Login failed. Security clearance denied.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleLogout = () => {
+    api.logout();
+    setIsAuthenticated(false);
   };
 
   const handleDelete = async (type: Tab, id: string | number) => {
@@ -199,10 +223,61 @@ export default function AdminDashboardClient() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen pt-40 pb-20 bg-background flex flex-col items-center justify-center text-center px-4">
-        <ShieldAlert size={48} className="text-red-500 mb-6 w-16 h-16 bg-red-500/10 p-4 rounded-full" />
-        <h1 className="text-4xl font-black uppercase tracking-tighter mb-4">Access Denied</h1>
-        <p className="text-[10px] font-black uppercase tracking-widest text-white/40">Level 5 Clearance Required</p>
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="w-full max-w-md bg-white/5 backdrop-blur-xl border border-white/10 p-10 rounded-3xl"
+        >
+          <div className="flex flex-col items-center mb-10 text-center">
+            <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-6 border border-primary/20">
+              <Lock className="text-primary w-8 h-8" />
+            </div>
+            <h1 className="text-3xl font-black uppercase tracking-tighter mb-2">Command Center</h1>
+            <p className="text-[10px] font-black uppercase tracking-widest text-white/40">Secure Administrative Access</p>
+          </div>
+
+          <form onSubmit={handleLogin} className="space-y-6">
+            {authError && (
+              <div className="p-4 bg-red-500/10 border border-red-500/20 text-red-500 text-[10px] font-black uppercase tracking-widest text-center rounded-xl">
+                {authError}
+              </div>
+            )}
+            
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-widest text-white/40 px-1">Username / ID</label>
+              <input 
+                type="text"
+                required
+                value={authForm.username}
+                onChange={e => setAuthForm(prev => ({ ...prev, username: e.target.value }))}
+                className="w-full bg-black/40 border border-white/10 rounded-2xl py-4 px-6 text-white focus:outline-none focus:border-primary transition-colors"
+                placeholder="REGISTRY_CORE_ADMIN"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-widest text-white/40 px-1">Access Token</label>
+              <input 
+                type="password"
+                required
+                value={authForm.password}
+                onChange={e => setAuthForm(prev => ({ ...prev, password: e.target.value }))}
+                className="w-full bg-black/40 border border-white/10 rounded-2xl py-4 px-6 text-white focus:outline-none focus:border-primary transition-colors"
+                placeholder="••••••••••••"
+              />
+            </div>
+
+            <button 
+              type="submit"
+              disabled={isLoading}
+              className="w-full crimson-btn py-5 rounded-2xl flex items-center justify-center gap-3 disabled:opacity-50"
+            >
+              {isLoading ? <Loader2 className="animate-spin w-5 h-5" /> : <ShieldAlert className="w-5 h-5" />}
+              <span className="font-black uppercase tracking-widest text-xs">Authorize Access</span>
+            </button>
+          </form>
+        </motion.div>
       </div>
     );
   }
@@ -227,9 +302,18 @@ export default function AdminDashboardClient() {
           <ShieldAlert size={14} />
         </div>
         
-        <h1 className="text-5xl md:text-7xl font-black mb-12 uppercase tracking-tighter leading-none">
-          Admin <span className="text-primary italic">Dashboard</span>
-        </h1>
+        <div className="flex items-center justify-between mb-12">
+          <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tighter leading-none">
+            Admin <span className="text-primary italic">Dashboard</span>
+          </h1>
+          <button 
+            onClick={handleLogout}
+            className="flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-red-500/10 border border-white/10 hover:border-red-500/20 text-white/40 hover:text-red-500 rounded-2xl transition-all group"
+          >
+            <LogOut size={16} className="group-hover:-translate-x-1 transition-transform" />
+            <span className="text-[10px] font-black uppercase tracking-widest">Terminate Session</span>
+          </button>
+        </div>
 
         {/* Tabs */}
         <div className="flex border-b border-white/10 mb-8 overflow-x-auto no-scrollbar pb-2">
@@ -407,7 +491,7 @@ export default function AdminDashboardClient() {
                          </div>
                          <div className="overflow-hidden">
                            <h3 className="font-black uppercase tracking-tighter truncate w-full max-w-[200px]">{partner.name}</h3>
-                           <div className="text-[10px] font-bold text-white/50 truncate w-full max-w-[200px]">{partner.url}</div>
+                           <div className="break-words text-white/40 group-hover:text-white/60 transition-colors text-[10px] font-bold">{partner.url}</div>
                          </div>
                        </div>
                        <div className="flex gap-2 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity w-full sm:w-auto justify-end mt-2 sm:mt-0">
