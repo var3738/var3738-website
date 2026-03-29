@@ -19,7 +19,7 @@ export default function Header() {
     { label: 'Impact', href: '/impact' },
     { label: 'Blog', href: '/blog' },
     { label: 'Merch', href: '/merch' },
-    { label: 'Admin', href: '/admin' },
+    // { label: 'Admin', href: '/admin' },
   ];
 
   return (
@@ -43,19 +43,27 @@ export default function Header() {
         </nav>
 
         <div className="flex items-center gap-4">
-          <button 
+          {/* <button 
             onClick={() => setShowTeam(true)}
             className="text-xs font-black uppercase tracking-widest text-white/50 hover:text-primary transition-colors hidden md:block"
           >
             The Team
-          </button>
+          </button> */}
           
-          <button 
+          {/* <button 
             onClick={() => setShowRegister(true)}
             className="crimson-btn-outline text-xs py-2 px-5 hidden md:block"
           >
             Register
+          </button> */}
+
+           <button 
+            onClick={() =>  setShowTeam(true)}
+            className="crimson-btn-outline text-xs py-2 px-5 hidden md:block"
+          >
+            The Team
           </button>
+
           
           {/* Mobile Toggle */}
           <button
@@ -87,7 +95,7 @@ export default function Header() {
                   {link.label}
                 </Link>
               ))}
-              <button
+              {/* <button
                 onClick={() => {
                   setShowTeam(true);
                   setIsMenuOpen(false);
@@ -95,8 +103,8 @@ export default function Header() {
                 className="w-full text-xs font-black uppercase tracking-widest text-white/50 border border-white/10 py-4 rounded-xl"
               >
                 The Team
-              </button>
-              
+              </button> */}
+{/*               
               <button
                 onClick={() => {
                   setShowRegister(true);
@@ -105,6 +113,16 @@ export default function Header() {
                 className="crimson-btn w-full"
               >
                 Register
+              </button> */}
+
+              <button
+                onClick={() => {
+                  setShowTeam(true);
+                  setIsMenuOpen(false);
+                }}
+                className="crimson-btn w-full"
+              >
+                The Team
               </button>
             </div>
           </motion.div>
