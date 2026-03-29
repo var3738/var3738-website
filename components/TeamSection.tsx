@@ -30,7 +30,7 @@ export default function TeamSection() {
         <div className="mb-20">
            <h2 className="mb-6 font-black tracking-tighter">
              The <br />
-             <span className="text-primary italic">Movement</span> Creators
+             <span className="text-primary italic">Leadership</span> Structure
            </h2>
            <p className="text-white/40 max-w-xl text-lg font-medium">
              A professional coalition of builders, dreamers, and agitators. Redefining power through structured civic engagement.
@@ -48,7 +48,7 @@ export default function TeamSection() {
                 key={member.id}
                 name={member.name}
                 position={member.position}
-                image={member.image}
+                image={member.image_url}
               />
             ))}
           </div>

@@ -5,11 +5,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 import { Menu, X } from 'lucide-react';
 import RegistrationForm from './RegistrationForm';
+import TeamOverlay from './TeamOverlay';
 import Image from 'next/image';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
+  const [showTeam, setShowTeam] = useState(false);
 
   const navLinks = [
     { label: 'Home', href: '/' },
@@ -41,6 +43,13 @@ export default function Header() {
         </nav>
 
         <div className="flex items-center gap-4">
+          <button 
+            onClick={() => setShowTeam(true)}
+            className="text-xs font-black uppercase tracking-widest text-white/50 hover:text-primary transition-colors hidden md:block"
+          >
+            The Team
+          </button>
+          
           <button 
             onClick={() => setShowRegister(true)}
             className="crimson-btn-outline text-xs py-2 px-5 hidden md:block"
@@ -80,6 +89,16 @@ export default function Header() {
               ))}
               <button
                 onClick={() => {
+                  setShowTeam(true);
+                  setIsMenuOpen(false);
+                }}
+                className="w-full text-xs font-black uppercase tracking-widest text-white/50 border border-white/10 py-4 rounded-xl"
+              >
+                The Team
+              </button>
+              
+              <button
+                onClick={() => {
                   setShowRegister(true);
                   setIsMenuOpen(false);
                 }}
@@ -96,6 +115,12 @@ export default function Header() {
         <RegistrationForm 
           wardName="Join the Movement" 
           onClose={() => setShowRegister(false)} 
+        />
+      )}
+
+      {showTeam && (
+        <TeamOverlay 
+          onClose={() => setShowTeam(false)} 
         />
       )}
     </header>

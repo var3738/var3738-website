@@ -54,7 +54,7 @@ export default function PartnersSection({ title = "Engaged Partners", className 
               <PartnerCard 
                 key={partner.id} 
                 name={partner.name} 
-                logo={partner.logo} 
+                logo={partner.logo_url} 
                 url={partner.url}
                 index={idx} 
               />

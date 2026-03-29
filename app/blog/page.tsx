@@ -4,27 +4,53 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { api, Post } from '@/lib/api';
 import BlogCard from '@/components/BlogCard';
-import { Loader2, Newspaper } from 'lucide-react';
+import { Loader2, Newspaper, PenSquare, Plus, ShieldCheck } from 'lucide-react';
+import CMSFormModal, { FormField } from '@/components/admin/CMSFormModal';
 
 export default function BlogListingPage() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    async function loadPosts() {
-      try {
-        const data = await api.getPosts();
-        setPosts(data);
-      } catch (err) {
-        console.error('Failed to load posts:', err);
-        setError('The newsroom is currently offline. Please check back later.');
-      } finally {
-        setIsLoading(false);
-      }
+    setIsLoggedIn(!!localStorage.getItem('var3738_token'));
+  }, []);
+
+  const loadPosts = async () => {
+    setIsLoading(true);
+    try {
+      const data = await api.getPosts();
+      setPosts(data.filter((p: Post) => p.is_published));
+    } catch (err) {
+      console.error('Failed to load posts:', err);
+      setError('The newsroom is currently offline. Please check back later.');
+    } finally {
+      setIsLoading(false);
     }
+  };
+
+  useEffect(() => {
     loadPosts();
   }, []);
+
+  const postFields: FormField[] = [
+    { name: 'title', label: 'Dispatch Title', type: 'text', required: true },
+    { name: 'content', label: 'Content', type: 'richtext', required: true }
+  ];
+
+  const handleSubmit = async (data: any) => {
+    try {
+      await api.createPost(data);
+      alert('Dispatch submitted successfully! It will appear on the registry once approved by an admin.');
+      setIsModalOpen(false);
+      loadPosts();
+    } catch (err) {
+      console.error('Submission failed', err);
+      alert('Submission failed. Your message might have been intercepted.');
+    }
+  };
 
   return (
     <main className="min-h-screen pt-40 pb-20 bg-background overflow-hidden selection:bg-primary selection:text-black">
@@ -64,6 +90,24 @@ export default function BlogListingPage() {
             Official updates, civic education, and dispatches from the front lines of the movement. 
             Understanding Article 37 & 38 through the lens of a new generation.
           </motion.p>
+          
+          {isLoggedIn && (
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 }}
+              className="mt-10"
+            >
+              <button 
+                onClick={() => setIsModalOpen(true)}
+                className="crimson-btn flex items-center gap-3 px-8 py-4"
+              >
+                <Plus size={18} />
+                <span className="font-black uppercase tracking-widest text-[10px]">Contribute a Dispatch</span>
+                <ShieldCheck size={14} className="text-white/40" />
+              </button>
+            </motion.div>
+          )}
         </div>
 
         {isLoading ? (
@@ -83,6 +127,14 @@ export default function BlogListingPage() {
           </div>
         )}
       </div>
+
+      <CMSFormModal 
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title="Contribute a Dispatch"
+        fields={postFields}
+        onSubmit={handleSubmit}
+      />
     </main>
   );
 }

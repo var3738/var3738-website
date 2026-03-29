@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Activity, Package, MessageSquare, ShieldAlert, Plus, Save, RefreshCw, PenSquare, Trash2, Users, Handshake, FileText, Image, File, LogOut, Loader2, Lock } from 'lucide-react';
+import { Activity, Package, MessageSquare, ShieldAlert, Plus, Save, RefreshCw, PenSquare, Trash2, Users, Handshake, FileText, Image, File, LogOut, Loader2, Lock, CheckCircle2, XCircle } from 'lucide-react';
 import { api, Event, Product, Feedback, Post, TeamMember, Partner, GalleryItem, DocumentItem } from '@/lib/api';
 import CMSFormModal, { FormField } from './CMSFormModal';
 
@@ -90,6 +90,15 @@ export default function AdminDashboardClient() {
     setIsAuthenticated(false);
   };
 
+  const handleTogglePublish = async (post: Post) => {
+    try {
+      await api.updatePost(post.id, { is_published: !post.is_published });
+      fetchData('posts');
+    } catch (err) {
+      console.error('Failed to toggle publish status:', err);
+    }
+  };
+
   const handleDelete = async (type: Tab, id: string | number) => {
     if (!confirm('Are you sure you want to delete this record?')) return;
     try {
@@ -113,7 +122,8 @@ export default function AdminDashboardClient() {
         title: initialData ? 'Edit Dispatch' : 'New Dispatch',
         fields: [
           { name: 'title', label: 'Title', type: 'text', required: true },
-          { name: 'content', label: 'Content', type: 'richtext', required: true }
+          { name: 'content', label: 'Content', type: 'richtext', required: true },
+          { name: 'is_published', label: 'Published / Visible to Public', type: 'checkbox' }
         ],
         onSubmit: async (data: any) => {
           if (initialData) await api.updatePost(initialData.id, data);
@@ -159,7 +169,7 @@ export default function AdminDashboardClient() {
         fields: [
           { name: 'name', label: 'Full Name', type: 'text', required: true },
           { name: 'position', label: 'Position / Role', type: 'text', required: true },
-          { name: 'image', label: 'Profile Image', type: 'file', folder: 'team' }
+          { name: 'image_url', label: 'Profile Image', type: 'file', folder: 'team' }
         ],
         onSubmit: async (data: any) => {
           if (initialData) await api.updateTeamMember(initialData.id, data);
@@ -173,7 +183,7 @@ export default function AdminDashboardClient() {
         fields: [
           { name: 'name', label: 'Organization Name', type: 'text', required: true },
           { name: 'url', label: 'Website URL', type: 'url' },
-          { name: 'logo', label: 'Partner Logo', type: 'file', folder: 'partners' }
+          { name: 'logo_url', label: 'Partner Logo', type: 'file', folder: 'partners' }
         ],
         onSubmit: async (data: any) => {
           if (initialData) await api.updatePartner(initialData.id, data);
@@ -358,10 +368,23 @@ export default function AdminDashboardClient() {
                   {posts.map(post => (
                     <div key={post.id} className="modern-card p-6 bg-white/5 border border-white/10 flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center group">
                       <div className="w-full overflow-hidden">
-                        <div className="text-[10px] font-bold uppercase tracking-widest text-primary mb-1">{new Date(post.created_at).toLocaleDateString()}</div>
+                        <div className="flex items-center gap-3 mb-1">
+                          <div className="text-[10px] font-bold uppercase tracking-widest text-primary">{new Date(post.created_at).toLocaleDateString()}</div>
+                          <div className="text-[10px] font-bold uppercase tracking-widest text-white/20">BY: {post.author_id.slice(0, 8)}...</div>
+                          <span className={`text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-sm ${post.is_published ? 'bg-green-500/10 text-green-500 border border-green-500/20' : 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/20'}`}>
+                            {post.is_published ? 'Live' : 'Pending'}
+                          </span>
+                        </div>
                         <h3 className="font-black uppercase tracking-tighter text-xl truncate w-full max-w-[250px] sm:max-w-lg">{post.title}</h3>
                       </div>
                       <div className="flex gap-2 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity w-full sm:w-auto justify-end mt-2 sm:mt-0">
+                         <button 
+                           onClick={() => handleTogglePublish(post)} 
+                           title={post.is_published ? "Unpublish" : "Publish Now"}
+                           className={`p-3 rounded transition-colors flex-1 sm:flex-none flex justify-center ${post.is_published ? 'bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500 hover:text-white' : 'bg-green-500/10 text-green-500 hover:bg-green-500 hover:text-white'}`}
+                         >
+                           {post.is_published ? <XCircle size={16} /> : <CheckCircle2 size={16} />}
+                         </button>
                          <button onClick={() => openModal('posts', post)} className="p-3 bg-white/5 hover:bg-white/10 rounded transition-colors flex-1 sm:flex-none flex justify-center"><PenSquare size={16} /></button>
                          <button onClick={() => handleDelete('posts', post.id)} className="p-3 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded transition-colors flex-1 sm:flex-none flex justify-center"><Trash2 size={16} /></button>
                       </div>
@@ -455,7 +478,7 @@ export default function AdminDashboardClient() {
                      <div key={member.id} className="modern-card p-6 bg-white/5 border border-white/10 flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center group">
                        <div className="flex items-center gap-4 w-full sm:w-auto overflow-hidden">
                          <div className="w-12 h-12 bg-white/10 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden">
-                           {member.image ? <img src={member.image.includes('http') ? member.image : `/${member.image}`} alt={member.name} className="object-cover w-full h-full" /> : <Users size={20} className="text-white/50" />}
+                           {member.image_url ? <img src={member.image_url.includes('http') ? member.image_url : `/${member.image_url}`} alt={member.name} className="object-cover w-full h-full" /> : <Users size={20} className="text-white/50" />}
                          </div>
                          <div className="overflow-hidden">
                            <h3 className="font-black uppercase tracking-tighter truncate w-full max-w-[200px]">{member.name}</h3>
@@ -487,7 +510,7 @@ export default function AdminDashboardClient() {
                      <div key={partner.id} className="modern-card p-6 bg-white/5 border border-white/10 flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center group">
                        <div className="flex items-center gap-4 sm:gap-6 w-full sm:w-auto overflow-hidden">
                          <div className="w-16 h-12 bg-white/10 flex-shrink-0 rounded flex items-center justify-center p-2">
-                            {partner.logo ? <img src={partner.logo} alt={partner.name} className="max-h-full max-w-full" /> : <Handshake size={20} />}
+                            {partner.logo_url ? <img src={partner.logo_url} alt={partner.name} className="max-h-full max-w-full" /> : <Handshake size={20} />}
                          </div>
                          <div className="overflow-hidden">
                            <h3 className="font-black uppercase tracking-tighter truncate w-full max-w-[200px]">{partner.name}</h3>
