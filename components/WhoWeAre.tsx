@@ -1,29 +1,25 @@
-'use client';
+"use client";
 
-import { motion } from 'framer-motion';
-import Image from 'next/image';
-import { useState, useEffect } from 'react';
+import { motion } from "framer-motion";
+import Image from "next/image";
+import { useState, useEffect } from "react";
 
-
-
-const IMAGES_COUNT = 40;
+const IMAGES_COUNT = 3;
 const IMAGES = Array.from({ length: IMAGES_COUNT }, (_, i) => {
-    const num = (i + 1).toString().padStart(2, '0');
-    return `/trans-nzoia-townhall/tnts-image${num}.jpeg`;
-  });
+  const num = (i + 1).toString().padStart(2, "0");
+  console.log(num);
+  return `/group-pics/group-pic-${num}.jpeg`;
+});
 
 export default function WhoWeAre() {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-    const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  
-    useEffect(() => {
-      const interval = setInterval(() => {
-        setCurrentImageIndex((prev) => (prev + 1) % IMAGES.length);
-      }, 4000);
-      return () => clearInterval(interval);
-    }, []);
-
-
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prev) => (prev + 1) % IMAGES.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <section className="w-full py-32 bg-black relative overflow-hidden px-4 border-t border-white/5">
@@ -45,14 +41,17 @@ export default function WhoWeAre() {
             </h2>
             <div className="space-y-6 text-xl font-medium text-white/60 leading-relaxed">
               <p>
-                VAR is a dynamic, youth-led civic movement built on transformative action. 
-                VAR 37-38 represents empowered youth utilizing constitutional rights to assemble 
-                <span className="text-white"> (Art. 37)</span> and channel energy into political action 
+                VAR is a dynamic, youth-led civic movement built on
+                transformative action. VAR 37-38 represents empowered youth
+                utilizing constitutional rights to assemble
+                <span className="text-white"> (Art. 37)</span> and channel
+                energy into political action
                 <span className="text-white"> (Art. 38)</span>.
               </p>
               <p>
-                We represent a national network of digitally-savvy, grassroots-connected young Kenyans 
-                actively shaping a more participatory, accountable, and peaceful political future.
+                We represent a national network of digitally-savvy,
+                grassroots-connected young Kenyans actively shaping a more
+                participatory, accountable, and peaceful political future.
               </p>
             </div>
           </motion.div>
@@ -65,14 +64,16 @@ export default function WhoWeAre() {
               viewport={{ once: true }}
               className="modern-card p-4 relative aspect-video overflow-hidden"
             >
-              <Image 
+              <Image
                 src={IMAGES[currentImageIndex]}
                 alt="VAR 37-38 youth movement members engaging in civic dialogue"
                 fill
                 className="object-cover opacity-60 group-hover:scale-105 transition-transform duration-700"
               />
               <div className="absolute inset-x-0 bottom-0 p-8 bg-linear-to-t from-black to-transparent">
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40">Field Activation: Trans Nzoia</p>
+                {/* <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40">
+                  We are an amazing team :)
+                </p> */}
               </div>
             </motion.div>
 
@@ -86,9 +87,13 @@ export default function WhoWeAre() {
               <div className="text-6xl font-black text-primary/50 absolute top-18 md:top-8 right-10 leading-none">
                 75%
               </div>
-              <h3 className="text-3xl font-black mb-8 uppercase tracking-tighter italic">Demographic Power</h3>
+              <h3 className="text-3xl font-black mb-8 uppercase tracking-tighter italic">
+                Demographic Power
+              </h3>
               <p className="text-white/60 text-lg font-medium leading-relaxed">
-                Our core value: an intrinsic, trusted connection to Kenya's youth demographic—over 75% of the population—engaging them in their own spaces and cultural contexts.
+                Our core value: an intrinsic, trusted connection to Kenya's
+                youth demographic—over 75% of the population—engaging them in
+                their own spaces and cultural contexts.
               </p>
             </motion.div>
           </div>

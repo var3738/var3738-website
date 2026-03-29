@@ -46,13 +46,12 @@ export default function Home() {
       <HeroSection />
       
       {/* 3-Stage Lifecycle (Bento Grid) - Keeping for visual impact */}
-      <LifecycleBento />
+      {/* <LifecycleBento /> */}
 
       <WhoWeAre />
       
       <DetailedPillars />
 
-      <StrategicAlignment />
 
       <ProvenTrackRecord />
 
@@ -81,7 +80,6 @@ export default function Home() {
       </section>
 
       <PartnershipFramework />
-
 
       <DUAEventSection />
       
