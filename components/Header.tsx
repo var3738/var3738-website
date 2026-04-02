@@ -15,6 +15,7 @@ export default function Header() {
 
   const navLinks = [
     { label: 'Home', href: '/' },
+    { label: 'About', href: '/about' },
     { label: 'Democracy Activated', href: '/democracy-activated' },
     { label: 'Impact', href: '/impact' },
     { label: 'Blog', href: '/blog' },

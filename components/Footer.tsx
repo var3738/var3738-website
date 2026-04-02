@@ -47,6 +47,7 @@ export default function Footer() {
             <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 mb-8">Ecosystem</h4>
             <ul className="space-y-4">
               {[
+                { label: 'About VAR', href: '/about' },
                 { label: 'Democracy Activated', href: '/democracy-activated' },
                 { label: 'Impact Dashboard', href: '/impact' },
                 { label: 'National Agenda', href: '/agenda' },

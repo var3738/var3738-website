@@ -23,12 +23,14 @@ export default function PartnerCard({ name, logo, url, index }: PartnerCardProps
       viewport={{ once: true }}
     >
       <div className="relative w-full h-20 mb-4 overflow-hidden md:grayscale group-hover:grayscale-0 transition-all duration-700">
-        <Image
-          src={logo}
-          alt={`VAR 37/38 Partner Engaged: ${name}`}
-          fill
-          className="object-contain"
-        />
+        {logo &&
+        (<Image
+        src={logo}
+        alt={`VAR 37/38 Partner Engaged: ${name}`}
+        fill
+        className="object-contain"
+        />)
+      }
       </div>
       <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 group-hover:text-primary transition-colors">
         {name}
