@@ -179,12 +179,48 @@ export interface DocumentItem {
 }
 
 export interface Post {
-  id: number;
+  id: string; // UUID
+  title: string;
+  slug: string; // Used for URLs
+  summary?: string; 
+  content: string; // Markdown supported
+  author_id: string;
+  category_id?: string;
+  status: 'draft' | 'published' | 'archived';
+  is_published: boolean;
+  image_url?: string; // Cloudinary URL
+  seo_metadata: Record<string, any>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+}
+
+export interface Tag {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+export interface Comment {
+  id: string;
+  post_id: string;
+  user_id?: string; // Null for guest comments
+  parent_id?: string; // Links to another comment if it's a reply
+  content: string;
+  is_approved: boolean;
+  created_at: string;
+  replies?: Comment[]; // Threaded structure
+}
+
+export interface PostCreate extends Partial<Omit<Post, 'id' | 'created_at' | 'updated_at'>> {
   title: string;
   content: string;
-  author_id: string;
-  is_published: boolean;
-  created_at: string;
 }
 
 export interface Product {
@@ -364,19 +400,39 @@ export const api = {
     });
   },
 
-  // Posts / CMS
-  async getPosts(): Promise<Post[]> {
-    const response = await fetch(`${BASE_URL}/cms/posts`);
+  // Posts / CMS V2
+  async getPosts(params?: { 
+    status?: 'published' | 'draft' | 'archived', 
+    category_id?: string, 
+    tag_id?: string 
+  }): Promise<Post[]> {
+    const query = new URLSearchParams();
+    if (params?.status) query.append('status', params.status);
+    if (params?.category_id) query.append('category_id', params.category_id);
+    if (params?.tag_id) query.append('tag_id', params.tag_id);
+
+    const response = await fetch(`${BASE_URL}/cms/posts?${query.toString()}`);
     const data = await handleResponse<any>(response);
     return Array.isArray(data) ? data : (data.posts || data.items || []);
   },
 
-  async getPost(id: number | string): Promise<Post> {
+  async getPost(id: string): Promise<Post> {
     const response = await fetch(`${BASE_URL}/cms/posts/${id}`);
     return handleResponse<Post>(response);
   },
 
-  async createPost(post: Partial<Post>): Promise<Post> {
+  async getPostBySlug(slug: string): Promise<Post> {
+    const response = await fetch(`${BASE_URL}/cms/posts/slug/${slug}`);
+    return handleResponse<Post>(response);
+  },
+
+  async searchPosts(q: string): Promise<Post[]> {
+    const response = await fetch(`${BASE_URL}/cms/posts/search?q=${encodeURIComponent(q)}`);
+    const data = await handleResponse<any>(response);
+    return Array.isArray(data) ? data : (data.posts || data.items || []);
+  },
+
+  async createPost(post: PostCreate): Promise<Post> {
     const response = await fetch(`${BASE_URL}/cms/posts`, {
       method: 'POST',
       headers: getAuthHeaders(),
@@ -385,7 +441,7 @@ export const api = {
     return handleResponse<Post>(response);
   },
 
-  async updatePost(id: number | string, post: Partial<Post>): Promise<Post> {
+  async updatePost(id: string, post: Partial<PostCreate>): Promise<Post> {
     const response = await fetch(`${BASE_URL}/cms/posts/${id}`, {
       method: 'PUT',
       headers: getAuthHeaders(),
@@ -394,11 +450,40 @@ export const api = {
     return handleResponse<Post>(response);
   },
 
-  async deletePost(id: number | string): Promise<void> {
+  async deletePost(id: string): Promise<void> {
     await fetch(`${BASE_URL}/cms/posts/${id}`, {
       method: 'DELETE',
       headers: getAuthHeaders()
     });
+  },
+
+  // Taxonomy
+  async getCategories(): Promise<Category[]> {
+    const response = await fetch(`${BASE_URL}/cms/categories`);
+    const data = await handleResponse<any>(response);
+    return Array.isArray(data) ? data : (data.categories || data.items || []);
+  },
+
+  async getTags(): Promise<Tag[]> {
+    const response = await fetch(`${BASE_URL}/cms/tags`);
+    const data = await handleResponse<any>(response);
+    return Array.isArray(data) ? data : (data.tags || data.items || []);
+  },
+
+  // Comments
+  async getComments(postId: string): Promise<Comment[]> {
+    const response = await fetch(`${BASE_URL}/cms/posts/${postId}/comments`);
+    const data = await handleResponse<any>(response);
+    return Array.isArray(data) ? data : (data.comments || data.items || []);
+  },
+
+  async createComment(postId: string, content: string, parentId?: string): Promise<Comment> {
+    const response = await fetch(`${BASE_URL}/cms/posts/${postId}/comments`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ content, parent_id: parentId })
+    });
+    return handleResponse<Comment>(response);
   },
 
   // Team
