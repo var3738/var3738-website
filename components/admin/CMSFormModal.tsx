@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { X, Loader2, Save, UploadCloud, Link as LinkIcon, Image as ImageIcon } from 'lucide-react';
 import dynamic from 'next/dynamic';
@@ -9,10 +9,11 @@ const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false });
 export interface FormField {
   name: string;
   label: string;
-  type: 'text' | 'number' | 'textarea' | 'url' | 'date' | 'file' | 'richtext';
+  type: 'text' | 'number' | 'textarea' | 'url' | 'date' | 'file' | 'richtext' | 'select';
   folder?: string; // used for file uploads to Cloudinary
   multiple?: boolean;
   required?: boolean;
+  options?: { label: string; value: string }[];
 }
 
 interface CMSFormModalProps {
@@ -39,9 +40,17 @@ export default function CMSFormModal({
   // Track individual file upload states
   const [uploadingFields, setUploadingFields] = useState<Record<string, boolean>>({});
 
+  // Ensure formData is reset when initialData changes or modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setFormData(initialData || {});
+      setError(null);
+    }
+  }, [isOpen, initialData]);
+
   if (!isOpen) return null;
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     setFormData((prev: any) => ({
       ...prev,
@@ -116,7 +125,7 @@ export default function CMSFormModal({
         className="relative w-full max-w-2xl bg-background border border-white/10 rounded-2xl overflow-hidden shadow-2xl"
       >
         <div className="flex justify-between items-center p-6 border-b border-white/5 bg-white/5">
-          <h2 className="text-xl font-black uppercase tracking-widest text-primary">{title}</h2>
+          <h2 className="text-xl font-black uppercase tracking-widest text-primary wrap-break-word">{title}</h2>
           <button onClick={onClose} className="text-white/50 hover:text-white transition-colors">
             <X size={20} />
           </button>
@@ -153,6 +162,21 @@ export default function CMSFormModal({
                       onChange={(content) => setFormData((prev: any) => ({ ...prev, [field.name]: content }))}
                     />
                   </div>
+                ) : field.type === 'select' ? (
+                  <select
+                    name={field.name}
+                    value={formData[field.name] || ''}
+                    onChange={handleChange}
+                    required={field.required}
+                    className="bg-black/50 border border-white/10 rounded-lg p-3 text-sm text-white focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors cursor-pointer appearance-none"
+                  >
+                    <option value="" disabled className="bg-background">Select {field.label}</option>
+                    {field.options?.map(opt => (
+                      <option key={opt.value} value={opt.value} className="bg-background">
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
                 ) : field.type === 'file' ? (
                   <div className="space-y-3">
                     <div className="flex items-center gap-4">

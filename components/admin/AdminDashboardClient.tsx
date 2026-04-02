@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Activity, Package, MessageSquare, ShieldAlert, Plus, Save, RefreshCw, PenSquare, Trash2, Users, Handshake, FileText, Image, File, LogOut, Loader2, Lock, CheckCircle2, XCircle } from 'lucide-react';
-import { api, Event, Product, Feedback, Post, TeamMember, Partner, GalleryItem, DocumentItem } from '@/lib/api';
+import { Activity, Package, MessageSquare, ShieldAlert, Plus, Save, RefreshCw, PenSquare, Trash2, Users, Handshake, FileText, Image, File, LogOut, Loader2, Lock, CheckCircle2, XCircle, Eye, Calendar, User as UserIcon, Share2, Bookmark } from 'lucide-react';
+import { api, Event, Product, Feedback, Post, TeamMember, Partner, GalleryItem, DocumentItem, Category } from '@/lib/api';
 import CMSFormModal, { FormField } from './CMSFormModal';
 
 type Tab = 'events' | 'merch' | 'posts' | 'team' | 'partners' | 'feedback' | 'gallery' | 'documents';
@@ -24,6 +24,11 @@ export default function AdminDashboardClient() {
   const [partners, setPartners] = useState<Partner[]>([]);
   const [gallery, setGallery] = useState<GalleryItem[]>([]);
   const [documents, setDocuments] = useState<DocumentItem[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  // Preview State
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [previewPost, setPreviewPost] = useState<Post | null>(null);
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -50,7 +55,14 @@ export default function AdminDashboardClient() {
     try {
       if (tab === 'events') setEvents(await api.getEvents());
       else if (tab === 'merch') setProducts(await api.getProducts(false));
-      else if (tab === 'posts') setPosts(await api.getPosts());
+      else if (tab === 'posts') {
+        const [postsData, categoriesData] = await Promise.all([
+          api.getPosts(),
+          api.getCategories()
+        ]);
+        setPosts(postsData);
+        setCategories(categoriesData);
+      }
       else if (tab === 'team') setTeam(await api.getTeamMembers());
       else if (tab === 'partners') setPartners(await api.getPartners());
       else if (tab === 'gallery') setGallery(await api.getGallery());
@@ -102,13 +114,13 @@ export default function AdminDashboardClient() {
   const handleDelete = async (type: Tab, id: string | number) => {
     if (!confirm('Are you sure you want to delete this record?')) return;
     try {
-      if (type === 'events') await api.deleteEvent(id);
-      else if (type === 'merch') await api.deleteProduct(id as string);
-      else if (type === 'posts') await api.deletePost(id);
-      else if (type === 'team') await api.deleteTeamMember(id as string);
-      else if (type === 'partners') await api.deletePartner(id as string);
-      else if (type === 'gallery') await api.deleteGalleryItem(id as string);
-      else if (type === 'documents') await api.deleteDocument(id as string);
+      if (type === 'events') await api.deleteEvent(id as any);
+      else if (type === 'merch') await api.deleteProduct(id as any);
+      else if (type === 'posts') await api.deletePost(id as any);
+      else if (type === 'team') await api.deleteTeamMember(id as any);
+      else if (type === 'partners') await api.deletePartner(id as any);
+      else if (type === 'gallery') await api.deleteGalleryItem(id as any);
+      else if (type === 'documents') await api.deleteDocument(id as any);
       fetchData(activeTab);
     } catch (err) {
       alert('Delete failed');
@@ -122,7 +134,21 @@ export default function AdminDashboardClient() {
         title: initialData ? 'Edit Dispatch' : 'New Dispatch',
         fields: [
           { name: 'title', label: 'Title', type: 'text', required: true },
+          { name: 'slug', label: 'Slug', type: 'text', required: true },
+          { name: 'summary', label: 'Summary', type: 'textarea' },
+          { 
+            name: 'category_id', 
+            label: 'Category', 
+            type: 'select', 
+            options: categories.map(c => ({ label: c.name, value: c.id }))
+          },
+          { name: 'image_url', label: 'Image URL', type: 'text' },
           { name: 'content', label: 'Content', type: 'richtext', required: true },
+          { name: 'status', label: 'Status', type: 'select', options: [
+            { label: 'Draft', value: 'draft' },
+            { label: 'Published', value: 'published' },
+            { label: 'Archived', value: 'archived' }
+          ]},
           { name: 'is_published', label: 'Published / Visible to Public', type: 'checkbox' }
         ],
         onSubmit: async (data: any) => {
@@ -371,13 +397,26 @@ export default function AdminDashboardClient() {
                         <div className="flex items-center gap-3 mb-1">
                           <div className="text-[10px] font-bold uppercase tracking-widest text-primary">{new Date(post.created_at).toLocaleDateString()}</div>
                           <div className="text-[10px] font-bold uppercase tracking-widest text-white/20">BY: {post.author_id.slice(0, 8)}...</div>
+                          {post.category_id && (
+                             <div className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 bg-primary/10 text-primary border border-primary/20 rounded">
+                               {categories.find(c => c.id === post.category_id)?.name || 'Misc'}
+                             </div>
+                          )}
                           <span className={`text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-sm ${post.is_published ? 'bg-green-500/10 text-green-500 border border-green-500/20' : 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/20'}`}>
-                            {post.is_published ? 'Live' : 'Pending'}
+                            {post.status.toUpperCase()}
                           </span>
                         </div>
                         <h3 className="font-black uppercase tracking-tighter text-xl truncate w-full max-w-[250px] sm:max-w-lg">{post.title}</h3>
+                        <div className="text-[8px] font-mono text-white/20 mt-1 uppercase tracking-widest">Slug: {post.slug}</div>
                       </div>
                       <div className="flex gap-2 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity w-full sm:w-auto justify-end mt-2 sm:mt-0">
+                         <button 
+                           onClick={() => { setPreviewPost(post); setIsPreviewOpen(true); }}
+                           title="Quick Preview"
+                           className="p-3 bg-primary/10 text-primary hover:bg-primary hover:text-black rounded transition-colors flex-1 sm:flex-none flex justify-center"
+                         >
+                           <Eye size={16} />
+                         </button>
                          <button 
                            onClick={() => handleTogglePublish(post)} 
                            title={post.is_published ? "Unpublish" : "Publish Now"}
@@ -409,7 +448,7 @@ export default function AdminDashboardClient() {
                     <div key={event.id} className="modern-card p-6 bg-white/5 border border-white/10 flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center group">
                       <div className="flex-1 w-full sm:w-auto">
                         <div className="text-[10px] font-bold uppercase tracking-widest text-primary mb-1">{event.ward} • {new Date(event.date).toLocaleDateString()}</div>
-                        <h3 className="font-black uppercase tracking-tighter text-xl break-words">{event.title}</h3>
+                        <h3 className="font-black uppercase tracking-tighter text-xl wrap-break-word">{event.title}</h3>
                         <p className="text-xs text-white/50 truncate max-w-[250px] sm:max-w-full">{event.location_name}</p>
                       </div>
                       <div className="flex flex-row sm:items-center justify-between w-full sm:w-auto gap-4 sm:gap-6 mt-4 sm:mt-0 pt-4 sm:pt-0 border-t sm:border-t-0 border-white/5">
@@ -514,7 +553,7 @@ export default function AdminDashboardClient() {
                          </div>
                          <div className="overflow-hidden">
                            <h3 className="font-black uppercase tracking-tighter truncate w-full max-w-[200px]">{partner.name}</h3>
-                           <div className="break-words text-white/40 group-hover:text-white/60 transition-colors text-[10px] font-bold">{partner.url}</div>
+                           <div className="wrap-break-word text-white/40 group-hover:text-white/60 transition-colors text-[10px] font-bold">{partner.url}</div>
                          </div>
                        </div>
                        <div className="flex gap-2 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity w-full sm:w-auto justify-end mt-2 sm:mt-0">
@@ -621,6 +660,7 @@ export default function AdminDashboardClient() {
       </div>
 
       <CMSFormModal 
+        key={modalConfig.initialData?.id || (isModalOpen ? 'new' : 'closed')}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         title={modalConfig.title}
@@ -628,6 +668,97 @@ export default function AdminDashboardClient() {
         initialData={modalConfig.initialData}
         onSubmit={modalConfig.onSubmit}
       />
+
+      <AnimatePresence>
+        {isPreviewOpen && previewPost && (
+          <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-background/95 backdrop-blur-md"
+              onClick={() => setIsPreviewOpen(false)}
+            />
+            
+            <motion.div
+              initial={{ opacity: 0, y: 100 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 100 }}
+              className="relative w-full max-w-5xl h-[90vh] bg-background border border-white/10 rounded-3xl overflow-hidden shadow-2xl flex flex-col"
+            >
+              {/* Preview Toolbar */}
+              <div className="flex justify-between items-center p-6 border-b border-white/5 bg-white/5 z-10">
+                <div className="flex items-center gap-4">
+                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Eye size={14} className="text-primary" />
+                  </div>
+                  <div>
+                    <h2 className="text-sm font-black uppercase tracking-widest text-white">Live Preview Mode</h2>
+                    <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Draft ID: {previewPost.id.slice(0, 8)}</p>
+                  </div>
+                </div>
+                <button onClick={() => setIsPreviewOpen(false)} className="crimson-btn px-6 py-2 text-[10px] uppercase font-black tracking-widest">
+                  Exit Preview
+                </button>
+              </div>
+
+              {/* Scrollable Render Area (Mimicking app/blog/[slug]/page.tsx) */}
+              <div className="flex-1 overflow-y-auto no-scrollbar pt-20 pb-40 px-8 md:px-20">
+                <div className="max-w-4xl mx-auto">
+                   <header className="mb-20">
+                      <div className="relative aspect-21/9 rounded-3xl overflow-hidden mb-12 border border-white/10 bg-white/5">
+                        {previewPost.image_url && <img src={previewPost.image_url} className="object-cover w-full h-full opacity-60" />}
+                        <div className="absolute inset-0 bg-linear-to-t from-background to-transparent" />
+                      </div>
+
+                      <h1 className="text-4xl md:text-6xl font-black tracking-tighter uppercase mb-10 leading-[0.9]">
+                        {previewPost.title}
+                      </h1>
+
+                      <div className="flex flex-wrap items-center justify-between gap-6 border-y border-white/5 py-8">
+                        <div className="flex items-center gap-10">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                              <UserIcon size={14} className="text-primary" />
+                            </div>
+                            <div>
+                               <div className="text-[8px] font-black text-white/30 uppercase tracking-widest">Author ID</div>
+                               <div className="text-[10px] font-bold uppercase">{previewPost.author_id.slice(0, 8)}</div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                              <Calendar size={14} className="text-primary" />
+                            </div>
+                            <div>
+                               <div className="text-[8px] font-black text-white/30 uppercase tracking-widest">Logged On</div>
+                               <div className="text-[10px] font-bold uppercase">{new Date(previewPost.created_at).toLocaleDateString()}</div>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center gap-4">
+                           <button className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white/30">
+                              <Share2 size={16} />
+                           </button>
+                           <button className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white/30">
+                              <Bookmark size={16} />
+                           </button>
+                        </div>
+                      </div>
+                   </header>
+
+                   <article className="prose prose-invert prose-p:text-white/70 prose-p:leading-relaxed prose-p:text-xl prose-p:font-medium prose-headings:font-black prose-headings:tracking-tighter prose-headings:uppercase max-w-none">
+                      {previewPost.content.split('\n').map((paragraph, i) => (
+                        paragraph.trim() ? <p key={i}>{paragraph}</p> : <br key={i} />
+                      ))}
+                   </article>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </main>
   );
 }

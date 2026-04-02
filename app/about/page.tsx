@@ -19,7 +19,7 @@ export default function AboutPage() {
     <main className="pt-20 bg-background text-white selection:bg-primary selection:text-black">
       {/* 1. Hero: The Manifesto */}
       <section className="relative w-full min-h-[90vh] flex items-center justify-center overflow-hidden px-4 py-32 border-b border-white/5">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent opacity-30 animate-pulse-slow" />
+        <div className="fixed inset-0 bg-[radial-gradient(circle_at_center,var(--tw-gradient-stops))] from-primary/10 via-background to-background pointer-events-none z-100" />
         <div className="max-w-7xl mx-auto relative z-10 text-center">
           <motion.div
             initial={{ opacity: 0, y: 40 }}
@@ -183,7 +183,7 @@ export default function AboutPage() {
                   </motion.div>
                </div>
 
-               <div className="flex items-center gap-12 p-8 modern-card border border-white/5 bg-linear-to-r from-white/5 to-transparent">
+               <div className="relative aspect-21/9 rounded-[2.5rem] overflow-hidden mb-20 border border-white/10 bg-white/5">
                   <div className="shrink-0 text-7xl font-black text-white/10 italic">10</div>
                   <p className="text-white/60 font-bold leading-relaxed uppercase tracking-tight">
                     Establishment of permanent <span className="text-white">Youth Peace Hubs</span> in election-sensitive counties 
