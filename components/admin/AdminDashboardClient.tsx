@@ -2,11 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
-import { Activity, Package, MessageSquare, ShieldAlert, Plus, Save, RefreshCw, PenSquare, Trash2, Users, Handshake, FileText, Image, File, LogOut, Loader2, Lock, CheckCircle2, XCircle, Eye, Calendar, User as UserIcon, Share2, Bookmark, GripVertical } from 'lucide-react';
-import { api, Event, Product, Feedback, Post, TeamMember, Partner, GalleryItem, DocumentItem, Category, teamUtils } from '@/lib/api';
+import { Activity, Package, MessageSquare, ShieldAlert, Plus, Save, RefreshCw, PenSquare, Trash2, Users, Handshake, FileText, Image, File, LogOut, Loader2, Lock, CheckCircle2, XCircle, Eye, Calendar, User as UserIcon, Share2, Bookmark, GripVertical, Award } from 'lucide-react';
+import { api, Event, Product, Feedback, Post, TeamMember, Partner, GalleryItem, DocumentItem, Category, teamUtils, certUtils } from '@/lib/api';
 import CMSFormModal, { FormField } from './CMSFormModal';
 
-type Tab = 'events' | 'merch' | 'posts' | 'team' | 'partners' | 'feedback' | 'gallery' | 'documents';
+type Tab = 'events' | 'merch' | 'posts' | 'team' | 'partners' | 'feedback' | 'gallery' | 'documents' | 'credentials';
 
 export default function AdminDashboardClient() {
   const [activeTab, setActiveTab] = useState<Tab>('posts');
@@ -373,6 +373,7 @@ export default function AdminDashboardClient() {
     { id: 'gallery', label: 'Gallery', icon: Image },
     { id: 'documents', label: 'Documents', icon: File },
     { id: 'feedback', label: 'Intel', icon: MessageSquare },
+    { id: 'credentials', label: 'Awards', icon: Award },
   ];
 
   return (
@@ -664,6 +665,87 @@ export default function AdminDashboardClient() {
             )}
 
             {/* DOCUMENTS TAB */}
+            {activeTab === 'credentials' && (
+              <motion.div key="credentials" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+                <div className="mb-10 p-8 modern-card bg-primary/10 border border-primary/20 rounded-3xl relative overflow-hidden">
+                   <div className="relative z-10">
+                      <h2 className="text-2xl font-black uppercase tracking-tighter mb-2 italic text-white">Certificate Authority</h2>
+                      <p className="text-xs font-medium text-white/60 max-w-lg mb-6 uppercase tracking-widest leading-relaxed">
+                        Issue cryptographically verified credentials for Townhall participants. 
+                        No database required - links are signed and persistent.
+                      </p>
+                      <div className="flex flex-wrap gap-4">
+                        <a href="/claim" target="_blank" className="bg-black text-[10px] font-black uppercase tracking-widest px-6 py-3 rounded hover:bg-white/10 transition-colors inline-flex items-center gap-2">
+                           View Claim Page <Eye size={12} />
+                        </a>
+                      </div>
+                   </div>
+                   <Award className="absolute -right-10 -bottom-10 w-48 h-48 text-primary opacity-10 rotate-12" />
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 pb-20">
+                   {/* Manual Generation */}
+                   <div className="modern-card p-8 bg-white/5 border border-white/10">
+                      <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-primary mb-6">Direct Issuance</h3>
+                      <div className="space-y-4">
+                         <div>
+                            <label className="block text-[8px] font-black uppercase tracking-widest text-white/40 mb-1">Participant Name</label>
+                            <input id="cert-name" type="text" className="w-full bg-black/50 border border-white/10 px-4 py-3 text-xs font-bold uppercase tracking-widest rounded outline-hidden focus:border-primary" placeholder="NAME" />
+                         </div>
+                         <div>
+                            <label className="block text-[8px] font-black uppercase tracking-widest text-white/40 mb-1">Event Name</label>
+                            <select id="cert-event" className="w-full bg-black/50 border border-white/10 px-4 py-3 text-xs font-bold uppercase tracking-widest rounded outline-hidden focus:border-primary">
+                               {events.map(e => <option key={e.id} value={e.title}>{e.title}</option>)}
+                               <option value="General Townhall">General Townhall</option>
+                            </select>
+                         </div>
+                         <button 
+                            onClick={() => {
+                              const name = (document.getElementById('cert-name') as HTMLInputElement).value;
+                              const event = (document.getElementById('cert-event') as HTMLSelectElement).value;
+                              if (!name) return alert('Name required');
+                              const date = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+                              const token = certUtils.generateToken(name, event, date);
+                              const url = `${window.location.origin}/certificate?token=${token}`;
+                              navigator.clipboard.writeText(url);
+                              alert('Certificate Link Copied to Clipboard!');
+                            }}
+                            className="w-full bg-white/10 hover:bg-white/20 px-6 py-4 text-[10px] font-black uppercase tracking-widest rounded transition-all"
+                         >
+                            Generate & Copy Link
+                         </button>
+                      </div>
+                   </div>
+
+                   {/* Codes Registry */}
+                   <div className="modern-card p-8 bg-white/5 border border-white/10">
+                      <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-primary mb-6">Activation Codes</h3>
+                      <div className="space-y-3">
+                         {[
+                           { code: 'VAR-TH-NZOIA', event: 'Trans Nzoia Townhall', status: 'active' },
+                           { code: 'VAR-DUA-2024', event: 'Democracy Activated', status: 'active' },
+                         ].map(item => (
+                           <div key={item.code} className="p-4 bg-black/40 border border-white/5 rounded flex justify-between items-center group">
+                              <div>
+                                 <div className="text-[10px] font-black uppercase tracking-widest text-white">{item.code}</div>
+                                 <div className="text-[8px] font-bold uppercase tracking-widest text-white/20">{item.event}</div>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                 <span className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.4)]"></span>
+                                 <button onClick={() => { navigator.clipboard.writeText(item.code); alert('Code Copied!'); }} className="opacity-0 group-hover:opacity-100 transition-opacity p-2 bg-white/5 rounded text-white"><Save size={12} /></button>
+                              </div>
+                           </div>
+                         ))}
+                         <p className="text-[8px] font-medium uppercase tracking-widest text-white/20 italic mt-4">
+                            * Codes are currently managed via source configuration to maintain stateless persistence. 
+                            Contact DevOps to add new event keys.
+                         </p>
+                      </div>
+                   </div>
+                </div>
+              </motion.div>
+            )}
+
             {activeTab === 'documents' && (
               <motion.div key="documents" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
                 <div className="flex justify-between items-center mb-6">
