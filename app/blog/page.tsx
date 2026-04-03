@@ -94,7 +94,7 @@ export default function BlogListingPage() {
       options: categories.map(c => ({ label: c.name, value: c.id }))
     },
     { name: 'content', label: 'Content', type: 'richtext', required: true },
-    { name: 'image_url', label: 'Cloudinary Image URL', type: 'text' }
+    { name: 'image_url', label: 'Feature Image', type: 'file', folder: 'blog' }
   ];
 
   const handleSubmit = async (data: any) => {
