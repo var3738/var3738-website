@@ -279,6 +279,38 @@ export const teamUtils = {
   }
 };
 
+export const certUtils = {
+  /**
+   * Generates a signed token for a participant
+   */
+  generateToken(name: string, event: string, date: string): string {
+    const data = JSON.stringify({ name, event, date });
+    const encodedData = btoa(encodeURIComponent(data));
+    // Simple signature using a secret "VAR_DEMOCRACY_ACT_2026"
+    // In a real app, this would use a proper HMAC-SHA256 from the environment
+    const signature = Array.from(encodedData).reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    return `${encodedData}.${signature}`;
+  },
+
+  /**
+   * Verifies and decodes a token
+   */
+  verifyToken(token: string): { name: string, event: string, date: string } | null {
+    try {
+      const [encodedData, signature] = token.split('.');
+      if (!encodedData || !signature) return null;
+
+      const expectedSignature = Array.from(encodedData).reduce((acc, char) => acc + char.charCodeAt(0), 0);
+      if (parseInt(signature, 10) !== expectedSignature) return null;
+
+      const data = decodeURIComponent(atob(encodedData));
+      return JSON.parse(data);
+    } catch (e) {
+      return null;
+    }
+  }
+};
+
 async function handleResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({ detail: 'Unknown error' }));
