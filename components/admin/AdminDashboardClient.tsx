@@ -142,7 +142,7 @@ export default function AdminDashboardClient() {
             type: 'select', 
             options: categories.map(c => ({ label: c.name, value: c.id }))
           },
-          { name: 'image_url', label: 'Image URL', type: 'text' },
+          { name: 'image_url', label: 'Feature Image', type: 'file', folder: 'blog' },
           { name: 'content', label: 'Content', type: 'richtext', required: true },
           { name: 'status', label: 'Status', type: 'select', options: [
             { label: 'Draft', value: 'draft' },
