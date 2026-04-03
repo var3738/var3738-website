@@ -3,7 +3,11 @@
  * This module provides a typed interface to the FastAPI backend.
  */
 
-const BASE_URL = '/api/var3738'; // Rewritten by next.config.mjs to point to actual API_URL safely
+const isServer = typeof window === 'undefined';
+const BASE_URL = isServer 
+  ? (process.env.API_URL || 'http://localhost:8000/api/v1') 
+  : '/api/var3738'; // Rewritten by next.config.mjs to point to actual API_URL safely
+
 
 // --- Types ---
 
