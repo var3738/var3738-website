@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Activity, Package, MessageSquare, ShieldAlert, Plus, Save, RefreshCw, PenSquare, Trash2, Users, Handshake, FileText, Image, File, LogOut, Loader2, Lock, CheckCircle2, XCircle, Eye, Calendar, User as UserIcon, Share2, Bookmark } from 'lucide-react';
-import { api, Event, Product, Feedback, Post, TeamMember, Partner, GalleryItem, DocumentItem, Category } from '@/lib/api';
+import { motion, AnimatePresence, Reorder } from 'framer-motion';
+import { Activity, Package, MessageSquare, ShieldAlert, Plus, Save, RefreshCw, PenSquare, Trash2, Users, Handshake, FileText, Image, File, LogOut, Loader2, Lock, CheckCircle2, XCircle, Eye, Calendar, User as UserIcon, Share2, Bookmark, GripVertical } from 'lucide-react';
+import { api, Event, Product, Feedback, Post, TeamMember, Partner, GalleryItem, DocumentItem, Category, teamUtils } from '@/lib/api';
 import CMSFormModal, { FormField } from './CMSFormModal';
 
 type Tab = 'events' | 'merch' | 'posts' | 'team' | 'partners' | 'feedback' | 'gallery' | 'documents';
@@ -25,6 +25,10 @@ export default function AdminDashboardClient() {
   const [gallery, setGallery] = useState<GalleryItem[]>([]);
   const [documents, setDocuments] = useState<DocumentItem[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  
+  // Reorder State
+  const [isOrderDirty, setIsOrderDirty] = useState(false);
+  const [isSavingOrder, setIsSavingOrder] = useState(false);
 
   // Preview State
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
@@ -127,6 +131,34 @@ export default function AdminDashboardClient() {
     }
   };
 
+  const handleSaveTeamOrder = async () => {
+    setIsSavingOrder(true);
+    try {
+      // Loop through sequentially to avoid race conditions or API overload
+      for (let i = 0; i < team.length; i++) {
+        const member = team[i];
+        const taggedPos = teamUtils.tagPosition(member.position, i);
+        
+        // Send the FULL member object instead of just position
+        // This avoids validation errors if the backend doesn't support PATCH-style PUT
+        await api.updateTeamMember(member.id, {
+          ...member,
+          position: taggedPos
+        });
+      }
+      
+      setIsOrderDirty(false);
+      alert('Team alignment updated and persisted.');
+      fetchData('team');
+    } catch (err: any) {
+      console.error('Failed to save team order:', err);
+      // Show actual error if available
+      alert(`Failed to save team order: ${err.message || 'Unknown error'}`);
+    } finally {
+      setIsSavingOrder(false);
+    }
+  };
+
   const openModal = (type: Tab, initialData?: any) => {
     let config: any = {};
     if (type === 'posts') {
@@ -194,11 +226,25 @@ export default function AdminDashboardClient() {
         title: initialData ? 'Edit Team Member' : 'New Team Member',
         fields: [
           { name: 'name', label: 'Full Name', type: 'text', required: true },
-          { name: 'position', label: 'Position / Role', type: 'text', required: true },
+          { 
+            name: 'position', 
+            label: 'Position / Role', 
+            type: 'text', 
+            required: true,
+            // Clean the position value for editing
+            value: initialData ? teamUtils.cleanPosition(initialData.position) : '' 
+          },
           { name: 'image_url', label: 'Profile Image', type: 'file', folder: 'team' }
         ],
         onSubmit: async (data: any) => {
-          if (initialData) await api.updateTeamMember(initialData.id, data);
+          // If we are creating/editing, we should probably keep the existing rank if editing
+          // or just save the clean position (it will be re-ranked on next "Save Order")
+          if (initialData) {
+            // Keep existing rank tag if it exists
+            const rank = teamUtils.getRank(initialData.position);
+            if (rank !== 9999) data.position = teamUtils.tagPosition(data.position, rank);
+            await api.updateTeamMember(initialData.id, data);
+          }
           else await api.createTeamMember(data);
           fetchData('team');
         }
@@ -507,31 +553,54 @@ export default function AdminDashboardClient() {
             {activeTab === 'team' && (
               <motion.div key="team" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
                 <div className="flex justify-between items-center mb-6">
-                   <h2 className="text-xl font-black uppercase tracking-widest">Team Members</h2>
+                   <div className="flex items-center gap-4">
+                     <h2 className="text-xl font-black uppercase tracking-widest">Team Members</h2>
+                     {isOrderDirty && (
+                       <motion.button 
+                         initial={{ opacity: 0, x: -20 }}
+                         animate={{ opacity: 1, x: 0 }}
+                         onClick={handleSaveTeamOrder}
+                         className="flex items-center gap-2 text-[8px] font-black uppercase tracking-widest bg-primary text-black px-3 py-1.5 rounded-full hover:scale-105 transition-transform"
+                       >
+                         {isSavingOrder ? <RefreshCw className="animate-spin" size={10} /> : <Save size={10} />}
+                         Save Alignment
+                       </motion.button>
+                     )}
+                   </div>
                    <button onClick={() => openModal('team')} className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest bg-white/10 hover:bg-primary hover:text-black px-4 py-2 rounded transition-colors">
                      <Plus size={14} /> Add Member
                    </button>
                  </div>
-                 <div className="space-y-4">
+
+                 <Reorder.Group axis="y" values={team} onReorder={(newOrder) => { setTeam(newOrder); setIsOrderDirty(true); }} className="space-y-4">
                    {team.map(member => (
-                     <div key={member.id} className="modern-card p-6 bg-white/5 border border-white/10 flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center group">
+                     <Reorder.Item key={member.id} value={member} className="modern-card p-6 bg-white/5 border border-white/10 flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center group cursor-default">
                        <div className="flex items-center gap-4 w-full sm:w-auto overflow-hidden">
+                         <div className="text-white/20 hover:text-primary cursor-grab active:cursor-grabbing p-1">
+                           <GripVertical size={20} />
+                         </div>
                          <div className="w-12 h-12 bg-white/10 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden">
                            {member.image_url ? <img src={member.image_url.includes('http') ? member.image_url : `/${member.image_url}`} alt={member.name} className="object-cover w-full h-full" /> : <Users size={20} className="text-white/50" />}
                          </div>
                          <div className="overflow-hidden">
                            <h3 className="font-black uppercase tracking-tighter truncate w-full max-w-[200px]">{member.name}</h3>
-                           <div className="text-[10px] font-bold uppercase tracking-widest text-primary truncate w-full max-w-[200px]">{member.position}</div>
+                           <div className="text-[10px] font-bold uppercase tracking-widest text-primary truncate w-full max-w-[200px]">{teamUtils.cleanPosition(member.position)}</div>
                          </div>
                        </div>
                        <div className="flex gap-2 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity w-full sm:w-auto justify-end mt-2 sm:mt-0">
                           <button onClick={() => openModal('team', member)} className="p-3 bg-white/5 hover:bg-white/10 rounded transition-colors flex-1 sm:flex-none flex justify-center"><PenSquare size={16} /></button>
                           <button onClick={() => handleDelete('team', member.id)} className="p-3 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded transition-colors flex-1 sm:flex-none flex justify-center"><Trash2 size={16} /></button>
                        </div>
-                     </div>
+                     </Reorder.Item>
                    ))}
-                   {team.length === 0 && !isLoading && <p className="text-white/30 text-xs uppercase tracking-widest">No team members found.</p>}
-                 </div>
+                 </Reorder.Group>
+                 
+                 {team.length === 0 && !isLoading && <p className="text-white/30 text-xs uppercase tracking-widest">No team members found.</p>}
+                 {team.length > 0 && (
+                   <p className="mt-6 text-[8px] font-bold uppercase tracking-widest text-white/20 italic">
+                     * Drag the grip icons to rearrange the leadership structure. Changes must be saved to persist.
+                   </p>
+                 )}
               </motion.div>
             )}
 

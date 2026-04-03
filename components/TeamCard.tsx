@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { motion } from 'framer-motion';
+import { teamUtils } from '@/lib/api';
 
 interface TeamCardProps {
   name: string;
@@ -32,7 +33,7 @@ export default function TeamCard({ name, position, image }: TeamCardProps) {
           {name}
         </h3>
         <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">
-          {position}
+          {teamUtils.cleanPosition(position)}
         </p>
       </div>
     </motion.div>

@@ -242,6 +242,38 @@ export interface AuthResponse {
 }
 
 // --- Helper Functions ---
+export const teamUtils = {
+  /**
+   * Extracts the real position from a tagged string (e.g., "CEO [RANK:0]" -> "CEO")
+   */
+  cleanPosition(position: string): string {
+    if (!position) return '';
+    return position.replace(/\s*\[RANK:\d+\]\s*/g, '').trim();
+  },
+
+  /**
+   * Appends a rank tag to a position string
+   */
+  tagPosition(position: string, rank: number): string {
+    const clean = this.cleanPosition(position);
+    return `${clean} [RANK:${rank}]`;
+  },
+
+  /**
+   * Extracts the rank integer from a position string
+   */
+  getRank(position: string): number {
+    const match = position?.match(/\[RANK:(\d+)\]/);
+    return match ? parseInt(match[1], 10) : 9999;
+  },
+
+  /**
+   * Sorts team members based on their [RANK:X] tags
+   */
+  sortMembers(members: TeamMember[]): TeamMember[] {
+    return [...members].sort((a, b) => this.getRank(a.position) - this.getRank(b.position));
+  }
+};
 
 async function handleResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
@@ -490,7 +522,8 @@ export const api = {
   async getTeamMembers(): Promise<TeamMember[]> {
     const response = await fetch(`${BASE_URL}/team`);
     const data = await handleResponse<any>(response);
-    return Array.isArray(data) ? data : (data.team || data.members || data.items || []);
+    const members = Array.isArray(data) ? data : (data.team || data.members || data.items || []);
+    return teamUtils.sortMembers(members);
   },
 
   async createTeamMember(member: Partial<TeamMember>): Promise<TeamMember> {

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import TeamCard from './TeamCard';
-import { api, TeamMember } from '@/lib/api';
+import { api, TeamMember, teamUtils } from '@/lib/api';
 import { Loader2 } from 'lucide-react';
 
 export default function TeamSection() {
@@ -47,7 +47,7 @@ export default function TeamSection() {
               <TeamCard
                 key={member.id}
                 name={member.name}
-                position={member.position}
+                position={teamUtils.cleanPosition(member.position)}
                 image={member.image_url}
               />
             ))}
