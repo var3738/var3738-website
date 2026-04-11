@@ -9,6 +9,22 @@ import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import Link from 'next/link';
 
+const LC = {
+  primary: '#D0171D',
+  white: '#FFFFFF',
+  white80: 'rgba(255, 255, 255, 0.8)',
+  white60: 'rgba(255, 255, 255, 0.6)',
+  white40: 'rgba(255, 255, 255, 0.4)',
+  white30: 'rgba(255, 255, 255, 0.3)',
+  white20: 'rgba(255, 255, 255, 0.2)',
+  white10: 'rgba(255, 255, 255, 0.1)',
+  white05: 'rgba(255, 255, 255, 0.05)',
+  black: '#000000',
+  bgDark: '#0a0a0a',
+  primary20: 'rgba(208, 23, 29, 0.2)',
+  primary30: 'rgba(208, 23, 29, 0.3)',
+};
+
 function Content() {
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
@@ -84,18 +100,18 @@ function Content() {
   return (
     <div 
       className="min-h-screen p-4 sm:p-8 flex flex-col items-center gap-8 py-20"
-      style={{ backgroundColor: '#0a0a0a' }}
+      style={{ backgroundColor: LC.bgDark }}
     >
       {/* Action Bar */}
-      <div className="w-full max-w-2xl flex justify-between items-center no-print" style={{ color: '#FFFFFF' }}>
-        <Link href="/" className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white transition-all">
+      <div className="w-full max-w-2xl flex justify-between items-center no-print" style={{ color: LC.white }}>
+        <Link href="/" className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest transition-all" style={{ opacity: 0.4 }}>
           <ArrowLeft size={14} /> Back
         </Link>
         <button 
           onClick={handleDownload}
           disabled={isDownloading}
-          className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-black px-6 py-3 rounded-full hover:scale-105 transition-transform disabled:opacity-50"
-          style={{ backgroundColor: '#D0171D' }}
+          className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest px-6 py-3 rounded-full hover:scale-105 transition-transform disabled:opacity-50"
+          style={{ backgroundColor: LC.primary, color: LC.black }}
         >
           {isDownloading ? 'Generating...' : <><Download size={14} /> Download Certificate</>}
         </button>
@@ -105,21 +121,22 @@ function Content() {
       <div className="w-full max-w-2xl relative shadow-[0_0_100px_rgba(0,0,0,1)]">
         <div 
           ref={certificateRef}
-          className="aspect-[1/1.414] w-full border overflow-hidden relative flex flex-col items-center p-12 sm:p-20 text-center"
+          className="aspect-[1/1.414] w-full overflow-hidden relative flex flex-col items-center p-12 sm:p-20 text-center"
           style={{ 
-            backgroundColor: '#000000',
-            borderColor: 'rgba(208, 23, 29, 0.2)',
-            backgroundImage: 'radial-gradient(circle at center, #111111 0%, #000000 100%)' 
+            backgroundColor: LC.black,
+            border: `1px solid ${LC.primary20}`,
+            backgroundImage: 'radial-gradient(circle at center, #111111 0%, #000000 100%)',
+            color: LC.white
           }}
         >
           {/* Mockup Decorative Border */}
           <div 
-            className="absolute inset-4 border pointer-events-none"
-            style={{ borderColor: 'rgba(255, 255, 255, 0.05)' }}
+            className="absolute inset-4 pointer-events-none"
+            style={{ border: `1px solid ${LC.white05}` }}
           ></div>
           
-          {/* Central Logo Watermark (Simplified for html2canvas compatibility) */}
-          <div className="absolute inset-0 flex items-center justify-center opacity-[0.04] pointer-events-none">
+          {/* Central Logo Watermark */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ opacity: 0.04 }}>
             <img 
               src="/var-logo-nobg.png" 
               alt="Seal" 
@@ -131,67 +148,67 @@ function Content() {
           <div className="relative z-10 w-full flex-1 flex flex-col items-center justify-between py-10">
             {/* Header Logos */}
             <div className="flex flex-col items-center gap-6 mb-10 w-full">
-               <h1 className="text-3xl sm:text-5xl font-black uppercase tracking-tighter leading-none" style={{ color: '#D0171D' }}>
+               <h1 className="text-3xl sm:text-5xl font-black uppercase tracking-tighter leading-none" style={{ color: LC.primary }}>
                  CERTIFICATE <br />
                  <span style={{ fontStyle: 'italic' }}>OF PARTICIPATION</span>
                </h1>
-               <p className="text-[10px] font-black uppercase tracking-[0.4em]" style={{ color: 'rgba(255, 255, 255, 0.4)' }}>
+               <p className="text-[10px] font-black uppercase tracking-[0.4em]" style={{ color: LC.white40 }}>
                   This digital credential is proudly presented to
                </p>
             </div>
 
             {/* Recipient Name */}
             <div className="w-full">
-               <h2 className="text-4xl sm:text-6xl font-black uppercase tracking-tighter" style={{ color: '#FFFFFF' }}>
+               <h2 className="text-4xl sm:text-6xl font-black uppercase tracking-tighter" style={{ color: LC.white }}>
                  {data.name}
                </h2>
                <div 
                 className="max-w-[280px] text-[9px] sm:text-[11px] font-medium leading-relaxed uppercase tracking-widest mx-auto mt-4"
-                style={{ color: 'rgba(255, 255, 255, 0.4)' }}
+                style={{ color: LC.white40 }}
                >
                  For their valuable engagement and active contribution in the <br />
-                 <span style={{ color: 'rgba(255, 255, 255, 0.6)' }}>Civic Engagement Initiative</span>
+                 <span style={{ color: LC.white60 }}>Civic Engagement and peace Initiative</span>
                </div>
             </div>
 
             {/* Branding Hub */}
             <div className="flex flex-col items-center gap-4">
-               <div className="text-2xl sm:text-3xl font-black uppercase tracking-tight" style={{ color: 'rgba(255, 255, 255, 0.8)' }}>
-                 DEMOCRACY <span style={{ color: '#D0171D' }}>ACTIVATED</span>
+               <div className="text-2xl sm:text-3xl font-black uppercase tracking-tight" style={{ color: LC.white80 }}>
+                 DEMOCRACY <span style={{ color: LC.primary }}>ACTIVATED</span>
                </div>
-               <div className="text-[10px] font-bold uppercase tracking-[0.5em]" style={{ color: 'rgba(255, 255, 255, 0.3)' }}>
+               <div className="text-[10px] font-bold uppercase tracking-[0.5em]" style={{ color: LC.white30 }}>
                  ORGANIZED BY
                </div>
-               <div className="text-xl sm:text-2xl font-black tracking-tighter" style={{ color: '#FFFFFF' }}>
+               <div className="text-xl sm:text-2xl font-black tracking-tighter" style={{ color: LC.white }}>
                  VAR 37/38
                </div>
-               <div className="text-[10px] font-bold" style={{ color: 'rgba(255, 255, 255, 0.4)' }}>{data.date}</div>
+               <div className="text-[10px] font-bold" style={{ color: LC.white40 }}>{data.date}</div>
             </div>
 
             {/* Signatures */}
             <div className="w-full grid grid-cols-2 gap-12 sm:gap-20 mt-12 px-4 sm:px-10">
-              <div className="flex flex-col items-center gap-1" style={{ color: '#FFFFFF' }}>
+              <div className="flex flex-col items-center gap-1">
                 <div 
                   className="font-sacramento text-2xl sm:text-4xl transform -rotate-1 mb-[-10px] h-10 flex items-end"
                   style={{ color: 'rgba(255, 255, 255, 0.9)' }}
                 >
                   Keno Manwar
                 </div>
-                <div className="w-full h-px" style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)' }}></div>
-                <div className="text-[10px] font-black uppercase tracking-widest mt-2">Keno Manwar</div>
-                <div className="text-[7px] font-bold uppercase tracking-widest" style={{ color: 'rgba(255, 255, 255, 0.3)' }}>Founder | VAR 37/38</div>
+                <div className="w-full h-px" style={{ backgroundColor: LC.white20 }}></div>
+                <div className="text-[10px] font-black uppercase tracking-widest mt-2" style={{ color: LC.white }}>Keno Manwar</div>
+                <div className="text-[7px] font-bold uppercase tracking-widest" style={{ color: LC.white30 }}>Founder | VAR 37/38</div>
               </div>
 
-              <div className="flex flex-col items-center gap-1" style={{ color: '#FFFFFF' }}>
+              <div className="flex flex-col items-center gap-1">
                 <div 
                   className="font-sacramento text-2xl sm:text-4xl transform rotate-1 mb-[-10px] h-10 flex items-end"
                   style={{ color: 'rgba(255, 255, 255, 0.9)' }}
                 >
                   Ivy Muchoki
                 </div>
-                <div className="w-full h-px" style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)' }}></div>
-                <div className="text-[10px] font-black uppercase tracking-widest mt-2">Ivy Muchoki</div>
-                <div className="text-[7px] font-bold uppercase tracking-widest" style={{ color: 'rgba(255, 255, 255, 0.3)' }}>National Coordinator</div>
+                <div className="w-full h-px" style={{ backgroundColor: LC.white20 }}></div>
+                <div className="text-[10px] font-black uppercase tracking_widest mt-2" style={{ color: LC.white }}>Ivy Muchoki</div>
+                <div className="text-[7px] font-bold uppercase tracking_widest" style={{ color: LC.white30 }}>National Coordinator</div>
               </div>
             </div>
 
@@ -200,20 +217,20 @@ function Content() {
                <div className="flex items-center justify-center gap-6">
                  <div className="flex flex-col items-center gap-1">
                     <img src="/var-logo-nobg.png" alt="VAR" className="w-6 opacity-40 grayscale invert" />
-                    <span className="text-[6px] font-bold text-white/20 uppercase tracking-widest">Issuer</span>
+                    <span className="text-[6px] font-bold uppercase tracking-widest" style={{ color: LC.white20 }}>Issuer</span>
                  </div>
-                 <div className="w-px h-8 bg-white/10"></div>
+                 <div className="w-px h-8" style={{ backgroundColor: LC.white10 }}></div>
                  <div className="flex flex-col items-center gap-1">
                     <img 
                       src="/partners/IEBC_Emblem-nobg.png" 
                       alt="IEBC" 
-                      className="w-8 opacity-60 grayscale invert brightness-150" 
-                      style={{ filter: 'grayscale(1) invert(1) brightness(1.5)' }}
+                      className="w-8" 
+                      style={{ filter: 'grayscale(1) invert(1) brightness(1.5)', opacity: 0.6 }}
                     />
-                    <span className="text-[6px] font-bold text-white/40 uppercase tracking-widest">IEBC Verified</span>
+                    <span className="text-[6px] font-bold uppercase tracking-widest" style={{ color: LC.white40 }}>IEBC Verified</span>
                  </div>
                </div>
-               <div className="text-[7px] font-bold uppercase tracking-[0.4em]" style={{ color: 'rgba(255, 255, 255, 0.2)' }}>
+               <div className="text-[7px] font-bold uppercase tracking-[0.4em]" style={{ color: LC.white20 }}>
                  VAR 37/38 © DEMOCRACY ACTIVATED | ID: {token?.slice(-8).toUpperCase() || 'UNVERIFIED'}
                </div>
             </div>
@@ -221,21 +238,21 @@ function Content() {
 
           {/* Diagonal Corner Lines (Mockup Style) */}
           <div className="absolute top-0 left-0 w-16 h-16 pointer-events-none">
-             <div className="absolute top-4 left-4 w-12 h-px -rotate-45 origin-top-left" style={{ backgroundColor: 'rgba(208, 23, 29, 0.3)' }}></div>
+             <div className="absolute top-4 left-4 w-12 h-px -rotate-45 origin-top-left" style={{ backgroundColor: LC.primary30 }}></div>
           </div>
           <div className="absolute top-0 right-0 w-16 h-16 pointer-events-none">
-             <div className="absolute top-4 right-4 w-12 h-px rotate-45 origin-top-right" style={{ backgroundColor: 'rgba(208, 23, 29, 0.3)' }}></div>
+             <div className="absolute top-4 right-4 w-12 h-px rotate-45 origin-top-right" style={{ backgroundColor: LC.primary30 }}></div>
           </div>
           <div className="absolute bottom-0 left-0 w-16 h-16 pointer-events-none">
-             <div className="absolute bottom-4 left-4 w-12 h-px rotate-45 origin-bottom-left" style={{ backgroundColor: 'rgba(208, 23, 29, 0.3)' }}></div>
+             <div className="absolute bottom-4 left-4 w-12 h-px rotate-45 origin-bottom-left" style={{ backgroundColor: LC.primary30 }}></div>
           </div>
           <div className="absolute bottom-0 right-0 w-16 h-16 pointer-events-none">
-             <div className="absolute bottom-4 right-4 w-12 h-px -rotate-45 origin-bottom-right" style={{ backgroundColor: 'rgba(208, 23, 29, 0.3)' }}></div>
+             <div className="absolute bottom-4 right-4 w-12 h-px -rotate-45 origin-bottom-right" style={{ backgroundColor: LC.primary30 }}></div>
           </div>
         </div>
       </div>
       
-      <p className="text-[10px] font-bold uppercase tracking-widest italic no-print text-center max-w-sm" style={{ color: 'rgba(255, 255, 255, 0.2)' }}>
+      <p className="text-[10px] font-bold uppercase tracking-widest italic no-print text-center max-w-sm" style={{ color: LC.white20 }}>
         * Institutionalizing Youth Power through Ideological Engagement. Verified Digital Credential Issued by VAR 37/38.
       </p>
     </div>
