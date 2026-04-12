@@ -143,6 +143,7 @@ export interface Feedback {
   id: number;
   event_id: number;
   user_id: string;
+  user_full_name?: string;
   rating: number;
   comment?: string;
   created_at: string;
@@ -349,7 +350,21 @@ export const certUtils = {
 async function handleResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({ detail: 'Unknown error' }));
-    throw new Error(errorData.detail || `API request failed with status ${response.status}`);
+    let message = `API request failed with status ${response.status}`;
+    
+    if (errorData.detail) {
+      if (Array.isArray(errorData.detail)) {
+        // Handle FastAPI validation errors (list of objects)
+        message = errorData.detail.map((err: any) => {
+          const loc = err.loc ? err.loc.join('.') : '';
+          return loc ? `${loc}: ${err.msg}` : err.msg;
+        }).join(', ');
+      } else {
+        message = errorData.detail;
+      }
+    }
+    
+    throw new Error(message);
   }
   return response.json();
 }
@@ -458,8 +473,12 @@ export const api = {
   // Feedback (Ground Intel)
   async getFeedback(eventId: number): Promise<Feedback[]> {
     const response = await fetch(`${BASE_URL}/events/${eventId}/feedback`);
-    const data = await handleResponse<any>(response);
-    return Array.isArray(data) ? data : (data.feedback || data.items || []);
+    return handleResponse<Feedback[]>(response);
+  },
+
+  async getLatestFeedback(limit: number = 10): Promise<Feedback[]> {
+    const response = await fetch(`${BASE_URL}/events/feedback/latest?limit=${limit}`);
+    return handleResponse<Feedback[]>(response);
   },
 
   async submitFeedback(eventId: number, rating: number, comment?: string): Promise<Feedback> {

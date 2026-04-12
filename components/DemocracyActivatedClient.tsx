@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import HeroSection from "@/components/HeroSection";
 import EventCard from "@/components/EventCard";
 import AuthModal from "@/components/AuthModal";
-import { LogIn, LogOut, ShieldCheck, User as UserIcon, Award, Search, Share2, PlusCircle, XCircle } from "lucide-react";
+import { LogIn, LogOut, ShieldCheck, User as UserIcon, Award, Search, Share2, PlusCircle, XCircle, Star } from "lucide-react";
 import EventFeedbackModal from "@/components/EventFeedbackModal";
 import StatCard from "@/components/StatCard";
 import TownhallGallery from "@/components/TownhallGallery";
@@ -62,6 +62,8 @@ export default function DemocracyActivatedClient() {
   const [claimCredentialId, setClaimCredentialId] = useState('');
   const [isClaiming, setIsClaiming] = useState(false);
   const [authModal, setAuthModal] = useState<{ isOpen: boolean, mode: 'login' | 'register', event?: any } | null>(null);
+  const [latestFeedbacks, setLatestFeedbacks] = useState<any[]>([]);
+  const [loadingFeedback, setLoadingFeedback] = useState(true);
 
   useEffect(() => {
     async function checkAuth() {
@@ -133,17 +135,22 @@ export default function DemocracyActivatedClient() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function loadEvents() {
+    async function loadData() {
       try {
-        const events = await api.getEvents();
+        const [events, feedback] = await Promise.all([
+          api.getEvents(),
+          api.getLatestFeedback(6)
+        ]);
         setWards(events);
+        setLatestFeedbacks(feedback);
       } catch (error) {
-        console.error("Failed to load events:", error);
+        console.error("Failed to load democracy data:", error);
       } finally {
         setLoading(false);
+        setLoadingFeedback(false);
       }
     }
-    loadEvents();
+    loadData();
   }, []);
 
   return (
@@ -416,6 +423,7 @@ export default function DemocracyActivatedClient() {
               wards.map((ward) => (
                 <EventCard
                   key={ward.id}
+                  eventId={ward.id}
                   wardName={ward.ward || ward.title}
                   date={new Date(ward.date).toLocaleDateString("en-US", {
                     month: "long",
@@ -427,12 +435,10 @@ export default function DemocracyActivatedClient() {
                   isLoggedIn={!!user}
                   onRegister={() => {
                     if (user) {
-                      // Already logged in - attempt to register directly
                       api.registerForEvent(ward.id, user.id)
                         .then(() => alert(`Success! You have claimed a seat for ${ward.title}`))
                         .catch(err => alert(err.message || 'Registration failed'));
                     } else {
-                      // Login first
                       setAuthModal({ isOpen: true, mode: 'register', event: ward });
                     }
                   }}
@@ -444,6 +450,72 @@ export default function DemocracyActivatedClient() {
             ) : (
               <div className="col-span-full py-20 text-center text-white/30 italic">
                 No events scheduled at this moment. Stay tuned.
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* Ground Intel Section */}
+      <section className="w-full py-32 bg-background relative overflow-hidden border-t border-white/5">
+        <div className="glow-orb top-1/2 left-0 opacity-10"></div>
+        <div className="max-w-7xl mx-auto px-4 relative z-10">
+          <div className="mb-20">
+            <div className="text-[10px] font-black uppercase tracking-[0.2em] text-primary mb-6">Real-Time Sentiment</div>
+            <h2 className="mb-6 font-black tracking-tighter uppercase leading-none text-5xl lg:text-7xl">
+              Ground <span className="text-primary italic">Intel</span>
+            </h2>
+            <p className="text-white/40 font-bold uppercase tracking-widest text-[10px]">Voices from the Pilot Wards</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {!loadingFeedback ? (
+              latestFeedbacks.map((fb, idx) => (
+                <motion.div
+                  key={fb.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: idx * 0.1 }}
+                  className="modern-card p-8 bg-white/[0.03] border border-white/10 relative group hover:bg-white/5 transition-all"
+                >
+                  <div className="flex justify-between items-start mb-6">
+                    <div className="flex gap-1 text-primary">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <Star key={i} size={12} className={i < fb.rating ? "fill-primary" : "text-white/10"} />
+                      ))}
+                    </div>
+                    <div className="text-[8px] font-black uppercase tracking-widest text-white/20">
+                      {new Date(fb.created_at).toLocaleDateString()}
+                    </div>
+                  </div>
+                  
+                  <blockquote className="text-lg font-black italic tracking-tight mb-8 text-white/90 leading-snug">
+                    "{fb.comment || 'The movement is moving forward.'}"
+                  </blockquote>
+                  
+                  <div className="flex items-center gap-3 pt-6 border-t border-white/5">
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-[10px] font-black">
+                      {fb.user_full_name?.[0] || 'V'}
+                    </div>
+                    <div>
+                      <div className="text-[10px] font-black uppercase tracking-widest text-white">
+                        {fb.user_full_name || `Contributor ${fb.user_id.slice(0, 4)}`}
+                      </div>
+                      <div className="text-[8px] font-bold uppercase tracking-widest text-primary/50">Verified Activator</div>
+                    </div>
+                  </div>
+                </motion.div>
+              ))
+            ) : (
+                Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="modern-card p-8 bg-black/20 h-48 animate-pulse rounded-2xl border border-white/5" />
+                ))
+            )}
+            
+            {!loadingFeedback && latestFeedbacks.length === 0 && (
+              <div className="col-span-full py-20 text-center text-white/20 italic font-medium">
+                Scanning the ground... Intel incoming.
               </div>
             )}
           </div>
