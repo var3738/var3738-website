@@ -398,29 +398,29 @@ export default function AdminDashboardClient() {
   ];
 
   return (
-    <main className="min-h-screen pt-32 pb-20 bg-background selection:bg-primary selection:text-black">
-      <div className="max-w-7xl mx-auto px-4">
+    <main className="min-h-screen pt-24 md:pt-32 pb-20 bg-background selection:bg-primary selection:text-black">
+      <div className="max-w-7xl mx-auto px-4 md:px-6">
         <div className="flex items-center gap-3 text-primary mb-6">
           <div className="h-px w-8 bg-primary"></div>
           <span className="text-[10px] font-black uppercase tracking-[0.3em]">Command Center</span>
           <ShieldAlert size={14} />
         </div>
         
-        <div className="flex items-center justify-between mb-12">
-          <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tighter leading-none">
+        <div className="flex items-center justify-between mb-8 md:mb-12 gap-4">
+          <h1 className="text-3xl sm:text-5xl md:text-7xl font-black uppercase tracking-tighter leading-none">
             Admin <span className="text-primary italic">Dashboard</span>
           </h1>
           <button 
             onClick={handleLogout}
-            className="flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-red-500/10 border border-white/10 hover:border-red-500/20 text-white/40 hover:text-red-500 rounded-2xl transition-all group"
+            className="flex items-center gap-2 px-3 md:px-6 py-3 bg-white/5 hover:bg-red-500/10 border border-white/10 hover:border-red-500/20 text-white/40 hover:text-red-500 rounded-2xl transition-all group flex-shrink-0"
           >
             <LogOut size={16} className="group-hover:-translate-x-1 transition-transform" />
-            <span className="text-[10px] font-black uppercase tracking-widest">Terminate Session</span>
+            <span className="hidden sm:block text-[10px] font-black uppercase tracking-widest">Terminate Session</span>
           </button>
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-white/10 mb-8 overflow-x-auto no-scrollbar pb-2">
+        <div className="flex border-b border-white/10 mb-8 overflow-x-auto no-scrollbar pb-px">
           {TABS.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -428,13 +428,13 @@ export default function AdminDashboardClient() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as Tab)}
-                className={`flex items-center gap-2 px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em] transition-colors border-b-2 whitespace-nowrap ${
+                className={`flex items-center gap-1.5 px-3 sm:px-5 py-3.5 text-[9px] font-black uppercase tracking-[0.15em] transition-colors border-b-2 whitespace-nowrap ${
                   isActive 
                     ? 'border-primary text-primary' 
                     : 'border-transparent text-white/40 hover:text-white hover:border-white/20'
                 }`}
               >
-                <Icon size={14} /> {tab.label}
+                <Icon size={12} /> <span className="hidden sm:inline">{tab.label}</span>
               </button>
             );
           })}
@@ -698,7 +698,7 @@ export default function AdminDashboardClient() {
                    <Award className="absolute -right-10 -bottom-10 w-48 h-48 text-primary opacity-10 rotate-12" />
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-20">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8 pb-20">
                    {/* Event & Registration Selection */}
                    <div className="lg:col-span-2 space-y-6">
                       <div className="modern-card p-8 bg-white/5 border border-white/10">
