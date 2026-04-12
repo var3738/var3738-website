@@ -3,8 +3,8 @@
 import { Suspense, useRef, useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Download, ShieldCheck, Printer, ArrowLeft } from 'lucide-react';
-import { certUtils } from '@/lib/api';
+import { Download, ShieldCheck, Printer, ArrowLeft, Award, Cloud, CheckCircle } from 'lucide-react';
+import { api, certUtils } from '@/lib/api';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import Link from 'next/link';
@@ -27,25 +27,110 @@ const LC = {
 
 function Content() {
   const searchParams = useSearchParams();
-  const token = searchParams.get('token');
-  const [data, setData] = useState<{ name: string; event: string; date: string } | null>(null);
-  const [isValid, setIsValid] = useState<boolean | null>(null);
   const certificateRef = useRef<HTMLDivElement>(null);
+  const [isLoadingData, setIsLoadingData] = useState(true);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  const [data, setData] = useState<{name: string, event: string, date: string} | null>(null);
+  const [isValid, setIsValid] = useState<boolean | null>(null);
 
   useEffect(() => {
-    if (token) {
-      const decoded = certUtils.verifyToken(token);
-      if (decoded) {
-        setData(decoded);
-        setIsValid(true);
+    api.getMe().then(setUser).catch(() => setUser(null));
+  }, []);
+
+  const handleUploadToCloud = async () => {
+    if (!certificateRef.current || !data) return;
+    setIsUploading(true);
+    try {
+      // 1. Generate Image
+      const canvas = await html2canvas(certificateRef.current, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#000000',
+        logging: false
+      });
+      
+      const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, 'image/png', 0.95));
+      if (!blob) throw new Error("Failed to create image blob");
+
+      const file = new File([blob], `Certificate_${data.name.replace(/\s+/g, '_')}.png`, { type: 'image/png' });
+
+      // 2. Upload to Cloudinary via our NextJS route
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('folder', 'certificates');
+
+      const uploadRes = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData
+      });
+      const uploadData = await uploadRes.json();
+      if (!uploadRes.ok) throw new Error(uploadData.error || 'Upload failed');
+
+      // 3. Find and Update the Document record
+      const credentialId = searchParams.get('id');
+      const docs = await api.getDocuments();
+      const existingDoc = docs.find(d => d.file_url.includes(`id=${credentialId}`));
+      
+      if (existingDoc) {
+        await api.updateDocument(existingDoc.id, {
+          file_url: uploadData.url,
+          title: `CERTIFICATE: ${data.name} (${credentialId}) [Finalized]`
+        });
+      } else {
+        // Create new if not found
+        await api.createDocument({
+          title: `CERTIFICATE: ${data.name} (${credentialId}) [Finalized]`,
+          file_url: uploadData.url
+        });
+      }
+
+      alert('Certificate finalized and saved to official Documents library!');
+    } catch (err: any) {
+      console.error('Cloud upload failed:', err);
+      alert(err.message || 'Failed to sync with cloud storage.');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+  useEffect(() => {
+    const initialize = async () => {
+      const id = searchParams.get('id');
+      const token = searchParams.get('token');
+
+      if (id) {
+        setIsLoadingData(true);
+        const cert = await api.getCertificateByCredentialId(id);
+        if (cert) {
+
+          console.log("cert", cert);
+          setData({ 
+            name: cert.recipient_name, 
+            event: cert.event_name, 
+            date: new Date(cert.issue_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) 
+          });
+          setIsValid(true);
+        } else {
+          setIsValid(false);
+        }
+        setIsLoadingData(false);
+      } else if (token) {
+        const decoded = certUtils.verifyToken(token);
+        if (decoded) {
+          setData(decoded);
+          setIsValid(true);
+        } else {
+          setIsValid(false);
+        }
       } else {
         setIsValid(false);
       }
-    } else {
-      setIsValid(false);
-    }
-  }, [token]);
+    };
+    
+    initialize();
+  }, [searchParams]);
 
   const handleDownload = async () => {
     if (!certificateRef.current) return;
@@ -75,6 +160,8 @@ function Content() {
   };
 
   if (isValid === false) {
+ console.log("cert", data);
+    console.log("isValid", isValid);
     return (
       <div className="min-h-screen bg-black flex items-center justify-center p-4 text-center">
         <div className="max-w-md space-y-6">
@@ -85,6 +172,14 @@ function Content() {
           <p className="text-white/40 text-sm font-medium">This certificate link is invalid or has been tampered with. Please contact VAR 37/38 administration for assistance.</p>
           <Link href="/" className="inline-block text-[10px] font-black uppercase tracking-widest bg-white/10 px-6 py-3 rounded hover:bg-white/20 transition-colors">Return to Base</Link>
         </div>
+      </div>
+    );
+  }
+
+  if (isLoadingData) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: LC.black }}>
+        <div className="animate-pulse text-[10px] font-black uppercase tracking-widest" style={{ color: LC.primary }}>Querying Registry...</div>
       </div>
     );
   }
@@ -107,14 +202,32 @@ function Content() {
         <Link href="/" className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest transition-all" style={{ opacity: 0.4 }}>
           <ArrowLeft size={14} /> Back
         </Link>
-        <button 
-          onClick={handleDownload}
-          disabled={isDownloading}
-          className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest px-6 py-3 rounded-full hover:scale-105 transition-transform disabled:opacity-50"
-          style={{ backgroundColor: LC.primary, color: LC.black }}
-        >
-          {isDownloading ? 'Generating...' : <><Download size={14} /> Download Certificate</>}
-        </button>
+        <div className="flex items-center gap-3">
+          {user?.role === 'admin' && (
+            <button 
+              onClick={handleUploadToCloud}
+              disabled={isUploading}
+              className="flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full transition-all text-[10px] font-black uppercase tracking-widest disabled:opacity-50"
+            >
+              {isUploading ? (
+                <div className="flex items-center gap-2">
+                   <div className="w-2 h-2 rounded-full bg-primary animate-ping" />
+                   Storage Sync...
+                </div>
+              ) : (
+                <><Cloud size={14} className="text-primary" /> Finalize Record</>
+              )}
+            </button>
+          )}
+          <button 
+            onClick={handleDownload}
+            disabled={isDownloading}
+            className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest px-6 py-3 rounded-full hover:scale-105 transition-transform disabled:opacity-50"
+            style={{ backgroundColor: LC.primary, color: LC.black }}
+          >
+            {isDownloading ? 'Generating...' : <><Download size={14} /> Download Certificate</>}
+          </button>
+        </div>
       </div>
 
       {/* Certificate Frame */}
@@ -231,7 +344,7 @@ function Content() {
                  </div>
                </div>
                <div className="text-[7px] font-bold uppercase tracking-[0.4em]" style={{ color: LC.white20 }}>
-                 VAR 37/38 © DEMOCRACY ACTIVATED | ID: {token?.slice(-8).toUpperCase() || 'UNVERIFIED'}
+                 VAR 37/38 © DEMOCRACY ACTIVATED | ID: {searchParams.get('id') || token?.slice(-8).toUpperCase() || 'LEGACY-GEN'}
                </div>
             </div>
           </div>
