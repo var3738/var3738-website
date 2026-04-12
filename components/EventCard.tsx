@@ -9,6 +9,7 @@ interface EventCardProps {
   maxCapacity: number;
   onRegister: () => void;
   onFeedback?: () => void;
+  isLoggedIn?: boolean;
 }
 
 export default function EventCard({
@@ -18,6 +19,7 @@ export default function EventCard({
   maxCapacity,
   onRegister,
   onFeedback,
+  isLoggedIn = false,
 }: EventCardProps) {
   const capacityPercentage = (capacity / maxCapacity) * 100;
 
@@ -43,6 +45,12 @@ export default function EventCard({
         <p className="text-white/40 font-medium text-sm">
           {date}
         </p>
+        {isLoggedIn && (
+          <div className="mt-4 inline-flex items-center gap-2 px-3 py-1 bg-primary/10 border border-primary/20 rounded-full">
+            <div className="w-1 h-1 rounded-full bg-primary animate-pulse" />
+            <span className="text-[8px] font-black uppercase tracking-widest text-primary">Identity Authorized</span>
+          </div>
+        )}
       </div>
 
       {/* Capacity Section */}
@@ -67,9 +75,9 @@ export default function EventCard({
       <div className="flex gap-4 w-full">
         <button
           onClick={onRegister}
-          className="crimson-btn flex-1 text-xs uppercase tracking-widest py-4"
+          className={`flex-1 text-xs uppercase tracking-widest py-4 ${isLoggedIn ? 'bg-primary text-black font-black' : 'crimson-btn'}`}
         >
-          Secure a Seat
+          {isLoggedIn ? 'Claim My Seat' : 'Secure a Seat'}
         </button>
         {onFeedback && (
           <button

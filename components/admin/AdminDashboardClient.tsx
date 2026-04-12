@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
-import { Activity, Package, MessageSquare, ShieldAlert, Plus, Save, RefreshCw, PenSquare, Trash2, Users, Handshake, FileText, Image, File, LogOut, Loader2, Lock, CheckCircle2, XCircle, Eye, Calendar, User as UserIcon, Share2, Bookmark, GripVertical, Award } from 'lucide-react';
-import { api, Event, Product, Feedback, Post, TeamMember, Partner, GalleryItem, DocumentItem, Category, teamUtils, certUtils } from '@/lib/api';
-import CMSFormModal, { FormField } from './CMSFormModal';
+import { Activity, Package, MessageSquare, ShieldAlert, Plus, Save, RefreshCw, PenSquare, Trash2, Users, Handshake, FileText, Image, File, LogOut, Loader2, Lock, CheckCircle2, XCircle, Eye, Calendar, User as UserIcon, Share2, Bookmark, GripVertical, Award, ShieldCheck } from 'lucide-react';
+import { api, Event, Product, Feedback, Post, TeamMember, Partner, GalleryItem, DocumentItem, Category, teamUtils, certUtils, Certificate, EventRegistration } from '@/lib/api';
+import CMSFormModal, { FormField } from './CMSFormModal'; 
+import html2canvas from 'html2canvas';
+import { useRef } from 'react';
 
 type Tab = 'events' | 'merch' | 'posts' | 'team' | 'partners' | 'feedback' | 'gallery' | 'documents' | 'credentials';
 
@@ -24,7 +26,16 @@ export default function AdminDashboardClient() {
   const [partners, setPartners] = useState<Partner[]>([]);
   const [gallery, setGallery] = useState<GalleryItem[]>([]);
   const [documents, setDocuments] = useState<DocumentItem[]>([]);
+  const [certificates, setCertificates] = useState<Certificate[]>([]);
+  const [registrations, setRegistrations] = useState<EventRegistration[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
+  const [selectedRegIds, setSelectedRegIds] = useState<Set<number>>(new Set());
+  const [issuedRecent, setIssuedRecent] = useState<Certificate[]>([]);
+  const [isIssuing, setIsIssuing] = useState(false);
+  const [generationProgress, setGenerationProgress] = useState<{ total: number, current: number, status: string } | null>(null);
+  const hiddenCertRef = useRef<HTMLDivElement>(null);
+  const [activeSnapshotData, setActiveSnapshotData] = useState<Certificate | null>(null);
   
   // Reorder State
   const [isOrderDirty, setIsOrderDirty] = useState(false);
@@ -71,6 +82,16 @@ export default function AdminDashboardClient() {
       else if (tab === 'partners') setPartners(await api.getPartners());
       else if (tab === 'gallery') setGallery(await api.getGallery());
       else if (tab === 'documents') setDocuments(await api.getDocuments());
+      else if (tab === 'credentials') {
+        const [certs, eventsData] = await Promise.all([
+          api.getCertificates(),
+          api.getEvents()
+        ]);
+        setCertificates(certs);
+        setEvents(eventsData);
+        setRegistrations([]);
+        setSelectedEventId(null);
+      }
       else if (tab === 'feedback') {
         const eventsData = await api.getEvents();
         setEvents(eventsData);
@@ -657,89 +678,428 @@ export default function AdminDashboardClient() {
                               <button onClick={() => handleDelete('gallery', item.id)} className="p-3 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded transition-colors"><Trash2 size={16} /></button>
                            </div>
                         </div>
-                     </div>
-                   ))}
-                   {gallery.length === 0 && !isLoading && <p className="text-white/30 text-xs uppercase tracking-widest col-span-full">No gallery photos found.</p>}
-                 </div>
-              </motion.div>
-            )}
+                      </div>
+                    ))}
+                    {gallery.length === 0 && !isLoading && <p className="text-white/30 text-xs uppercase tracking-widest col-span-full">No gallery photos found.</p>}
+                  </div>
+               </motion.div>
+             )}
 
-            {/* DOCUMENTS TAB */}
+            {/* CREDENTIALS / AWARDS TAB */}
             {activeTab === 'credentials' && (
               <motion.div key="credentials" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
                 <div className="mb-10 p-8 modern-card bg-primary/10 border border-primary/20 rounded-3xl relative overflow-hidden">
                    <div className="relative z-10">
-                      <h2 className="text-2xl font-black uppercase tracking-tighter mb-2 italic text-white">Certificate Authority</h2>
+                      <h2 className="text-2xl font-black uppercase tracking-tighter mb-2 italic text-white">Awards Authority</h2>
                       <p className="text-xs font-medium text-white/60 max-w-lg mb-6 uppercase tracking-widest leading-relaxed">
-                        Issue cryptographically verified credentials for Townhall participants. 
-                        No database required - links are signed and persistent.
+                        Manage persistent digital credentials. Select a Townhall to view registrations and issue bulk certificates.
                       </p>
-                      <div className="flex flex-wrap gap-4">
-                        <a href="/claim" target="_blank" className="bg-black text-[10px] font-black uppercase tracking-widest px-6 py-3 rounded hover:bg-white/10 transition-colors inline-flex items-center gap-2">
-                           View Claim Page <Eye size={12} />
-                        </a>
-                      </div>
                    </div>
                    <Award className="absolute -right-10 -bottom-10 w-48 h-48 text-primary opacity-10 rotate-12" />
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 pb-20">
-                   {/* Manual Generation */}
-                   <div className="modern-card p-8 bg-white/5 border border-white/10">
-                      <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-primary mb-6">Direct Issuance</h3>
-                      <div className="space-y-4">
-                         <div>
-                            <label className="block text-[8px] font-black uppercase tracking-widest text-white/40 mb-1">Participant Name</label>
-                            <input id="cert-name" type="text" className="w-full bg-black/50 border border-white/10 px-4 py-3 text-xs font-bold uppercase tracking-widest rounded outline-hidden focus:border-primary" placeholder="NAME" />
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-20">
+                   {/* Event & Registration Selection */}
+                   <div className="lg:col-span-2 space-y-6">
+                      <div className="modern-card p-8 bg-white/5 border border-white/10">
+                         <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-primary mb-6">1. Select Townhall / Event</h3>
+                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {events.map(ev => (
+                               <button 
+                                 key={ev.id} 
+                                 onClick={async () => {
+                                   setSelectedEventId(ev.id);
+                                   setSelectedRegIds(new Set());
+                                   setIsLoading(true);
+                                   setRegistrations(await api.getEventRegistrations(ev.id));
+                                   setIsLoading(false);
+                                 }}
+                                 className={`p-4 rounded-xl border text-left transition-all ${selectedEventId === ev.id ? 'bg-primary/20 border-primary' : 'bg-black/40 border-white/5 hover:border-white/20'}`}
+                               >
+                                  <div className="text-[10px] font-black uppercase tracking-widest text-white">{ev.title}</div>
+                                  <div className="text-[8px] font-bold uppercase tracking-widest text-white/40">{ev.date}</div>
+                               </button>
+                            ))}
                          </div>
-                         <div>
-                            <label className="block text-[8px] font-black uppercase tracking-widest text-white/40 mb-1">Event Name</label>
-                            <select id="cert-event" className="w-full bg-black/50 border border-white/10 px-4 py-3 text-xs font-bold uppercase tracking-widest rounded outline-hidden focus:border-primary">
-                               {events.map(e => <option key={e.id} value={e.title}>{e.title}</option>)}
-                               <option value="General Townhall">General Townhall</option>
-                            </select>
-                         </div>
-                         <button 
-                            onClick={() => {
-                              const name = (document.getElementById('cert-name') as HTMLInputElement).value;
-                              const event = (document.getElementById('cert-event') as HTMLSelectElement).value;
-                              if (!name) return alert('Name required');
-                              const date = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-                              const token = certUtils.generateToken(name, event, date);
-                              const url = `${window.location.origin}/certificate?token=${token}`;
-                              navigator.clipboard.writeText(url);
-                              alert('Certificate Link Copied to Clipboard!');
-                            }}
-                            className="w-full bg-white/10 hover:bg-white/20 px-6 py-4 text-[10px] font-black uppercase tracking-widest rounded transition-all"
-                         >
-                            Generate & Copy Link
-                         </button>
                       </div>
-                   </div>
 
-                   {/* Codes Registry */}
-                   <div className="modern-card p-8 bg-white/5 border border-white/10">
-                      <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-primary mb-6">Activation Codes</h3>
-                      <div className="space-y-3">
-                         {[
-                           { code: 'VAR-TH-NZOIA', event: 'Trans Nzoia Townhall', status: 'active' },
-                           { code: 'VAR-DUA-2024', event: 'Democracy Activated', status: 'active' },
-                         ].map(item => (
-                           <div key={item.code} className="p-4 bg-black/40 border border-white/5 rounded flex justify-between items-center group">
-                              <div>
-                                 <div className="text-[10px] font-black uppercase tracking-widest text-white">{item.code}</div>
-                                 <div className="text-[8px] font-bold uppercase tracking-widest text-white/20">{item.event}</div>
-                              </div>
+                      {selectedEventId && (
+                        <div className="modern-card p-8 bg-white/5 border border-white/10 overflow-hidden">
+                           <div className="flex justify-between items-center mb-6">
+                              <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">2. Eligible Participants</h3>
+                              <button 
+                                disabled={isIssuing || (selectedRegIds.size === 0)}
+                                onClick={async () => {
+                                  setIsIssuing(true);
+                                  const ev = events.find(e => e.id === selectedEventId);
+                                  if (!ev) return;
+                                  
+                                  const recipients = registrations.filter(r => selectedRegIds.has(r.id));
+                                  
+                                  try {
+                                    const results: Certificate[] = [];
+                                    const total = recipients.length;
+                                    setGenerationProgress({ total, current: 0, status: 'Issuing Records...' });
+
+                                    for (let i = 0; i < recipients.length; i++) {
+                                      const reg = recipients[i];
+                                      setGenerationProgress({ total, current: i + 1, status: `Issuing for ${reg.full_name}...` });
+
+                                      const cert = await api.issueCertificate({
+                                        credential_id: certUtils.generateCredentialId(),
+                                        recipient_name: reg.full_name || 'Participant',
+                                        recipient_email: reg.email,
+                                        user_id: reg.user_id,
+                                        event_id: ev.id,
+                                        event_name: ev.title,
+                                        issue_date: new Date().toISOString(),
+                                        is_claimed: true
+                                      });
+                                      
+                                      // 1. Trigger Snapshot Render
+                                      console.log(`[CERT_GEN] Starting issuance for ${reg.full_name} (${cert.credential_id})`);
+                                      setGenerationProgress({ total, current: i + 1, status: `Snapshotting ${reg.full_name}...` });
+                                      setActiveSnapshotData(cert);
+                                      
+                                      // Wait for React to render the hidden cert
+                                      console.log(`[CERT_GEN] Waiting for render...`);
+                                      await new Promise(r => setTimeout(r, 1500));
+
+                                      // 2. Capture and Upload
+                                      if (hiddenCertRef.current) {
+                                        console.log(`[CERT_GEN] Capturing canvas...`);
+                                        try {
+                                          const canvas = await html2canvas(hiddenCertRef.current, {
+                                            scale: 2,
+                                            useCORS: true,
+                                            backgroundColor: '#000000',
+                                            logging: true,
+                                            onclone: (clonedDoc) => {
+                                              // Disable any stylesheet containing oklch/oklab which html2canvas cannot parse
+                                              const sheets = Array.from(clonedDoc.styleSheets);
+                                              for (const sheet of sheets) {
+                                                try {
+                                                  const rules = Array.from(sheet.cssRules || []);
+                                                  const text = rules.map(r => r.cssText).join(' ');
+                                                  if (text.includes('oklch') || text.includes('oklab')) {
+                                                    (sheet as any).disabled = true;
+                                                  }
+                                                } catch {
+                                                  // Cross-origin sheets throw on cssRules access — skip them
+                                                }
+                                              }
+                                            }
+                                          });
+
+                                          console.log(`[CERT_GEN] Canvas captured. Converting to blob...`);
+                                          const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, 'image/png', 0.95));
+                                          
+                                          if (blob) {
+                                            console.log(`[CERT_GEN] Blob ready (${blob.size} bytes). Uploading to Cloudinary...`);
+                                            const file = new window.File([blob], `Certificate_${cert.credential_id}.png`, { type: 'image/png' });
+                                            const formData = new FormData();
+                                            formData.append('file', file);
+                                            formData.append('folder', 'certificates');
+
+                                            const uploadRes = await fetch('/api/upload', {
+                                              method: 'POST',
+                                              body: formData
+                                            });
+                                            const uploadData = await uploadRes.json();
+                                            
+                                            if (uploadRes.ok && uploadData.url) {
+                                              console.log(`[CERT_GEN] Upload SUCCESS: ${uploadData.url}`);
+                                              // 3. Link back to DB
+                                              console.log(`[CERT_GEN] Patching database record...`);
+                                              await api.updateCertificate(cert.id, {
+                                                file_url: uploadData.url
+                                              });
+                                              cert.file_url = uploadData.url;
+                                              console.log(`[CERT_GEN] Database linked successfully.`);
+                                            } else {
+                                              console.error(`[CERT_GEN] Upload FAILED:`, uploadData);
+                                            }
+                                          } else {
+                                            console.error(`[CERT_GEN] Failed to create blob from canvas.`);
+                                          }
+                                        } catch (snapErr) {
+                                          console.error('[CERT_GEN] Snapshot logic error:', snapErr);
+                                        }
+                                      } else {
+                                        console.error(`[CERT_GEN] hiddenCertRef.current is NULL. Capture impossible.`);
+                                      }
+
+                                      // Also register as a formal "Document" (CMS Registry)
+                                      try {
+                                        await api.createDocument({
+                                          title: `CERTIFICATE: ${reg.full_name} (${cert.credential_id})`,
+                                          file_url: cert.file_url || `${window.location.origin}/certificate?id=${cert.credential_id}`
+                                        });
+                                      } catch (docErr) {
+                                        console.error('Failed to register certificate as document:', docErr);
+                                      }
+
+                                      results.push(cert);
+                                    }
+                                    setIssuedRecent(results);
+                                    setSelectedRegIds(new Set());
+                                    setGenerationProgress(null);
+                                    setActiveSnapshotData(null);
+                                    setCertificates(await api.getCertificates());
+                                  } catch (e: any) {
+                                    alert(`Awarding process encountered an error: ${e.message || 'Unknown error'}`);
+                                    setGenerationProgress(null);
+                                  } finally {
+                                    setIsIssuing(false);
+                                  }
+                                }}
+                                className="px-6 py-2 bg-primary text-black text-[10px] font-black uppercase tracking-widest rounded-full hover:scale-105 transition-transform disabled:opacity-50"
+                              >
+                                 {isIssuing ? 'Processing...' : `Issue to ${selectedRegIds.size} Selected`}
+                              </button>
+                           </div>
+
+                           <div className="overflow-x-auto">
+                              <table className="w-full text-left">
+                                 <thead>
+                                    <tr className="border-b border-white/10 text-left">
+                                       <th className="py-4 w-10">
+                                          <input 
+                                            type="checkbox" 
+                                            checked={registrations.length > 0 && selectedRegIds.size === registrations.length}
+                                            onChange={() => {
+                                               if (selectedRegIds.size === registrations.length) {
+                                                  setSelectedRegIds(new Set());
+                                               } else {
+                                                  setSelectedRegIds(new Set(registrations.map(r => r.id)));
+                                               }
+                                            }}
+                                            className="w-4 h-4 bg-white/5 border-white/10 rounded"
+                                          />
+                                       </th>
+                                       <th className="py-4 text-[8px] font-black uppercase tracking-widest text-white/40">Participant</th>
+                                       <th className="py-4 text-[8px] font-black uppercase tracking-widest text-white/40">Email</th>
+                                       <th className="py-4 text-[8px] font-black uppercase tracking-widest text-white/40">County</th>
+                                    </tr>
+                                 </thead>
+                                 <tbody>
+                                    {registrations.map(reg => (
+                                       <tr key={reg.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                                          <td className="py-4">
+                                             <input 
+                                               type="checkbox" 
+                                               checked={selectedRegIds.has(reg.id)}
+                                               onChange={() => {
+                                                  const newSelection = new Set(selectedRegIds);
+                                                  if (newSelection.has(reg.id)) newSelection.delete(reg.id);
+                                                  else newSelection.add(reg.id);
+                                                  setSelectedRegIds(newSelection);
+                                               }}
+                                               className="w-4 h-4 bg-white/5 border-white/10 rounded"
+                                             />
+                                          </td>
+                                          <td className="py-4 text-[10px] font-bold text-white uppercase tracking-widest">{reg.full_name || 'Unnamed Participant'}</td>
+                                          <td className="py-4 text-[9px] font-medium text-white/40">{reg.email}</td>
+                                          <td className="py-4 text-[8px] font-black text-primary uppercase tracking-widest">{reg.county || 'N/A'}</td>
+                                       </tr>
+                                    ))}
+                                    {registrations.length === 0 && (
+                                      <tr>
+                                         <td colSpan={3} className="py-10 text-center text-[10px] font-bold uppercase tracking-widest text-white/20 italic">
+                                            No registrations found for this event.
+                                         </td>
+                                      </tr>
+                                    )}
+                                 </tbody>
+                               </table>
+                           </div>
+                        </div>
+                      )}
+
+                      {/* Automation Generation Progress */}
+                      {generationProgress && (
+                        <div className="modern-card p-6 bg-primary/5 border border-primary/20 mb-6 overflow-hidden relative">
+                           <div className="flex justify-between items-center mb-4">
                               <div className="flex items-center gap-3">
-                                 <span className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.4)]"></span>
-                                 <button onClick={() => { navigator.clipboard.writeText(item.code); alert('Code Copied!'); }} className="opacity-0 group-hover:opacity-100 transition-opacity p-2 bg-white/5 rounded text-white"><Save size={12} /></button>
+                                 <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                                    <Activity size={20} className="animate-spin" />
+                                 </div>
+                                 <div className="text-left">
+                                    <div className="text-[10px] font-black uppercase tracking-widest text-primary mb-0.5">Automated Generation Engine</div>
+                                    <div className="text-[12px] font-black uppercase tracking-tight text-white">{generationProgress.status}</div>
+                                 </div>
+                              </div>
+                              <div className="text-right">
+                                 <div className="text-xl font-black italic text-primary">{Math.round((generationProgress.current / generationProgress.total) * 100)}%</div>
+                                 <div className="text-[8px] font-black uppercase tracking-[0.2em] text-white/30">{generationProgress.current} / {generationProgress.total} Complete</div>
                               </div>
                            </div>
-                         ))}
-                         <p className="text-[8px] font-medium uppercase tracking-widest text-white/20 italic mt-4">
-                            * Codes are currently managed via source configuration to maintain stateless persistence. 
-                            Contact DevOps to add new event keys.
-                         </p>
+                           <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
+                              <motion.div 
+                                className="h-full bg-primary"
+                                initial={{ width: 0 }}
+                                animate={{ width: `${(generationProgress.current / generationProgress.total) * 100}%` }}
+                                transition={{ duration: 0.5 }}
+                              />
+                           </div>
+                        </div>
+                      )}
+
+                      {/* Batch Issuance Results */}
+                      <AnimatePresence>
+                        {issuedRecent.length > 0 && (
+                          <motion.div 
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0 }}
+                            className="modern-card p-8 bg-green-500/5 border border-green-500/20"
+                          >
+                             <div className="flex justify-between items-center mb-6">
+                                <div>
+                                   <div className="text-[8px] font-black uppercase tracking-widest text-green-500 mb-1">Batch Complete</div>
+                                   <h3 className="text-xl font-black uppercase tracking-tighter italic text-white">{issuedRecent.length} Credentials Generated</h3>
+                                </div>
+                                <button 
+                                  onClick={() => setIssuedRecent([])}
+                                  className="p-2 hover:bg-white/5 rounded-full transition-colors text-white/30"
+                                >
+                                   <XCircle size={16} />
+                                </button>
+                             </div>
+
+                             <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
+                                {issuedRecent.map(cert => (
+                                   <div key={cert.id} className="p-4 bg-black/40 border border-white/5 rounded-xl flex items-center justify-between group">
+                                      <div className="flex items-center gap-4">
+                                         <div className="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center text-green-500 text-sm">
+                                            {cert.file_url ? <CheckCircle2 size={18} /> : <ShieldCheck size={18} />}
+                                         </div>
+                                         <div className="text-left">
+                                            <div className="text-[10px] font-black uppercase tracking-tight text-white">{cert.recipient_name}</div>
+                                            <div className="text-[8px] font-bold uppercase tracking-widest text-white/30">{cert.credential_id}</div>
+                                         </div>
+                                      </div>
+                                      <div className="flex gap-2">
+                                         <button 
+                                           onClick={() => window.open(cert.file_url || `/certificate?id=${cert.credential_id}`, '_blank')}
+                                           className="p-2.5 bg-white/5 hover:bg-white/10 rounded-lg border border-white/10 transition-all text-white/60 hover:text-white"
+                                           title="View Official Certificate"
+                                         >
+                                            <Eye size={14} />
+                                         </button>
+                                         <button 
+                                           onClick={() => {
+                                             navigator.clipboard.writeText(cert.file_url || `${window.location.origin}/certificate?id=${cert.credential_id}`);
+                                             alert('Link copied to clipboard!');
+                                           }}
+                                           className="p-2.5 bg-white/5 hover:bg-white/10 rounded-lg border border-white/10 transition-all text-white/60 hover:text-white"
+                                           title="Copy Public Link"
+                                         >
+                                            <Share2 size={14} />
+                                         </button>
+                                      </div>
+                                   </div>
+                                ))}
+                             </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+
+                      {/* Hidden Snapshot Component */}
+                      {activeSnapshotData && (
+                        <div className="fixed -left-[2000px] top-0 no-print" style={{ pointerEvents: 'none' }}>
+                           <div 
+                              ref={hiddenCertRef}
+                              className="w-[1000px] aspect-[1/1.414] p-20 flex flex-col items-center justify-center text-center relative"
+                              style={{ 
+                                backgroundImage: 'radial-gradient(circle at center, #111111 0%, #000000 100%)',
+                                border: '1px solid rgba(208, 23, 29, 0.4)'
+                              }}
+                           >
+                               {/* Re-implementing simplified certificate layout for snapshotting */}
+                               <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'repeating-linear-gradient(45deg, #ffffff 0, #ffffff 1px, transparent 0, transparent 50%)', backgroundSize: '10px 10px' }} />
+                               
+                               <div className="mb-12">
+                                  <div className="w-16 h-16 rounded-2xl rotate-45 flex items-center justify-center mb-6 mx-auto" style={{ backgroundColor: '#d0171d' }}>
+                                     <Award size={32} className="-rotate-45" style={{ color: '#000000' }} strokeWidth={3} />
+                                  </div>
+                                  <div className="text-[12px] font-black uppercase tracking-[0.4em]" style={{ color: '#d0171d' }}>Voice of a Generation</div>
+                                  <div className="text-4xl font-black uppercase tracking-tighter mt-1">VAR 37/38</div>
+                               </div>
+
+                               <div className="mb-12">
+                                  <div className="text-[10px] font-black uppercase tracking-[0.5em] mb-4" style={{ color: '#d0171d' }}>Official Accreditation</div>
+                                  <h1 className="text-6xl font-black uppercase tracking-tighter italic leading-tight">Certificate of<br/>Participation</h1>
+                               </div>
+
+                               <div className="flex-1 flex flex-col justify-center items-center">
+                                  <div className="text-[12px] font-medium text-white/40 uppercase tracking-widest mb-6">This is to certify that</div>
+                                  <div className="text-5xl font-black uppercase tracking-tight text-white mb-8 underline underline-offset-[12px]" style={{ textDecorationColor: 'rgba(208, 23, 29, 0.3)' }}>
+                                     {activeSnapshotData.recipient_name}
+                                  </div>
+                                  <div className="max-w-2xl text-xl font-medium text-white/60 leading-relaxed mb-8">
+                                     Has successfully participated and completed the 
+                                     <span className="text-white block mt-2 font-black uppercase tracking-wide">
+                                        {activeSnapshotData.event_name}
+                                     </span>
+                                  </div>
+                                  <div className="text-[12px] font-black uppercase tracking-widest" style={{ color: 'rgba(208, 23, 29, 0.6)' }}>
+                                     Issued on {new Date(activeSnapshotData.issue_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                                  </div>
+                               </div>
+
+                               <div className="w-full pt-12 mt-12 border-t border-white/5 flex justify-between items-center">
+                                  <div className="text-left">
+                                     <div className="text-[8px] font-black uppercase tracking-widest text-white/30 mb-2">Credential ID</div>
+                                     <div className="text-xs font-mono font-bold tracking-wider px-3 py-1.5 rounded border" style={{ color: '#d0171d', backgroundColor: 'rgba(208, 23, 29, 0.05)', borderColor: 'rgba(208, 23, 29, 0.1)' }}>
+                                        {activeSnapshotData.credential_id}
+                                     </div>
+                                  </div>
+                                  <div className="flex gap-4 items-center">
+                                     <ShieldCheck size={32} style={{ color: '#d0171d', opacity: 0.5 }} />
+                                     <div className="text-right">
+                                        <div className="text-[8px] font-black uppercase tracking-widest text-white/30 mb-1">Authenticity</div>
+                                        <div className="text-[10px] font-black uppercase text-white">Verified Security</div>
+                                     </div>
+                                  </div>
+                               </div>
+                           </div>
+                        </div>
+                      )}
+                   </div>
+
+                   {/* Registry Sidebar */}
+                   <div className="space-y-6">
+                      <div className="modern-card p-8 bg-white/5 border border-white/10">
+                         <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-primary mb-6">Recent Records</h3>
+                         <div className="space-y-3">
+                            {certificates.slice(0, 10).map(cert => (
+                               <div key={cert.id} className="p-4 bg-black/40 border border-white/5 rounded group flex justify-between items-center">
+                                  <div>
+                                     <div className="text-[9px] font-black uppercase tracking-widest text-white">{cert.recipient_name}</div>
+                                     <div className="text-[7px] font-bold uppercase tracking-widest text-white/30">{cert.credential_id}</div>
+                                  </div>
+                                  <button 
+                                    onClick={() => {
+                                       const url = `${window.location.origin}/certificate?id=${cert.credential_id}`;
+                                       navigator.clipboard.writeText(url);
+                                       alert('Record Link Copied!');
+                                    }}
+                                    className="p-2 opacity-0 group-hover:opacity-100 bg-white/5 rounded hover:bg-white/10 transition-all"
+                                  >
+                                     <Share2 size={12} className="text-white" />
+                                  </button>
+                               </div>
+                            ))}
+                            {certificates.length === 0 && (
+                               <div className="text-[8px] font-bold uppercase tracking-widest text-white/20 italic text-center py-4">No records in database.</div>
+                            )}
+                         </div>
+                         {certificates.length > 0 && (
+                           <button className="w-full mt-6 py-3 border border-white/10 rounded text-[8px] font-black uppercase tracking-widest text-white/40 hover:text-white transition-all">
+                              View Full Registry
+                           </button>
+                         )}
                       </div>
                    </div>
                 </div>

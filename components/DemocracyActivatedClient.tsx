@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import HeroSection from "@/components/HeroSection";
 import EventCard from "@/components/EventCard";
-import RegistrationForm from "@/components/RegistrationForm";
+import AuthModal from "@/components/AuthModal";
+import { LogIn, LogOut, ShieldCheck, User as UserIcon, Award, Search, Share2, PlusCircle, XCircle } from "lucide-react";
 import EventFeedbackModal from "@/components/EventFeedbackModal";
 import StatCard from "@/components/StatCard";
 import TownhallGallery from "@/components/TownhallGallery";
@@ -55,6 +56,46 @@ export default function DemocracyActivatedClient() {
     name: string;
   } | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [user, setUser] = useState<any>(null);
+  const [userCertificates, setUserCertificates] = useState<any[]>([]);
+  const [isClaimModalOpen, setIsClaimModalOpen] = useState(false);
+  const [claimCredentialId, setClaimCredentialId] = useState('');
+  const [isClaiming, setIsClaiming] = useState(false);
+  const [authModal, setAuthModal] = useState<{ isOpen: boolean, mode: 'login' | 'register', event?: any } | null>(null);
+
+  useEffect(() => {
+    async function checkAuth() {
+      try {
+        const currentUser = await api.getMe();
+        setUser(currentUser);
+        // Also fetch user certificates
+        const certs = await api.getCertificates({ user_id: currentUser.id });
+        setUserCertificates(certs);
+      } catch (err) {
+        setUser(null);
+      }
+    }
+    checkAuth();
+  }, []);
+
+  const handleClaim = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!claimCredentialId.trim() || !user) return;
+    
+    setIsClaiming(true);
+    try {
+      await api.claimCertificate(claimCredentialId);
+      const updatedCerts = await api.getCertificates({ user_id: user.id });
+      setUserCertificates(updatedCerts);
+      setClaimCredentialId('');
+      setIsClaimModalOpen(false);
+      alert('Certificate successfully claimed and linked to your profile!');
+    } catch (err: any) {
+      alert(err.message || 'Failed to claim certificate. Please check the ID.');
+    } finally {
+      setIsClaiming(false);
+    }
+  };
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -194,6 +235,114 @@ export default function DemocracyActivatedClient() {
               <span className="text-primary italic">Trans Nzoia Edition</span>
             </h2>
           </div>
+
+          {/* User Auth Bar */}
+          <div className="mb-12 flex justify-center">
+            <div className="modern-card p-1.5 bg-white/5 border border-white/10 rounded-2xl flex items-center gap-2">
+               {user ? (
+                 <div className="flex items-center gap-6 px-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                        <ShieldCheck size={16} />
+                      </div>
+                      <div>
+                        <div className="text-[8px] font-black text-white/30 uppercase tracking-widest leading-none mb-1">Authenticated</div>
+                        <div className="text-[10px] font-bold uppercase tracking-tighter text-white">{user.full_name}</div>
+                      </div>
+                    </div>
+                    <button 
+                      onClick={() => { api.logout(); setUser(null); }}
+                      className="flex items-center gap-2 px-4 py-2 hover:bg-white/5 rounded-lg transition-colors text-[9px] font-black uppercase tracking-widest text-white/40 hover:text-red-500"
+                    >
+                      <LogOut size={12} /> Logout
+                    </button>
+                 </div>
+               ) : (
+                 <button 
+                   onClick={() => setAuthModal({ isOpen: true, mode: 'login' })}
+                   className="flex items-center gap-3 px-8 py-3 bg-white/5 hover:bg-white/10 rounded-xl transition-all group"
+                 >
+                    <LogIn size={14} className="text-primary group-hover:scale-110 transition-transform" />
+                    <span className="text-[10px] font-black uppercase tracking-widest">Identify Yourself to Register</span>
+                 </button>
+               )}
+            </div>
+          </div>
+
+          {/* User Awards Gallery */}
+          {user && (
+            <div className="mb-24 max-w-4xl mx-auto">
+               <div className="flex justify-between items-center mb-10">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-primary/10 rounded-lg text-primary">
+                      <Award size={20} />
+                    </div>
+                    <h3 className="text-xl font-black uppercase tracking-tighter">Your Awarded Certificates</h3>
+                  </div>
+                  <button 
+                    onClick={() => setIsClaimModalOpen(true)}
+                    className="flex items-center gap-2 text-[8px] font-black uppercase tracking-[0.2em] border border-white/10 hover:border-primary/50 px-4 py-2 rounded-full transition-all"
+                  >
+                    <PlusCircle size={14} className="text-primary" /> Claim Missing
+                  </button>
+               </div>
+
+               {userCertificates.length > 0 ? (
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {userCertificates.map((cert: any) => (
+                      <motion.div 
+                        key={cert.id}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="modern-card p-6 bg-white/5 border border-white/10 group relative overflow-hidden"
+                      >
+                         <Award className="absolute -bottom-4 -right-4 w-24 h-24 text-primary/5 group-hover:text-primary/10 transition-colors" />
+                         <div className="relative z-10 flex justify-between items-start">
+                            <div>
+                               <div className="text-[10px] font-black uppercase tracking-widest text-primary mb-1">{cert.event_name}</div>
+                               <div className="text-xl font-black uppercase tracking-tighter mb-4 italic">{cert.recipient_name}</div>
+                               <div className="flex items-center gap-3 text-white/30 text-[9px] font-bold uppercase tracking-widest">
+                                  <span>ID: {cert.credential_id}</span>
+                                  <span>•</span>
+                                  <span>Issued: {new Date(cert.issue_date).toLocaleDateString()}</span>
+                               </div>
+                            </div>
+                            <div className="flex gap-2">
+                               <button 
+                                 onClick={() => window.open(`/certificate?id=${cert.credential_id}`, '_blank')}
+                                 className="p-3 bg-white/5 hover:bg-white/10 rounded-lg border border-white/10 transition-all"
+                               >
+                                  <Search size={16} className="text-white" />
+                               </button>
+                               <button 
+                                 onClick={() => {
+                                   navigator.clipboard.writeText(`${window.location.origin}/certificate?id=${cert.credential_id}`);
+                                   alert('Credential Link Copied!');
+                                 }}
+                                 className="p-3 bg-white/5 hover:bg-white/10 rounded-lg border border-white/10 transition-all"
+                               >
+                                  <Share2 size={16} className="text-white" />
+                               </button>
+                            </div>
+                         </div>
+                      </motion.div>
+                    ))}
+                 </div>
+               ) : (
+                 <div className="modern-card py-16 text-center bg-white/5 border border-white/10 border-dashed">
+                    <Award size={40} className="mx-auto text-white/5 mb-4" />
+                    <p className="text-[10px] font-black uppercase tracking-widest text-white/20">No certificates found linked to your profile.</p>
+                    <button 
+                      onClick={() => setIsClaimModalOpen(true)}
+                      className="mt-6 text-[10px] font-bold text-primary hover:underline uppercase tracking-widest"
+                    >
+                      Manually claim using a Credential ID
+                    </button>
+                 </div>
+               )}
+            </div>
+          )}
+
           {/* Wards Explorer: Accordion Style */}
           <div className="mb-24 max-w-4xl mx-auto space-y-4">
             {CONSTITUENCIES.map((constituency, idx) => (
@@ -275,7 +424,18 @@ export default function DemocracyActivatedClient() {
                   })}
                   capacity={ward.registration_count || 0}
                   maxCapacity={ward.max_capacity}
-                  onRegister={() => setSelectedWard(ward.title)}
+                  isLoggedIn={!!user}
+                  onRegister={() => {
+                    if (user) {
+                      // Already logged in - attempt to register directly
+                      api.registerForEvent(ward.id, user.id)
+                        .then(() => alert(`Success! You have claimed a seat for ${ward.title}`))
+                        .catch(err => alert(err.message || 'Registration failed'));
+                    } else {
+                      // Login first
+                      setAuthModal({ isOpen: true, mode: 'register', event: ward });
+                    }
+                  }}
                   onFeedback={() =>
                     setFeedbackEvent({ id: ward.id, name: ward.title })
                   }
@@ -342,11 +502,14 @@ export default function DemocracyActivatedClient() {
 
       <PartnersSection />
 
-      {/* Registration Modal */}
-      {selectedWard && (
-        <RegistrationForm
-          wardName={selectedWard}
-          onClose={() => setSelectedWard(null)}
+      {/* Authentication Modal */}
+      {authModal?.isOpen && (
+        <AuthModal
+          initialMode={authModal.mode}
+          targetEventId={authModal.event?.id}
+          targetEventName={authModal.event?.title || authModal.event?.ward}
+          onClose={() => setAuthModal(null)}
+          onSuccess={(u) => setUser(u)}
         />
       )}
 
@@ -357,6 +520,45 @@ export default function DemocracyActivatedClient() {
           eventName={feedbackEvent.name}
           onClose={() => setFeedbackEvent(null)}
         />
+      )}
+      {/* Claim Modal */}
+      {isClaimModalOpen && (
+         <div className="fixed inset-0 bg-black/90 backdrop-blur-xl z-[150] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="modern-card max-w-md w-full p-10 relative bg-background border border-white/10"
+            >
+               <button 
+                 onClick={() => setIsClaimModalOpen(false)}
+                 className="absolute top-6 right-6 text-white/40 hover:text-white"
+               >
+                 <XCircle size={24} />
+               </button>
+               <div className="text-center mb-10">
+                  <div className="text-[10px] font-black uppercase tracking-[0.2em] text-primary mb-4">Manual Registry Claim</div>
+                  <h3 className="text-3xl font-black uppercase tracking-tighter italic">Found a Record?</h3>
+                  <p className="text-[10px] font-medium text-white/30 tracking-widest mt-2 uppercase">Enter the Credential ID from your award</p>
+               </div>
+               <form onSubmit={handleClaim} className="space-y-6">
+                  <input 
+                    type="text"
+                    value={claimCredentialId}
+                    onChange={(e) => setClaimCredentialId(e.target.value.toUpperCase())}
+                    placeholder="EX: VAR-2026-XXXX"
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-6 py-4 text-white focus:border-primary/50 focus:outline-none placeholder:text-white/10 font-bold uppercase tracking-tight text-center"
+                    required
+                  />
+                  <button 
+                    type="submit"
+                    disabled={isClaiming || !claimCredentialId}
+                    className="w-full crimson-btn py-5 text-[10px] font-black uppercase tracking-[0.2em] disabled:opacity-50"
+                  >
+                    {isClaiming ? 'Verifying...' : 'Claim & Link to Profile'}
+                  </button>
+               </form>
+            </motion.div>
+         </div>
       )}
     </div>
   );

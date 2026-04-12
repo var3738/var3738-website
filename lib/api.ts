@@ -182,6 +182,29 @@ export interface DocumentItem {
   created_at: string;
 }
 
+export interface Certificate {
+  id: string; 
+  credential_id: string; // VAR-YYYY-XXXX
+  recipient_name: string;
+  recipient_email?: string;
+  user_id?: string;
+  event_id: number | string;
+  event_name: string;
+  issue_date: string;
+  is_claimed: boolean;
+  metadata?: any;
+}
+
+export interface EventRegistration {
+  id: string;
+  user_id: string;
+  full_name: string;
+  email: string;
+  phone?: string;
+  county?: string;
+  is_verified?: boolean;
+}
+
 export interface Post {
   id: string; // UUID
   title: string;
@@ -308,6 +331,18 @@ export const certUtils = {
     } catch (e) {
       return null;
     }
+  },
+
+  /**
+   * Generates a unique, readable Credential ID (VAR-YYYY-XXXX)
+   */
+  generateCredentialId(year: string | number = new Date().getFullYear()): string {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // No O, 0, I, 1 for legibility
+    let result = '';
+    for (let i = 0; i < 4; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return `VAR-${year}-${result}`;
   }
 };
 
@@ -355,6 +390,13 @@ export const api = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(userData),
+    });
+    return handleResponse<User>(response);
+  },
+
+  async getMe(): Promise<User> {
+    const response = await fetch(`${BASE_URL}/users/me`, {
+      headers: getAuthHeaders(),
     });
     return handleResponse<User>(response);
   },
@@ -690,6 +732,77 @@ export const api = {
       method: 'DELETE',
       headers: getAuthHeaders()
     });
+  },
+
+  // --- Certificates (Persistent via Documents Proxy) ---
+  
+  /**
+   * Fetches participants registered for a specific event
+   */
+  async getEventRegistrations(eventId: number | string): Promise<EventRegistration[]> {
+    const response = await fetch(`${BASE_URL}/events/${eventId}/registrations`, {
+      headers: getAuthHeaders()
+    });
+    const data = await handleResponse<any>(response);
+    return Array.isArray(data) ? data : (data.registrations || data.items || []);
+  },
+
+  async getCertificates(filters?: { event_id?: number | string; user_id?: string; email?: string }): Promise<Certificate[]> {
+    const params = new URLSearchParams();
+    if (filters?.event_id) params.append('event_id', filters.event_id.toString());
+    if (filters?.user_id) params.append('user_id', filters.user_id);
+    if (filters?.email) params.append('email', filters.email);
+    
+    const query = params.toString() ? `?${params.toString()}` : '';
+    const response = await fetch(`${BASE_URL}/certificates${query}`, {
+        headers: getAuthHeaders()
+    });
+    const data = await handleResponse<any>(response);
+    return Array.isArray(data) ? data : (data.certificates || data.items || []);
+  },
+
+  async issueCertificate(certData: Omit<Certificate, 'id'>): Promise<Certificate> {
+    const response = await fetch(`${BASE_URL}/certificates`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(certData)
+    });
+    return handleResponse<Certificate>(response);
+  },
+
+  async updateCertificate(id: string, cert: Partial<Certificate>): Promise<Certificate> {
+    const response = await fetch(`${BASE_URL}/certificates/${id}`, {
+      method: 'PATCH',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(cert)
+    });
+    return handleResponse<Certificate>(response);
+  },
+
+  async deleteCertificate(id: string): Promise<void> {
+    await fetch(`${BASE_URL}/certificates/${id}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders()
+    });
+  },
+
+  async claimCertificate(credentialId: string): Promise<Certificate> {
+    const response = await fetch(`${BASE_URL}/certificates/${credentialId}/claim`, {
+      method: 'PATCH',
+      headers: getAuthHeaders()
+    });
+    return handleResponse<Certificate>(response);
+  },
+
+  async getCertificateByCredentialId(credentialId: string): Promise<Certificate | null> {
+    const response = await fetch(`${BASE_URL}/certificates/${credentialId}`, {
+        headers: getAuthHeaders()
+    });
+    try {
+        return await handleResponse<Certificate>(response);
+    } catch (e) {
+        return null;
+    }
   },
 
   async getGeoBoundaries(adminLevel: number, parentPcode?: string): Promise<any> {
