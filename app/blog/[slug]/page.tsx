@@ -158,7 +158,7 @@ export default function BlogPostPage() {
           <motion.h1 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-5xl md:text-7xl font-black tracking-tighter uppercase mb-10 leading-[0.9]"
+            className="text-5xl md:text-7xl font-black tracking-tighter uppercase mb-10 leading-[1.1] pt-4"
           >
             {post.title}
           </motion.h1>
@@ -201,7 +201,7 @@ export default function BlogPostPage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
-          className="prose prose-invert prose-p:text-white/70 prose-p:leading-relaxed prose-p:text-xl prose-p:font-medium prose-headings:font-black prose-headings:tracking-tighter prose-headings:uppercase max-w-none mb-32"
+          className="prose prose-invert max-w-none mb-32 overflow-hidden"
           dangerouslySetInnerHTML={{ __html: post.content }}
         />
 
