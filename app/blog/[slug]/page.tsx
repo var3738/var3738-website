@@ -170,8 +170,8 @@ export default function BlogPostPage() {
                   <User size={14} className="text-primary" />
                 </div>
                 <div>
-                   <div className="text-[8px] font-black text-white/30 uppercase tracking-widest">Author ID</div>
-                   <div className="text-[10px] font-bold uppercase">{post.author_id.slice(0, 8)}</div>
+                   <div className="text-[8px] font-black text-white/30 uppercase tracking-widest">Author</div>
+                   <div className="text-[10px] font-bold uppercase">{post.author_name || `ID: ${post.author_id.slice(0, 8)}`}</div>
                 </div>
               </div>
               <div className="flex items-center gap-3">

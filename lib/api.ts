@@ -213,6 +213,7 @@ export interface Post {
   summary?: string; 
   content: string; // Markdown supported
   author_id: string;
+  author_name?: string;
   category_id?: string;
   status: 'draft' | 'published' | 'archived';
   is_published: boolean;
