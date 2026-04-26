@@ -18,7 +18,6 @@ export default function DUAEventSection() {
       const interval = setInterval(() => {
         setCurrentImageIndex((prev) => (prev + 1) % IMAGES.length);
       }, 4000);
-      console.log(IMAGES);
       return () => clearInterval(interval);
     }, []);
 

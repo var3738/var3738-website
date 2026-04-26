@@ -7,7 +7,6 @@ import { useState, useEffect } from "react";
 const IMAGES_COUNT = 3;
 const IMAGES = Array.from({ length: IMAGES_COUNT }, (_, i) => {
   const num = (i + 1).toString().padStart(2, "0");
-  console.log(num);
   return `/group-pics/group-pic-${num}.jpeg`;
 });
 
