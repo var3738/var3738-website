@@ -458,7 +458,9 @@ export const api = {
     if (params?.category_id) query.append('category_id', params.category_id);
     if (params?.tag_id) query.append('tag_id', params.tag_id);
 
-    const response = await fetch(`${BASE_URL}/cms/posts?${query.toString()}`);
+    const response = await fetch(`${BASE_URL}/cms/posts?${query.toString()}`, {
+      headers: getAuthHeaders()
+    });
     const data = await handleResponse<any>(response);
     return Array.isArray(data) ? data : (data.posts || data.items || []);
   },

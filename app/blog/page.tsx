@@ -44,8 +44,7 @@ export default function BlogListingPage() {
     setIsLoading(true);
     try {
       const data = await api.getPosts({ 
-        category_id: catId || undefined,
-        status: 'published'
+        category_id: catId || undefined
       });
       setPosts(data);
     } catch (err) {
