@@ -171,6 +171,7 @@ export default function AdminDashboardClient() {
       else if (type === 'partners') await api.deletePartner(id as any);
       else if (type === 'gallery') await api.deleteGalleryItem(id as any);
       else if (type === 'documents') await api.deleteDocument(id as any);
+      else if (type === 'users') await api.deleteUser(id as any);
       fetchData(activeTab);
     } catch (err) {
       alert('Delete failed');
@@ -1246,6 +1247,7 @@ export default function AdminDashboardClient() {
                       </div>
                       <div className="flex gap-2 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity w-full sm:w-auto justify-end mt-2 sm:mt-0">
                          <button onClick={() => openModal('users', user)} className="p-3 bg-white/5 hover:bg-white/10 rounded transition-colors flex-1 sm:flex-none flex justify-center"><PenSquare size={16} /></button>
+                         <button onClick={() => handleDelete('users', user.id)} className="p-3 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded transition-colors flex-1 sm:flex-none flex justify-center"><Trash2 size={16} /></button>
                       </div>
                     </div>
                   ))}

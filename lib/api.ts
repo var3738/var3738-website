@@ -279,6 +279,9 @@ async function handleResponse<T>(response: Response): Promise<T> {
     
     throw new Error(message);
   }
+  if (response.status === 204) {
+    return {} as T;
+  }
   return response.json();
 }
 
@@ -369,10 +372,11 @@ export const api = {
   },
 
   async deleteEvent(id: number | string): Promise<void> {
-    await fetch(`${BASE_URL}/events/${id}`, {
+    const response = await fetch(`${BASE_URL}/events/${id}`, {
       method: 'DELETE',
       headers: getAuthHeaders()
     });
+    await handleResponse<void>(response);
   },
 
   async registerForEvent(eventId: number, userId: string): Promise<void> {
@@ -436,10 +440,11 @@ export const api = {
   },
 
   async deleteProduct(id: string): Promise<void> {
-    await fetch(`${BASE_URL}/merch/products/${id}`, {
+    const response = await fetch(`${BASE_URL}/merch/products/${id}`, {
       method: 'DELETE',
       headers: getAuthHeaders()
     });
+    await handleResponse<void>(response);
   },
 
   // Posts / CMS V2
@@ -493,10 +498,11 @@ export const api = {
   },
 
   async deletePost(id: string): Promise<void> {
-    await fetch(`${BASE_URL}/cms/posts/${id}`, {
+    const response = await fetch(`${BASE_URL}/cms/posts/${id}`, {
       method: 'DELETE',
       headers: getAuthHeaders()
     });
+    await handleResponse<void>(response);
   },
 
   // Geo
@@ -527,6 +533,14 @@ export const api = {
       body: JSON.stringify(data)
     });
     return handleResponse<User>(response);
+  },
+
+  async deleteUser(id: string): Promise<void> {
+    const response = await fetch(`${BASE_URL}/users/${id}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders()
+    });
+    await handleResponse<void>(response);
   },
 
   // Taxonomy
@@ -585,10 +599,11 @@ export const api = {
   },
 
   async deleteTeamMember(id: string): Promise<void> {
-    await fetch(`${BASE_URL}/team/${id}`, {
+    const response = await fetch(`${BASE_URL}/team/${id}`, {
       method: 'DELETE',
       headers: getAuthHeaders()
     });
+    await handleResponse<void>(response);
   },
 
   // Partners
@@ -617,10 +632,11 @@ export const api = {
   },
 
   async deletePartner(id: string): Promise<void> {
-    await fetch(`${BASE_URL}/partners/${id}`, {
+    const response = await fetch(`${BASE_URL}/partners/${id}`, {
       method: 'DELETE',
       headers: getAuthHeaders()
     });
+    await handleResponse<void>(response);
   },
 
   // Gallery
@@ -658,10 +674,11 @@ export const api = {
   },
 
   async deleteGalleryItem(id: string): Promise<void> {
-    await fetch(`${BASE_URL}/gallery/${id}`, {
+    const response = await fetch(`${BASE_URL}/gallery/${id}`, {
       method: 'DELETE',
       headers: getAuthHeaders()
     });
+    await handleResponse<void>(response);
   },
 
   // Documents
@@ -690,10 +707,11 @@ export const api = {
   },
 
   async deleteDocument(id: string): Promise<void> {
-    await fetch(`${BASE_URL}/documents/${id}`, {
+    const response = await fetch(`${BASE_URL}/documents/${id}`, {
       method: 'DELETE',
       headers: getAuthHeaders()
     });
+    await handleResponse<void>(response);
   },
 
   // --- Certificates (Persistent via Documents Proxy) ---
