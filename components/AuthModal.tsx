@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle, X, ArrowRight, User, Mail, Phone, Lock, Hash, MapPin, LogIn } from 'lucide-react';
 import Portal from './Portal';
-import { api, UserRole } from '@/lib/api';
+import { api, UserRole, GeoBoundary } from '@/lib/api';
 
 interface AuthModalProps {
   onClose: () => void;
@@ -39,12 +39,67 @@ export default function AuthModal({
     ward: '',
     isYouthChampion: false,
   });
+  
+  // Geo Data State
+  const [counties, setCounties] = useState<GeoBoundary[]>([]);
+  const [subCounties, setSubCounties] = useState<GeoBoundary[]>([]);
+  const [wards, setWards] = useState<GeoBoundary[]>([]);
+  
+  const [selectedCounty, setSelectedCounty] = useState('');
+  const [selectedSubCounty, setSelectedSubCounty] = useState('');
 
   // Login Data
   const [loginData, setLoginData] = useState({
     email: '',
     password: ''
   });
+  
+  // Fetch Initial Geo Data
+  useEffect(() => {
+    if (mode === 'register') {
+      api.getGeoBoundaries(1)
+        .then(data => setCounties(Array.isArray(data) ? data : []))
+        .catch(err => {
+          console.error('Failed to load counties', err);
+          setCounties([]);
+        });
+    }
+  }, [mode]);
+
+  useEffect(() => {
+    if (selectedCounty) {
+      api.getGeoBoundaries(2, selectedCounty)
+        .then(data => setSubCounties(Array.isArray(data) ? data : []))
+        .catch(err => {
+          console.error('Failed to load sub-counties', err);
+          setSubCounties([]);
+        });
+      setWards([]);
+      setSelectedSubCounty('');
+      setFormData(prev => ({ 
+        ...prev, 
+        county: counties.find(c => c.pcode === selectedCounty)?.name || '', 
+        subCounty: '', 
+        ward: '' 
+      }));
+    }
+  }, [selectedCounty]);
+
+  useEffect(() => {
+    if (selectedSubCounty) {
+      api.getGeoBoundaries(3, selectedSubCounty)
+        .then(data => setWards(Array.isArray(data) ? data : []))
+        .catch(err => {
+          console.error('Failed to load wards', err);
+          setWards([]);
+        });
+      setFormData(prev => ({ 
+        ...prev, 
+        subCounty: subCounties.find(s => s.pcode === selectedSubCounty)?.name || '', 
+        ward: '' 
+      }));
+    }
+  }, [selectedSubCounty]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -241,10 +296,57 @@ export default function AuthModal({
                           required
                         />
                       </div>
-                      <div className="p-4 bg-primary/5 border border-primary/20 rounded-xl">
-                        <p className="text-[10px] font-bold text-primary italic uppercase tracking-widest text-center">
-                          Complete profile during first townhall attendance
-                        </p>
+                      <div className="grid grid-cols-1 gap-4">
+                        <select
+                          name="county"
+                          value={selectedCounty}
+                          onChange={(e) => setSelectedCounty(e.target.value)}
+                          className="w-full bg-white/5 border border-white/10 rounded-xl px-6 py-4 text-white focus:border-primary/50 focus:outline-none font-bold uppercase text-[10px] tracking-tight appearance-none"
+                          required
+                        >
+                          <option value="" disabled className="bg-black">SELECT COUNTY</option>
+                          {Array.isArray(counties) && counties.map(c => <option key={c.pcode} value={c.pcode} className="bg-black">{c.name}</option>)}
+                        </select>
+                        
+                        <div className="grid grid-cols-2 gap-4">
+                          <select
+                            name="subCounty"
+                            value={selectedSubCounty}
+                            onChange={(e) => setSelectedSubCounty(e.target.value)}
+                            disabled={!selectedCounty}
+                            className="w-full bg-white/5 border border-white/10 rounded-xl px-6 py-4 text-white focus:border-primary/50 focus:outline-none font-bold uppercase text-[10px] tracking-tight appearance-none disabled:opacity-30"
+                            required
+                          >
+                            <option value="" disabled className="bg-black">SUB-COUNTY</option>
+                            {Array.isArray(subCounties) && subCounties.map(s => <option key={s.pcode} value={s.pcode} className="bg-black">{s.name}</option>)}
+                          </select>
+                          
+                          <select
+                            name="ward"
+                            value={formData.ward}
+                            onChange={(e) => setFormData(prev => ({ ...prev, ward: e.target.value }))}
+                            disabled={!selectedSubCounty}
+                            className="w-full bg-white/5 border border-white/10 rounded-xl px-6 py-4 text-white focus:border-primary/50 focus:outline-none font-bold uppercase text-[10px] tracking-tight appearance-none disabled:opacity-30"
+                            required
+                          >
+                            <option value="" disabled className="bg-black">WARD</option>
+                            {Array.isArray(wards) && wards.map(w => <option key={w.pcode} value={w.name} className="bg-black">{w.name}</option>)}
+                          </select>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-3 p-4 bg-primary/5 border border-primary/20 rounded-xl">
+                        <input 
+                          type="checkbox" 
+                          id="isYouthChampion"
+                          name="isYouthChampion"
+                          checked={formData.isYouthChampion}
+                          onChange={handleInputChange}
+                          className="accent-primary w-4 h-4"
+                        />
+                        <label htmlFor="isYouthChampion" className="text-[10px] font-bold text-primary uppercase tracking-widest cursor-pointer">
+                          I am a VAR 37/38 Youth Champion
+                        </label>
                       </div>
                     </div>
                   )}

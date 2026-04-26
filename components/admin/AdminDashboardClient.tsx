@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
 import { Activity, Package, MessageSquare, ShieldAlert, Plus, Save, RefreshCw, PenSquare, Trash2, Users, Handshake, FileText, Image, File, LogOut, Loader2, Lock, CheckCircle2, XCircle, Eye, Calendar, User as UserIcon, Share2, Bookmark, GripVertical, Award, ShieldCheck } from 'lucide-react';
 import { api, Event, Product, Feedback, Post, TeamMember, Partner, GalleryItem, DocumentItem, Category, teamUtils, certUtils, Certificate, EventRegistration } from '@/lib/api';
@@ -8,11 +9,13 @@ import CMSFormModal, { FormField } from './CMSFormModal';
 import html2canvas from 'html2canvas';
 import { useRef } from 'react';
 
-type Tab = 'events' | 'merch' | 'posts' | 'team' | 'partners' | 'feedback' | 'gallery' | 'documents' | 'credentials';
+type Tab = 'events' | 'merch' | 'posts' | 'team' | 'partners' | 'feedback' | 'gallery' | 'documents' | 'credentials' | 'users';
 
 export default function AdminDashboardClient() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<Tab>('posts');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [authForm, setAuthForm] = useState({ username: '', password: '' });
   const [authError, setAuthError] = useState('');
@@ -29,6 +32,7 @@ export default function AdminDashboardClient() {
   const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [registrations, setRegistrations] = useState<EventRegistration[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [users, setUsers] = useState<any[]>([]);
   const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
   const [selectedRegIds, setSelectedRegIds] = useState<Set<number>>(new Set());
   const [issuedRecent, setIssuedRecent] = useState<Certificate[]>([]);
@@ -52,11 +56,29 @@ export default function AdminDashboardClient() {
   });
   
   useEffect(() => {
-    const token = localStorage.getItem('var3738_token');
-    if (token) {
-      setIsAuthenticated(true);
-      fetchData(activeTab);
-    }
+    const verifyAdmin = async () => {
+      const token = localStorage.getItem('var3738_token');
+      if (token) {
+        try {
+          const user = await api.getMe();
+          if (user.role === 'admin') {
+            setIsAuthenticated(true);
+            setIsAdmin(true);
+            fetchData(activeTab);
+          } else {
+            setIsAdmin(false);
+            // Non-admin users are redirected
+            router.push('/');
+          }
+        } catch (err) {
+          setIsAuthenticated(false);
+          setIsAdmin(false);
+        }
+      } else {
+        setIsAdmin(false);
+      }
+    };
+    verifyAdmin();
   }, []);
   
   useEffect(() => {
@@ -96,6 +118,9 @@ export default function AdminDashboardClient() {
         const eventsData = await api.getEvents();
         setEvents(eventsData);
         if (eventsData.length > 0) setFeedbacks(await api.getFeedback(eventsData[0].id));
+      }
+      else if (tab === 'users') {
+        setUsers(await api.getUsers());
       }
     } catch (err: any) {
       console.error('Admin fetch error', err);
@@ -284,6 +309,27 @@ export default function AdminDashboardClient() {
           fetchData('partners');
         }
       };
+    } else if (type === 'users') {
+      config = {
+        title: 'Modify Citizen Profile',
+        fields: [
+          { name: 'full_name', label: 'Full Name', type: 'text', required: true },
+          { name: 'email', label: 'Email', type: 'text', required: true },
+          { name: 'role', label: 'Role', type: 'select', options: [
+            { label: 'Guest', value: 'guest' },
+            { label: 'Activated Youth', value: 'activated_youth' },
+            { label: 'Youth Champion', value: 'youth_champion' },
+            { label: 'Content Creator', value: 'content_creator' },
+            { label: 'Admin', value: 'admin' }
+          ]},
+          { name: 'county', label: 'County', type: 'text' },
+          { name: 'is_active', label: 'Account Active', type: 'checkbox' }
+        ],
+        onSubmit: async (data: any) => {
+          await api.updateUser(initialData.id, data);
+          fetchData('users');
+        }
+      };
     } else if (type === 'gallery') {
       config = {
         title: initialData ? 'Edit Gallery Photo' : 'Upload Gallery Photos',
@@ -395,6 +441,7 @@ export default function AdminDashboardClient() {
     { id: 'documents', label: 'Documents', icon: File },
     { id: 'feedback', label: 'Intel', icon: MessageSquare },
     { id: 'credentials', label: 'Awards', icon: Award },
+    { id: 'users', label: 'Citizens', icon: Users },
   ];
 
   return (
@@ -1163,6 +1210,46 @@ export default function AdminDashboardClient() {
                      </div>
                    ))}
                    {feedbacks.length === 0 && !isLoading && <p className="text-white/30 text-xs uppercase tracking-widest">No intel acquired for this event.</p>}
+                </div>
+              </motion.div>
+            )}
+            {activeTab === 'users' && (
+              <motion.div key="users" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-xl font-black uppercase tracking-widest">Citizen Registry</h2>
+                  <div className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30">
+                    {users.length} Profiles Indexed
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  {users.map(user => (
+                    <div key={user.id} className="modern-card p-6 bg-white/5 border border-white/10 flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center group">
+                      <div className="flex-1 w-full sm:w-auto">
+                        <div className="flex items-center gap-3 mb-1">
+                          <div className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded ${
+                            user.role === 'admin' ? 'bg-red-500/20 text-red-500' : 
+                            user.role === 'content_creator' ? 'bg-blue-500/20 text-blue-500' :
+                            user.role === 'youth_champion' ? 'bg-primary/20 text-primary' :
+                            'bg-white/10 text-white/40'
+                          }`}>
+                            {user.role.replace('_', ' ')}
+                          </div>
+                          {!user.is_active && (
+                            <span className="text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 bg-red-500/10 text-red-500 border border-red-500/20 rounded-sm">Suspended</span>
+                          )}
+                        </div>
+                        <h3 className="font-black uppercase tracking-tighter text-xl truncate w-full max-w-[250px] sm:max-w-lg">{user.full_name}</h3>
+                        <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1">
+                          <div className="text-[10px] font-bold text-white/30 lowercase">{user.email}</div>
+                          <div className="text-[10px] font-bold text-white/30 uppercase tracking-widest">{user.county} • {user.ward}</div>
+                        </div>
+                      </div>
+                      <div className="flex gap-2 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity w-full sm:w-auto justify-end mt-2 sm:mt-0">
+                         <button onClick={() => openModal('users', user)} className="p-3 bg-white/5 hover:bg-white/10 rounded transition-colors flex-1 sm:flex-none flex justify-center"><PenSquare size={16} /></button>
+                      </div>
+                    </div>
+                  ))}
+                  {users.length === 0 && !isLoading && <p className="text-white/30 text-xs uppercase tracking-widest">No citizens found.</p>}
                 </div>
               </motion.div>
             )}

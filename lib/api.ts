@@ -9,102 +9,6 @@ const BASE_URL = isServer
   : '/api/var3738'; // Rewritten by next.config.mjs to point to actual API_URL safely
 
 
-// --- Types ---
-
-// export type UserRole = 'guest' | 'activated_youth' | 'youth_champion' | 'content_creator' | 'admin';
-
-// export interface User {
-//   id: string;
-//   full_name: string;
-//   email: string;
-//   phone?: string;
-//   national_id?: string;
-//   county: string;
-//   sub_county: string;
-//   ward: string;
-//   role: UserRole;
-//   is_active: boolean;
-// }
-
-// export interface UserCreate extends Omit<User, 'id' | 'is_active' | 'role'> {
-//   password: string;
-//   role?: UserRole;
-// }
-
-// export interface Event {
-//   id: number;
-//   title: string;
-//   description: string;
-//   ward: string;
-//   date: string;
-//   location_name: string;
-//   max_capacity: number;
-//   is_active: boolean;
-//   registration_count?: number;
-// }
-
-// export interface EventCreate extends Omit<Event, 'id' | 'registration_count'> {}
-
-// export interface Feedback {
-//   id: number;
-//   event_id: number;
-//   user_id: string;
-//   rating: number;
-//   comment?: string;
-//   created_at: string;
-// }
-
-// export interface TeamMember {
-//   id: string;
-//   name: string;
-//   position: string;
-//   image: string;
-// }
-
-// export interface Partner {
-//   id: string;
-//   name: string;
-//   logo: string;
-//   url: string;
-// }
-
-// export interface GalleryItem {
-//   id: string;
-//   title: string;
-//   image_url: string;
-//   created_at: string;
-// }
-
-// export interface DocumentItem {
-//   id: string;
-//   title: string;
-//   file_url: string;
-//   created_at: string;
-// }
-
-// export interface Post {
-//   id: number;
-//   title: string;
-//   content: string;
-//   author_id: string;
-//   is_published: boolean;
-//   created_at: string;
-// }
-
-// export interface Product {
-//   id: string;
-//   name: string;
-//   description: string;
-//   price: number;
-//   stock_quantity: number;
-//   image_url?: string;
-//   is_active: boolean;
-// }
-
-/**
- * VAR 37/38 API Service Layer - Corrected Types
- */
-
 export type UserRole = 'guest' | 'activated_youth' | 'youth_champion' | 'content_creator' | 'admin';
 
 export interface User {
@@ -268,6 +172,14 @@ export interface ProductCreate extends Omit<Product, 'id'> {}
 export interface AuthResponse {
   access_token: string;
   token_type: string;
+}
+
+export interface GeoBoundary {
+  id: string;
+  name: string;
+  admin_level: number;
+  pcode: string;
+  parent_pcode?: string;
 }
 
 // --- Helper Functions ---
@@ -587,6 +499,36 @@ export const api = {
     });
   },
 
+  // Geo
+  async getGeoBoundaries(level?: number, parent?: string): Promise<GeoBoundary[]> {
+    let url = `${BASE_URL}/geo/boundaries/list`;
+    const params = new URLSearchParams();
+    if (level) params.append('admin_level', level.toString());
+    if (parent) params.append('parent_pcode', parent);
+    if (params.toString()) url += `?${params.toString()}`;
+    
+    const response = await fetch(url);
+    const data = await handleResponse<any>(response);
+    return data.boundaries || [];
+  },
+
+  // Users Management (Admin)
+  async getUsers(skip = 0, limit = 100): Promise<User[]> {
+    const response = await fetch(`${BASE_URL}/users?skip=${skip}&limit=${limit}`, {
+      headers: getAuthHeaders()
+    });
+    return handleResponse<User[]>(response);
+  },
+
+  async updateUser(id: string, data: Partial<User>): Promise<User> {
+    const response = await fetch(`${BASE_URL}/users/${id}`, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(data)
+    });
+    return handleResponse<User>(response);
+  },
+
   // Taxonomy
   async getCategories(): Promise<Category[]> {
     const response = await fetch(`${BASE_URL}/cms/categories`);
@@ -823,21 +765,6 @@ export const api = {
     } catch (e) {
         return null;
     }
-  },
-
-  async getGeoBoundaries(adminLevel: number, parentPcode?: string): Promise<any> {
-    const params = new URLSearchParams({ admin_level: adminLevel.toString() });
-    if (parentPcode) params.append('parent_pcode', parentPcode);
-    const response = await fetch(`${BASE_URL}/geo/boundaries/list?${params.toString()}`);
-    return handleResponse<any>(response);
-  },
-
-  async getGeoBoundariesList(adminLevel: number, parentPcode?: string): Promise<{name: string, pcode: string}[]> {
-    const params = new URLSearchParams({ admin_level: adminLevel.toString() });
-    if (parentPcode) params.append('parent_pcode', parentPcode);
-    const response = await fetch(`${BASE_URL}/geo/boundaries/list?${params.toString()}`);
-    const data = await handleResponse<{count: number, boundaries: {name: string, pcode: string}[]}>(response);
-    return data.boundaries;
   },
 
   async reverseGeocode(lat: number, lon: number): Promise<{county: {name: string, pcode: string}, sub_county: {name: string, pcode: string}, ward: {name: string, pcode: string}}> {
