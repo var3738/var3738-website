@@ -171,7 +171,7 @@ export default function BlogPostPage() {
                 </div>
                 <div>
                    <div className="text-[8px] font-black text-white/30 uppercase tracking-widest">Author</div>
-                   <div className="text-[10px] font-bold uppercase">{post.author_name || `ID: ${post.author_id.slice(0, 8)}`}</div>
+                   <div className="text-[10px] font-bold uppercase">{post.author_name || (post.author_id ? `ID: ${post.author_id.slice(0, 8)}` : 'ADMIN')}</div>
                 </div>
               </div>
               <div className="flex items-center gap-3">

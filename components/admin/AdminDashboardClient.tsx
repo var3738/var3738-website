@@ -512,7 +512,7 @@ export default function AdminDashboardClient() {
                       <div className="w-full overflow-hidden">
                         <div className="flex items-center gap-3 mb-1">
                           <div className="text-[10px] font-bold uppercase tracking-widest text-primary">{new Date(post.created_at).toLocaleDateString()}</div>
-                          <div className="text-[10px] font-bold uppercase tracking-widest text-white/20">BY: {post.author_id.slice(0, 8)}...</div>
+                          <div className="text-[10px] font-bold uppercase tracking-widest text-white/20">BY: {post.author_name || (post.author_id ? `${post.author_id.slice(0, 8)}...` : 'ADMIN')}</div>
                           {post.category_id && (
                              <div className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 bg-primary/10 text-primary border border-primary/20 rounded">
                                {categories.find(c => c.id === post.category_id)?.name || 'Misc'}
@@ -1323,7 +1323,7 @@ export default function AdminDashboardClient() {
                             </div>
                             <div>
                                <div className="text-[8px] font-black text-white/30 uppercase tracking-widest">Author ID</div>
-                               <div className="text-[10px] font-bold uppercase">{previewPost.author_id.slice(0, 8)}</div>
+                               <div className="text-[10px] font-bold uppercase">{previewPost.author_name || (previewPost.author_id ? previewPost.author_id.slice(0, 8) : 'ADMIN')}</div>
                             </div>
                           </div>
                           <div className="flex items-center gap-3">

@@ -46,7 +46,7 @@ export default function BlogCard({ post, index }: BlogCardProps) {
           <div className="h-1 w-1 rounded-full bg-white/20"></div>
           <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-white/30">
             <User size={12} />
-            {post.author_id.substring(0, 8)}
+            {post.author_name || (post.author_id ? `ID: ${post.author_id.substring(0, 8)}` : 'ADMIN')}
           </div>
         </div>
 
